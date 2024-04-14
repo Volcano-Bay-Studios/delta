@@ -14,6 +14,7 @@ import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.networking.NetworkHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandeler;
+import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
 import xyz.volcanobay.modog.rendering.DeltaStage;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.AddressPicker;
@@ -27,6 +28,7 @@ public class Delta extends ApplicationAdapter {
 
 	@Override
 	public void create () {
+		PhysicsObjectsRegistry.registerObjects();
 		RenderSystem.initialize();
 		PhysicsHandeler.initialize();
 		VisUI.load(VisUI.SkinScale.X1);
