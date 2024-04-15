@@ -4,27 +4,25 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.kotcrab.vis.ui.util.InputValidator;
 import com.kotcrab.vis.ui.util.TableUtils;
-import com.kotcrab.vis.ui.util.Validators;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisTextField;
 import com.kotcrab.vis.ui.widget.VisValidatableTextField;
 import com.kotcrab.vis.ui.widget.VisWindow;
-import xyz.volcanobay.modog.Delta;
-import xyz.volcanobay.modog.networking.NetworkHandeler;
+import xyz.volcanobay.modog.networking.NetworkHandler;
 
 public class AddressPicker extends VisWindow {
     VisTextField textField;
     VisValidatableTextField validatableTextField;
     VisTextButton textButton;
-    public AddressPicker(String title) {
+    public AddressPicker() {
         super("Enter IP:                         Port:");
+        NetworkHandler.connectWindowOpen = true;
         TableUtils.setSpacingDefaults(this);
         columnDefaults(0).left();
 
-        textField = new VisTextField();
-        validatableTextField = new VisValidatableTextField();
+        textField = new VisTextField("omega.yamishdoy.com");
+        validatableTextField = new VisValidatableTextField("8081");
         textButton = new VisTextButton("Join");
 
 
@@ -35,7 +33,7 @@ public class AddressPicker extends VisWindow {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 int port = Integer.parseInt(validatableTextField.getText());
-                NetworkHandeler.joinServer(textField.getText(),port);
+                NetworkHandler.joinServer(textField.getText(),port);
             }
         });
 
@@ -46,7 +44,14 @@ public class AddressPicker extends VisWindow {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         setPosition(Gdx.graphics.getWidth(), 18);
+        if (NetworkHandler.isConnected)
+            remove();
         super.draw(batch, parentAlpha);
     }
 
+    @Override
+    public boolean remove() {
+        NetworkHandler.connectWindowOpen = false;
+        return super.remove();
+    }
 }

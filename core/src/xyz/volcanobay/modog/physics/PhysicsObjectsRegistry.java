@@ -12,6 +12,7 @@ public class PhysicsObjectsRegistry {
     public static void registerNewObject(String name, PhysicsObject object){
         if (!physicsObjectHashMap.containsKey(name)) {
             physicsObjectHashMap.put(name,object);
+            object.pickTexture();
         } else {
             Delta.LOGGER.warning("Duplicate registry object: "+name);
         }

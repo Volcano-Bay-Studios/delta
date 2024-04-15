@@ -1,23 +1,15 @@
 package xyz.volcanobay.modog.rendering;
 
-import box2dLight.DirectionalLight;
-import box2dLight.PointLight;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.badlogic.gdx.utils.viewport.ScalingViewport;
-import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import xyz.volcanobay.modog.physics.PhysicsHandeler;
-
-import java.awt.*;
+import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.physics.PhysicsObject;
 
 public class RenderSystem {
     public static OrthographicCamera camera;
@@ -27,10 +19,11 @@ public class RenderSystem {
     public static Vector2 oldCam;
     public static float scrolledAmount;
     public static RayHandler rayHandler;
+    public static PhysicsObject followObject;
 
     public static void initialize(){
 
-        img = new Texture("badlogic.jpg");
+        img = new Texture("wheel.png");
         batch = new SpriteBatch();
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
@@ -40,7 +33,7 @@ public class RenderSystem {
         camera.update();
 
 
-        rayHandler = new RayHandler(PhysicsHandeler.world);
+        rayHandler = new RayHandler(PhysicsHandler.world);
         rayHandler.setShadows(true);
         rayHandler.setAmbientLight(0.5f);
 
@@ -49,17 +42,19 @@ public class RenderSystem {
         handleInput();
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+        float w = Gdx.graphics.getWidth();
+        float h = Gdx.graphics.getHeight();
+        camera.viewportHeight = 30 * (h / w);
 
         ScreenUtils.clear(0.3f, 0.3f, 0.3f, 1);
         batch.begin();
 
-//        batch.draw(img, 0, 0);
-
-
+        batch.draw(img, 0, 0);
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
+        PhysicsHandler.renderObjects();
+        PhysicsHandler.renderDebug();
         batch.end();
-
     }
 
     public static void handleInput() {
@@ -67,18 +62,24 @@ public class RenderSystem {
         float h = Gdx.graphics.getHeight();
         camera.zoom += scrolledAmount;
         Vector2 mouse = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE)) {
+            followObject = null;
             oldCam = new Vector2(camera.position.x,camera.position.y);
             oldMouse = mouse;
         }
-        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT) || Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
             float zoom = camera.zoom;
             camera.position.x = oldCam.x+((oldMouse.x- mouse.x)*(zoom/(w/30)));
             camera.position.y = oldCam.y-((oldMouse.y- mouse.y)*(zoom/(h/22.5f)));
+        }
+        if (followObject != null) {
+            camera.position.x = followObject.body.getPosition().x;
+            camera.position.y = followObject.body.getPosition().y;
         }
         if (RenderSystem.camera.zoom < 0.5) {
             RenderSystem.camera.zoom = 0.5f;
         }
         scrolledAmount = 0;
     }
+
 }

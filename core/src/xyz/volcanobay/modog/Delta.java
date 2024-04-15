@@ -2,18 +2,14 @@ package xyz.volcanobay.modog;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.PopupMenu;
-import xyz.volcanobay.modog.networking.NetworkHandeler;
-import xyz.volcanobay.modog.physics.PhysicsHandeler;
+import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
 import xyz.volcanobay.modog.rendering.DeltaStage;
 import xyz.volcanobay.modog.rendering.RenderSystem;
@@ -30,25 +26,26 @@ public class Delta extends ApplicationAdapter {
 	public void create () {
 		PhysicsObjectsRegistry.registerObjects();
 		RenderSystem.initialize();
-		PhysicsHandeler.initialize();
+		PhysicsHandler.initialize();
 		VisUI.load(VisUI.SkinScale.X1);
+		float w = Gdx.graphics.getWidth();
+		float h = Gdx.graphics.getHeight();
 
 		stage =  new DeltaStage(new ScreenViewport());
 		final Table root = new Table();
 		Gdx.input.setInputProcessor(stage);
 		stage.addActor(root);
-		stage.addActor(new AddressPicker("Ip"));
+		stage.addActor(new AddressPicker());
 	}
 
 	@Override
 	public void render () {
-		PhysicsHandeler.handleInput();
-		PhysicsHandeler.physicsStep();
 		RenderSystem.render();
-		PhysicsHandeler.renderObjects();
+		PhysicsHandler.handleInput();
+		PhysicsHandler.physicsStep();
+		NetworkHandler.handleFrame();
 		stage.act();
 		stage.draw();
-		NetworkHandeler.handleFrame();
 	}
 
 	@Override
@@ -63,6 +60,10 @@ public class Delta extends ApplicationAdapter {
 		RenderSystem.rayHandler.dispose();
 		RenderSystem.batch.dispose();
 		RenderSystem.img.dispose();
+		stage.dispose();
+		for (PhysicsObject object: PhysicsHandler.physicsObjectHashMap.values()) {
+			object.dispose();
+		}
 		VisUI.dispose();
 	}
 }

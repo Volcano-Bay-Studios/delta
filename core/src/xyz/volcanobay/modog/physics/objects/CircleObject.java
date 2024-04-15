@@ -1,5 +1,6 @@
 package xyz.volcanobay.modog.physics.objects;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
@@ -23,6 +24,11 @@ public class CircleObject extends PhysicsObject {
     @Override
     public CircleObject create(Body body) {
         return new CircleObject(body);
+    }
+
+    @Override
+    public void pickTexture() {
+        texture = new Texture("wheel.png");
     }
 
     @Override
