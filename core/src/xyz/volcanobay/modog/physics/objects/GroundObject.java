@@ -1,6 +1,7 @@
 package xyz.volcanobay.modog.physics.objects;
 
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -25,6 +26,7 @@ public class GroundObject extends PhysicsObject {
         super.initialise();
         type = "ground";
         required = true;
+        textureScale = new Vector2(0,0);
     }
 
     @Override
@@ -43,13 +45,11 @@ public class GroundObject extends PhysicsObject {
     }
 
     @Override
-    public FixtureDef getFixtureDef() {
-        FixtureDef fixtureDef = new FixtureDef();
+    public void createFixture() {
         PolygonShape groundBox = new PolygonShape();
         groundBox.setAsBox(200.0f, 10.0f);
-        fixtureDef.shape = groundBox;
+        body.createFixture(groundBox,1f);
         groundBox.dispose();
-        return fixtureDef;
     }
 
     @Override

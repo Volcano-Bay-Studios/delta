@@ -1,11 +1,10 @@
 package xyz.volcanobay.modog.physics;
 
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.physics.objects.SquareObject;
 import xyz.volcanobay.modog.physics.objects.CircleObject;
 import xyz.volcanobay.modog.physics.objects.GroundObject;
 
-import java.rmi.*;
-import java.rmi.registry.Registry;
 import java.util.HashMap;
 
 public class PhysicsObjectsRegistry {
@@ -23,6 +22,7 @@ public class PhysicsObjectsRegistry {
 
     public static void registerObjects() {
         registerNewObject("wheel",new CircleObject());
+        registerNewObject("crate",new SquareObject());
         registerNewObject("ground",new GroundObject());
     }
     public static PhysicsObject getFromRegistry(String name) {

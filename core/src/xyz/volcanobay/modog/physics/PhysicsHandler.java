@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PhysicsHandler {
     public static World world = new World(new Vector2(0, -30), true);
     public static Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
-    public static boolean isDebug = true;
+    public static boolean isDebug = false;
     public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectHashMap = new ConcurrentHashMap<>();
     public static List<Body> bodiesForDeletion = new ArrayList<>();
     public static List<NetworkablePhysicsObject> newObjectsForAddition = new ArrayList<>();
@@ -30,13 +30,16 @@ public class PhysicsHandler {
     public static MouseJoint mouseJoint;
     public static Body groundBody;
     public static Body staticMoveBody;
+    public static Body velocityMoveBody;
     public static Body mouseBody;
     public static String selectedPlaceableObject = "wheel";
     public static float simSpeed = 1f;
     public static boolean lockChanges = false;
+    public static Vector2 grabPoint;
 
     public static void initialize() {
         addGround();
+        World.setVelocityThreshold(1000000.0f);
     }
 
     public static void addBasicPhysicsObject(float x, float y) {
@@ -52,7 +55,7 @@ public class PhysicsHandler {
             uuid = NetworkableUUID.randomUUID();
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("wheel").create(body).setUuid(uuid);
         physicsObjectHashMap.put(uuid, newPhysicsObject);
-        body.createFixture(newPhysicsObject.getFixtureDef());
+        newPhysicsObject.createFixture();
     }
     public static void addObjectFromRegString(float x, float y, String registryObject) {
 //        System.out.println("addBasicPhysicsObject");
@@ -67,7 +70,7 @@ public class PhysicsHandler {
             uuid = NetworkableUUID.randomUUID();
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(registryObject).create(body).setUuid(uuid);
         physicsObjectHashMap.put(uuid, newPhysicsObject);
-        body.createFixture(newPhysicsObject.getFixtureDef());
+        newPhysicsObject.createFixture();
         if (!NetworkHandler.isHost) {
             NetworkHandler.clientAddObject(newPhysicsObject);
         }
@@ -93,7 +96,7 @@ public class PhysicsHandler {
         Body body = world.createBody(bodyDef);
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(physicsObject.type).create(body).setUuid(physicsObject.uuid);
         physicsObjectHashMap.put(physicsObject.uuid, newPhysicsObject);
-        body.createFixture(newPhysicsObject.getFixtureDef());
+        newPhysicsObject.createFixture();
     }
 
     public static void addGround() {
@@ -109,8 +112,9 @@ public class PhysicsHandler {
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("ground").create(body).setUuid(uuid);
         physicsObjectHashMap.put(uuid, newPhysicsObject);
         PolygonShape groundBox = new PolygonShape();
-        groundBox.setAsBox(300f, 10.0f);
+        groundBox.setAsBox(150, 5.0f);
         body.createFixture(groundBox, 0.0f);
+        groundBox.dispose();
     }
 
     public static void physicsStep() {
@@ -148,7 +152,7 @@ public class PhysicsHandler {
         List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
         for (NetworkablePhysicsObject physicsObject: networkablePhysicsObjects) {
             PhysicsObject ourPhysicsObject = physicsObjectHashMap.get(physicsObject.uuid);
-            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && !(mouseJoint != null && mouseJoint.getBodyB() == ourPhysicsObject.body)) {
+            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && ourPhysicsObject.body != velocityMoveBody) {
                 Body ourBody = ourPhysicsObject.body;
                 ourBody.setTransform(physicsObject.pos, physicsObject.angle);
                 ourBody.setLinearVelocity(physicsObject.vel);
@@ -203,28 +207,23 @@ public class PhysicsHandler {
         getMouseObject();
         Vector2 mouse = getMouseWorldPosition();
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && mouseJoint == null) {
+            if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && velocityMoveBody == null) {
                 staticMoveBody = mouseBody;
                 if (!NetworkHandler.isHost) {
                     NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseBody));
                 }
-            } else if (mouseBody != null && mouseJoint == null && simSpeed > 0) {
-                MouseJointDef jointDef = new MouseJointDef();
-                jointDef.bodyA = groundBody;
-                jointDef.bodyB = mouseBody;
-                jointDef.maxForce = 1000f * mouseBody.getMass();
-                jointDef.target.set(getMouseWorldPosition());
-                jointDef.collideConnected = true;
-                mouseJoint = (MouseJoint) world.createJoint(jointDef);
-                mouseJoint.setTarget(getMouseWorldPosition());
+            } else if (mouseBody != null && velocityMoveBody == null && simSpeed > 0) {
+                velocityMoveBody = mouseBody;
+                grabPoint = new Vector2((mouse.x-velocityMoveBody.getPosition().x),(mouse.y-velocityMoveBody.getPosition().y));
                 mouseBody.setAwake(true);
 
             }
-            if (mouseJoint != null) {
-                mouseJoint.setTarget(getMouseWorldPosition());
+            if (velocityMoveBody != null) {
+                velocityMoveBody.setLinearVelocity((mouse.x-grabPoint.x-velocityMoveBody.getPosition().x)*40,(mouse.y-grabPoint.y-velocityMoveBody.getPosition().y)*40);
+                velocityMoveBody.setLinearDamping(0f);
             }
-            if (!NetworkHandler.isHost && mouseJoint != null) {
-                NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseJoint.getBodyB()));
+            if (!NetworkHandler.isHost && velocityMoveBody != null) {
+                NetworkHandler.clientAddObject(getPhysicsObjectFromBody(velocityMoveBody));
             }
             if (staticMoveBody != null) {
                 staticMoveBody.setTransform(getMouseWorldPosition(), staticMoveBody.getAngle());
@@ -233,9 +232,9 @@ public class PhysicsHandler {
                     staticMoveBody.setAngularVelocity(0);
                 }
             }
-        } else if (mouseJoint != null) {
-            world.destroyJoint(mouseJoint);
-            mouseJoint = null;
+        } else if (velocityMoveBody != null) {
+            velocityMoveBody.setLinearDamping(.1f);
+            velocityMoveBody = null;
         } else if (staticMoveBody != null) {
             staticMoveBody = null;
         }
@@ -250,6 +249,12 @@ public class PhysicsHandler {
                     Delta.stage.addActor(new ObjectContext(physicsObject, physicsObject.getContextOptions()));
                 }
             }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DPAD_RIGHT)) {
+            selectedPlaceableObject = "crate";
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.DPAD_LEFT)) {
+            selectedPlaceableObject = "wheel";
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3))
             isDebug = !isDebug;

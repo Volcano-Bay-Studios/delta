@@ -2,19 +2,18 @@ package xyz.volcanobay.modog.physics.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.List;
 
-public class CircleObject extends PhysicsObject {
-    public CircleObject() {
+public class SquareObject extends PhysicsObject {
+    public SquareObject() {
         super();
     }
 
-    public CircleObject(Body body) {
+    public SquareObject(Body body) {
         super(body);
     }
 
@@ -24,33 +23,29 @@ public class CircleObject extends PhysicsObject {
     }
 
     @Override
-    public CircleObject create(Body body) {
-        return new CircleObject(body);
+    public SquareObject create(Body body) {
+        return new SquareObject(body);
     }
 
     @Override
     public void initialise() {
         super.initialise();
-        type = "wheel";
+        type = "crate";
     }
 
     @Override
     public void pickTexture() {
-        texture = new Texture("wheel.png");
+        texture = new Texture("crate.png");
     }
+
 
 
     @Override
     public void createFixture() {
-        FixtureDef fixtureDef = new FixtureDef();
-        CircleShape circle = new CircleShape();
-        circle.setRadius(7.8f);
-        fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.6f;
-        body.createFixture(fixtureDef);
-        circle.dispose();
+        PolygonShape groundBox = new PolygonShape();
+        groundBox.setAsBox(8.0f, 8.0f);
+        body.createFixture(groundBox,1f);
+        groundBox.dispose();
     }
 
     @Override

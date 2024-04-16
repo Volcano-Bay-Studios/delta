@@ -20,6 +20,7 @@ public class PhysicsObject {
     public String type;
     public Vector2 textureOffset;
     private Vector2 scale;
+    public Vector2 textureScale;
     public boolean required = false;
     /**
      * Constructor for Registry
@@ -27,6 +28,7 @@ public class PhysicsObject {
      */
     public PhysicsObject() {
         this.scale = new Vector2(1,1);
+        this.textureScale = new Vector2(0,0);
     }
     /**
      * Constructor for making new physics objects
@@ -34,6 +36,7 @@ public class PhysicsObject {
     public PhysicsObject(Body body) {
         this.body = body;
         this.scale = new Vector2(1,1);
+        this.textureScale = new Vector2(0,0);
         pickTexture();
         processTexture();
         initialise();
@@ -52,7 +55,7 @@ public class PhysicsObject {
         texture = new Texture("none.png");
     }
     public void processTexture() {
-        textureOffset = new Vector2((float) texture.getWidth() /2*scale.x, (float) texture.getWidth() /2*scale.y);
+        textureOffset = new Vector2((float) texture.getWidth() /2*scale.x, (float) texture.getHeight() /2*scale.y);
     }
 
     /**
@@ -61,6 +64,7 @@ public class PhysicsObject {
      *
      * @author ModogTheDev
      */
+    @Deprecated
     public FixtureDef getFixtureDef() {
         FixtureDef fixtureDef = new FixtureDef();
         PolygonShape box = new PolygonShape();
@@ -72,6 +76,9 @@ public class PhysicsObject {
         box.dispose();
         return fixtureDef;
     }
+    public void createFixture() {
+
+    }
     public void resize(Vector2 newSize) {
         scale = newSize;
         processTexture();
@@ -80,7 +87,7 @@ public class PhysicsObject {
 //        System.out.println("hu");
     }
     public void render() {
-        RenderSystem.batch.draw(texture,body.getPosition().x-textureOffset.x,body.getPosition().y-textureOffset.y,textureOffset.x,textureOffset.y, texture.getWidth(), texture.getHeight(),scale.x,scale.y, (float) Math.toDegrees(body.getAngle()),0,0,texture.getWidth(),texture.getHeight(),false,false);
+        RenderSystem.batch.draw(texture,body.getPosition().x-textureOffset.x,body.getPosition().y-textureOffset.y,textureOffset.x,textureOffset.y, texture.getWidth(), texture.getHeight(),scale.x+textureScale.x,scale.y+textureScale.y, (float) Math.toDegrees(body.getAngle()),0,0,texture.getWidth(),texture.getHeight(),false,false);
     }
     public void dispose() {
         texture.dispose();
