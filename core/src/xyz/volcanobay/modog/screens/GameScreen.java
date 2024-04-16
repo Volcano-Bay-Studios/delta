@@ -8,10 +8,10 @@ import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 
-public class HostScreen extends VisWindow {
+public class GameScreen extends VisWindow {
     public VisCheckBox isHost;
-    public HostScreen() {
-        super("Host Menu");
+    public GameScreen() {
+        super("Game Menu");
 
         isHost = new VisCheckBox("Is Hosting");
         isHost.addListener(new ChangeListener() {
@@ -32,4 +32,5 @@ public class HostScreen extends VisWindow {
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);
         super.draw(batch, parentAlpha);
     }
+
 }

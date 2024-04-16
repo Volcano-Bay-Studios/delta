@@ -2,6 +2,8 @@ package xyz.volcanobay.modog;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Cursor;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
@@ -36,6 +38,10 @@ public class Delta extends ApplicationAdapter {
 		Gdx.input.setInputProcessor(stage);
 		stage.addActor(root);
 		stage.addActor(new AddressPicker());
+//		Pixmap pixmap = new Pixmap(Gdx.files.internal("cursor.png"));
+//		Cursor cursor = Gdx.graphics.newCursor(pixmap, 1 ,1);
+//		pixmap.dispose();
+//		Gdx.graphics.setCursor(cursor);
 	}
 
 	@Override

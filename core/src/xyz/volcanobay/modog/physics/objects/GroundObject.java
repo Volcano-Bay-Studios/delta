@@ -39,7 +39,7 @@ public class GroundObject extends PhysicsObject {
 
     @Override
     public void pickTexture() {
-        texture = new Texture("none.png");
+        texture = new Texture("ground.png");
     }
 
     @Override

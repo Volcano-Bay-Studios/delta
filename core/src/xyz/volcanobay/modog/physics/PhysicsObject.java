@@ -80,7 +80,7 @@ public class PhysicsObject {
 //        System.out.println("hu");
     }
     public void render() {
-        RenderSystem.batch.draw(texture,body.getPosition().x-textureOffset.x,body.getPosition().y-textureOffset.y,textureOffset.x,textureOffset.y, 16F, 16F,scale.x,scale.y, (float) Math.toDegrees(body.getAngle()),0,0,texture.getWidth(),texture.getHeight(),false,false);
+        RenderSystem.batch.draw(texture,body.getPosition().x-textureOffset.x,body.getPosition().y-textureOffset.y,textureOffset.x,textureOffset.y, texture.getWidth(), texture.getHeight(),scale.x,scale.y, (float) Math.toDegrees(body.getAngle()),0,0,texture.getWidth(),texture.getHeight(),false,false);
     }
     public void dispose() {
         texture.dispose();

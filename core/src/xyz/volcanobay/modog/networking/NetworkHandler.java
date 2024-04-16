@@ -11,7 +11,7 @@ import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.AddressPicker;
-import xyz.volcanobay.modog.screens.HostScreen;
+import xyz.volcanobay.modog.screens.GameScreen;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public class NetworkHandler {
                 System.out.println("Connected to websocket server!");
                 Dialogs.showOKDialog(Delta.stage, "Connected!","Connected to "+connectedIp+connectedPort);
                 isConnected = true;
-                Delta.stage.addActor(new HostScreen());
+                Delta.stage.addActor(new GameScreen());
                 return false;
             }
 
@@ -98,14 +98,13 @@ public class NetworkHandler {
         }
     }
     public static void parseRemovalPacket(String packet) {
-        if (!isHost && !PhysicsHandler.world.isLocked()) {
+        if (!PhysicsHandler.world.isLocked()) {
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.minimal);
             JsonValue root = new JsonReader().parse(packet).child.next;
             JsonValue rootArray = new JsonReader().parse(root.asString());
-            List<NetworkableUUID> uuidsForRemoval = new ArrayList<>();
             for (JsonValue value : rootArray) {
-                NetworkableUUID uuid = json.fromJson(NetworkableUUID.class, value.toJson(JsonWriter.OutputType.json));
+                NetworkableUUID uuid = new NetworkableUUID(value.child.next.asLong(),value.child.next.next.asLong());
                 if (PhysicsHandler.physicsObjectHashMap.containsKey(uuid)) {
                     PhysicsHandler.bodiesForDeletion.add(PhysicsHandler.physicsObjectHashMap.get(uuid).body);
                 }
@@ -114,7 +113,7 @@ public class NetworkHandler {
         }
     }
     public static void parsePhysicsData(String packet) {
-        if (!isHost && !PhysicsHandler.world.isLocked()) {
+        if (!PhysicsHandler.world.isLocked()) {
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.minimal);
             JsonValue root = new JsonReader().parse(packet).child.next;
@@ -148,8 +147,16 @@ public class NetworkHandler {
         json.setOutputType(JsonWriter.OutputType.minimal);
         return json.toJson(new Packet("pD",json.toJson(physicsObjects)));
     }
+    public static void clientAddObject(PhysicsObject object) {
+        if (socket == null || !socket.isOpen())
+            return;
+        List<PhysicsObject> physicsObjectList = new ArrayList<>();
+        physicsObjectList.add(object);
+        sendPhysicsObjects(physicsObjectList);
+    }
     public static void sendPhysicsObjects(List<PhysicsObject> physicsObjectList) {
-
+        if (socket == null || !socket.isOpen())
+            return;
         Array<Body> bodies = new Array<>();
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;

@@ -3,7 +3,6 @@ package xyz.volcanobay.modog.rendering;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -53,7 +52,7 @@ public class RenderSystem {
 
 //        batch.draw(img, 0, 0);
         batch.enableBlending();
-        PhysicsHandler.renderObjects(batch);
+        PhysicsHandler.renderObjects();
         batch.disableBlending();
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
