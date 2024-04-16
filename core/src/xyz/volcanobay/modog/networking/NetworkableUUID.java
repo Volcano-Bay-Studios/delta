@@ -2,8 +2,6 @@ package xyz.volcanobay.modog.networking;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
-import jdk.internal.access.JavaLangAccess;
-import jdk.internal.access.SharedSecrets;
 
 import java.security.SecureRandom;
 import java.util.UUID;

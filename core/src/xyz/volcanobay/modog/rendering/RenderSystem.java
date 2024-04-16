@@ -3,6 +3,7 @@ package xyz.volcanobay.modog.rendering;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -20,10 +21,11 @@ public class RenderSystem {
     public static float scrolledAmount;
     public static RayHandler rayHandler;
     public static PhysicsObject followObject;
+    public static float zoomSpeed;
 
     public static void initialize(){
 
-        img = new Texture("wheel.png");
+        img = new Texture("none.png");
         batch = new SpriteBatch();
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
@@ -49,10 +51,12 @@ public class RenderSystem {
         ScreenUtils.clear(0.3f, 0.3f, 0.3f, 1);
         batch.begin();
 
-        batch.draw(img, 0, 0);
+//        batch.draw(img, 0, 0);
+        batch.enableBlending();
+        PhysicsHandler.renderObjects(batch);
+        batch.disableBlending();
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
-        PhysicsHandler.renderObjects();
         PhysicsHandler.renderDebug();
         batch.end();
     }
@@ -60,7 +64,8 @@ public class RenderSystem {
     public static void handleInput() {
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
-        camera.zoom += scrolledAmount;
+        zoomSpeed = (zoomSpeed+zoomSpeed+zoomSpeed+scrolledAmount)/4;
+        camera.zoom += zoomSpeed*(camera.zoom/5);
         Vector2 mouse = new Vector2(Gdx.input.getX(), Gdx.input.getY());
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) || Gdx.input.isButtonJustPressed(Input.Buttons.MIDDLE)) {
             followObject = null;

@@ -14,7 +14,8 @@ public class NetworkablePhysicsObject {
     public NetworkableUUID uuid;
     public float angularVelocity;
     public int index;
-    public NetworkablePhysicsObject(Vector2 pos,Vector2 vel,float angle,float angularVelocity,String type,int index, NetworkableUUID uuid) {
+    public int bodyType;
+    public NetworkablePhysicsObject(Vector2 pos,Vector2 vel,float angle,float angularVelocity,String type,int index, NetworkableUUID uuid, int bodyType) {
         this.pos = pos;
         this.vel = vel;
         this.angle = angle;
@@ -22,6 +23,7 @@ public class NetworkablePhysicsObject {
         this.angularVelocity = angularVelocity;
         this.index = index;
         this.uuid = uuid;
+        this.bodyType = bodyType;
     }
     public NetworkablePhysicsObject() {
 

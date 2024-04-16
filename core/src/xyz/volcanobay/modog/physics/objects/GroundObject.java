@@ -4,18 +4,27 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.List;
 
-public class CircleObject extends PhysicsObject {
-    public CircleObject() {
+public class GroundObject extends PhysicsObject {
+    public GroundObject() {
         super();
     }
 
-    public CircleObject(Body body) {
+    public GroundObject(Body body) {
         super(body);
+    }
+
+    @Override
+    public void initialise() {
+        super.initialise();
+        type = "ground";
+        required = true;
     }
 
     @Override
@@ -24,31 +33,22 @@ public class CircleObject extends PhysicsObject {
     }
 
     @Override
-    public CircleObject create(Body body) {
-        return new CircleObject(body);
-    }
-
-    @Override
-    public void initialise() {
-        super.initialise();
-        type = "wheel";
+    public GroundObject create(Body body) {
+        return new GroundObject(body);
     }
 
     @Override
     public void pickTexture() {
-        texture = new Texture("wheel.png");
+        texture = new Texture("none.png");
     }
 
     @Override
     public FixtureDef getFixtureDef() {
         FixtureDef fixtureDef = new FixtureDef();
-        CircleShape circle = new CircleShape();
-        circle.setRadius(7f);
-        fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.6f;
-        circle.dispose();
+        PolygonShape groundBox = new PolygonShape();
+        groundBox.setAsBox(200.0f, 10.0f);
+        fixtureDef.shape = groundBox;
+        groundBox.dispose();
         return fixtureDef;
     }
 
@@ -57,4 +57,5 @@ public class CircleObject extends PhysicsObject {
         super.getContextOptions();
         return textButtons;
     }
+
 }

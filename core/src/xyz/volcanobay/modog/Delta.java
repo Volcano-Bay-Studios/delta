@@ -43,9 +43,9 @@ public class Delta extends ApplicationAdapter {
 		RenderSystem.render();
 		PhysicsHandler.handleInput();
 		PhysicsHandler.physicsStep();
-		NetworkHandler.handleFrame();
 		stage.act();
 		stage.draw();
+		NetworkHandler.handleFrame();
 	}
 
 	@Override

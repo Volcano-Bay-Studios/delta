@@ -2,12 +2,14 @@ package xyz.volcanobay.modog.physics;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.rendering.RenderSystem;
@@ -16,12 +18,13 @@ import xyz.volcanobay.modog.screens.ObjectContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PhysicsHandler {
     public static World world = new World(new Vector2(0, -30), true);
     public static Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     public static boolean isDebug = true;
-    public static HashMap<NetworkableUUID, PhysicsObject> physicsObjectHashMap = new HashMap<>();
+    public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectHashMap = new ConcurrentHashMap<>();
     public static List<Body> bodiesForDeletion = new ArrayList<>();
     public static List<NetworkablePhysicsObject> newObjectsForAddition = new ArrayList<>();
     public static List<NetworkablePhysicsObject> objectsForUpdates = new ArrayList<>();
@@ -29,6 +32,7 @@ public class PhysicsHandler {
     public static Body groundBody;
     public static Body staticMoveBody;
     public static Body mouseBody;
+    public static String selectedPlaceableObject = "wheel";
     public static float simSpeed = 1f;
     public static boolean lockChanges = false;
 
@@ -49,54 +53,69 @@ public class PhysicsHandler {
         NetworkableUUID uuid = NetworkableUUID.randomUUID();
         while (physicsObjectHashMap.containsKey(uuid))
             uuid = NetworkableUUID.randomUUID();
-        physicsObjectHashMap.put(uuid, PhysicsObjectsRegistry.getFromRegistry("circle").create(body).setUuid(uuid));
+        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("wheel").create(body).setUuid(uuid);
+        physicsObjectHashMap.put(uuid, newPhysicsObject);
+        Fixture fixture = body.createFixture(newPhysicsObject.getFixtureDef());
+    }
+    public static void addObjectFromRegString(float x, float y, String registryObject) {
+//        System.out.println("addBasicPhysicsObject");
 
-        CircleShape circle = new CircleShape();
-        circle.setRadius(6f);
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(x, y);
 
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.6f;
-
-        Fixture fixture = body.createFixture(fixtureDef);
-        circle.dispose();
+        Body body = world.createBody(bodyDef);
+        NetworkableUUID uuid = NetworkableUUID.randomUUID();
+        while (physicsObjectHashMap.containsKey(uuid))
+            uuid = NetworkableUUID.randomUUID();
+        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(registryObject).create(body).setUuid(uuid);
+        physicsObjectHashMap.put(uuid, newPhysicsObject);
+        Fixture fixture = body.createFixture(newPhysicsObject.getFixtureDef());
     }
 
     public static void addNetworkedObject(NetworkablePhysicsObject physicsObject) {
 //        System.out.println("addNetworkedObject");
-
+        if (physicsObject.type == null || physicsObject.type.equals("ground") )
+            return;
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        if (physicsObject.bodyType == 0) {
+            bodyDef.type = BodyDef.BodyType.StaticBody;
+        } else if (physicsObject.bodyType == 2) {
+            bodyDef.type = BodyDef.BodyType.KinematicBody;
+        } else {
+            bodyDef.type = BodyDef.BodyType.DynamicBody;
+        }
         bodyDef.position.set(physicsObject.pos);
         bodyDef.linearVelocity.set(physicsObject.vel);
         bodyDef.angle = physicsObject.angle;
         bodyDef.angularVelocity = physicsObject.angularVelocity;
 
         Body body = world.createBody(bodyDef);
-        physicsObjectHashMap.put(physicsObject.uuid, PhysicsObjectsRegistry.getFromRegistry("circle").create(body).setUuid(physicsObject.uuid));
-
-        CircleShape circle = new CircleShape();
-        circle.setRadius(6f);
-
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = circle;
-        fixtureDef.density = 0.5f;
-        fixtureDef.friction = 0.4f;
-        fixtureDef.restitution = 0.6f;
-
-        Fixture fixture = body.createFixture(fixtureDef);
-        circle.dispose();
+        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(physicsObject.type).create(body).setUuid(physicsObject.uuid);
+        physicsObjectHashMap.put(physicsObject.uuid, newPhysicsObject);
+        Fixture fixture = body.createFixture(newPhysicsObject.getFixtureDef());
     }
 
     public static void addGround() {
-        BodyDef groundBodyDef = new BodyDef();
-        groundBodyDef.position.set(new Vector2(0, 10));
-        groundBody = world.createBody(groundBodyDef);
+//        BodyDef groundBodyDef = new BodyDef();
+//        groundBodyDef.position.set(new Vector2(0, 10));
+//        groundBody = world.createBody(groundBodyDef);
+//        PolygonShape groundBox = new PolygonShape();
+//        groundBox.setAsBox(RenderSystem.camera.viewportWidth * 50, 10.0f);
+//        groundBody.createFixture(groundBox, 0.0f);
+
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.position.set(0, 0);
+
+        Body body = world.createBody(bodyDef);
+        groundBody = body;
+        NetworkableUUID uuid = new NetworkableUUID(-4866359188412218577L,-6878574037472667055L);
+        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("ground").create(body).setUuid(uuid);
+        physicsObjectHashMap.put(uuid, newPhysicsObject);
         PolygonShape groundBox = new PolygonShape();
-        groundBox.setAsBox(RenderSystem.camera.viewportWidth * 50, 10.0f);
-        groundBody.createFixture(groundBox, 0.0f);
+        groundBox.setAsBox(300f, 10.0f);
+        body.createFixture(groundBox, 0.0f);
     }
 
     public static void physicsStep() {
@@ -115,20 +134,23 @@ public class PhysicsHandler {
                 physicsObject.tickPhysics();
             }
         }
+        List<NetworkableUUID> uuidsForRemovalFromClients = new ArrayList<>();
         for (Body body : bodiesForDeletion) {
             PhysicsObject object = getPhysicsObjectFromBody(body);
             if (object != null) {
+                uuidsForRemovalFromClients.add(object.uuid);
                 physicsObjectHashMap.remove(object.uuid);
                 world.destroyBody(body);
             }
         }
+        NetworkHandler.removeFromClients(uuidsForRemovalFromClients);
         bodiesForDeletion.clear();
     }
     public static void updateObjects() {
 //        System.out.println("updateObjects");
 
-        lockChanges = true;
-        for (NetworkablePhysicsObject physicsObject: objectsForUpdates) {
+        List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
+        for (NetworkablePhysicsObject physicsObject: networkablePhysicsObjects) {
             PhysicsObject ourPhysicsObject = physicsObjectHashMap.get(physicsObject.uuid);
             if (ourPhysicsObject != null) {
                 Body ourBody = ourPhysicsObject.body;
@@ -141,9 +163,8 @@ public class PhysicsHandler {
             addNetworkedObject(networkablePhysicsObject);
         }
 
-        objectsForUpdates.clear();
+        objectsForUpdates.removeAll(networkablePhysicsObjects);
         newObjectsForAddition.clear();
-        lockChanges = false;
     }
 
     public static void renderDebug() {
@@ -153,7 +174,7 @@ public class PhysicsHandler {
             debugRenderer.render(world, RenderSystem.camera.combined);
     }
 
-    public static void renderObjects() {
+    public static void renderObjects(SpriteBatch batch) {
 //        System.out.println("renderObjects");
 
         for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
@@ -217,7 +238,7 @@ public class PhysicsHandler {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             Vector2 mousePos = getMouseWorldPosition();
-            addBasicPhysicsObject(mousePos.x, mouse.y);
+            addObjectFromRegString(mousePos.x, mouse.y,selectedPlaceableObject);
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             if (mouseBody != null) {
@@ -227,6 +248,8 @@ public class PhysicsHandler {
                 }
             }
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3))
+            isDebug = !isDebug;
     }
 
     public static void getMouseObject() {
@@ -243,8 +266,7 @@ public class PhysicsHandler {
     public static void updatePhysicsObjectFromNetworkedObject(NetworkablePhysicsObject physicsObject) {
 //        System.out.println("updatePhysicsObjectFromNetworkedObject");
 
-        if (!world.isLocked() && !lockChanges) {
-            objectsForUpdates.clear();
+        if (!world.isLocked()) {
             newObjectsForAddition.clear();
             if (physicsObjectHashMap.containsKey(physicsObject.uuid)) {
                 objectsForUpdates.add(physicsObject);

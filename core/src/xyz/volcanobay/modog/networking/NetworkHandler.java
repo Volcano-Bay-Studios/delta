@@ -1,6 +1,7 @@
 package xyz.volcanobay.modog.networking;
 
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.utils.*;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSocketListener;
@@ -23,6 +24,7 @@ public class NetworkHandler {
     public static boolean connectWindowOpen = true;
     public static String connectedIp;
     public static int connectedPort;
+    public static List<byte[]> packetProcessQueue = new ArrayList<>();
     public static void initalise(){
     }
     public static void joinServer(String ip,int port){
@@ -50,13 +52,13 @@ public class NetworkHandler {
 
             @Override
             public boolean onMessage(WebSocket webSocket, String packet) {
-                parsePhysicsData(packet);
+                packetProcessQueue.add(packet.getBytes(StandardCharsets.UTF_8));
                 return false;
             }
 
             @Override
             public boolean onMessage(WebSocket webSocket, byte[] packet) {
-                parsePacket(packet);
+                packetProcessQueue.add(packet);
                 return false;
             }
 
@@ -77,17 +79,44 @@ public class NetworkHandler {
         }
         if (!isConnected && !connectWindowOpen)
             Delta.stage.addActor(new AddressPicker());
+        List<byte[]> processing = new ArrayList<>(packetProcessQueue);
+        for (byte[] bytes: processing) {
+            parsePacket(bytes);
+        }
+        packetProcessQueue.removeAll(processing);
     }
     public static void parsePacket(byte[] bytes) {
+        if (bytes == null)
+            return;
         String str = new String(bytes, StandardCharsets.UTF_8); // for UTF-8 encoding
         String type = new JsonReader().parse(str).child.asString();
-        if (type.equals("pD")) {
+        if (type.equals("pD") || type.equals("resync")) {
             parsePhysicsData(str);
+        }
+        if (type.equals("rM")) {
+            parseRemovalPacket(str);
+        }
+    }
+    public static void parseRemovalPacket(String packet) {
+        if (!isHost && !PhysicsHandler.world.isLocked()) {
+            Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.minimal);
+            JsonValue root = new JsonReader().parse(packet).child.next;
+            JsonValue rootArray = new JsonReader().parse(root.asString());
+            List<NetworkableUUID> uuidsForRemoval = new ArrayList<>();
+            for (JsonValue value : rootArray) {
+                NetworkableUUID uuid = json.fromJson(NetworkableUUID.class, value.toJson(JsonWriter.OutputType.json));
+                if (PhysicsHandler.physicsObjectHashMap.containsKey(uuid)) {
+                    PhysicsHandler.bodiesForDeletion.add(PhysicsHandler.physicsObjectHashMap.get(uuid).body);
+                }
+            }
+            PhysicsHandler.updateObjects();
         }
     }
     public static void parsePhysicsData(String packet) {
         if (!isHost && !PhysicsHandler.world.isLocked()) {
             Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.minimal);
             JsonValue root = new JsonReader().parse(packet).child.next;
             JsonValue rootArray = new JsonReader().parse(root.asString());
             for (JsonValue value : rootArray) {
@@ -106,10 +135,43 @@ public class NetworkHandler {
         int i=0;
         for (PhysicsObject physicsObject: PhysicsHandler.physicsObjectHashMap.values()) {
             Body body = physicsObject.body;
-            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), "1", i, physicsObject.uuid));
+            int bodyType = 0;
+            if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
+                bodyType = 1;
+            } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
+                bodyType = 2;
+            }
+            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType));
             i++;
         }
         Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.minimal);
         return json.toJson(new Packet("pD",json.toJson(physicsObjects)));
+    }
+    public static void sendPhysicsObjects(List<PhysicsObject> physicsObjectList) {
+
+        Array<Body> bodies = new Array<>();
+        List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
+        int i=0;
+        for (PhysicsObject physicsObject: physicsObjectList) {
+            Body body = physicsObject.body;
+            int bodyType = 0;
+            if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
+                bodyType = 1;
+            } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
+                bodyType = 2;
+            }
+            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType));
+            i++;
+        }
+        Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.minimal);
+        socket.send(json.toJson(new Packet("pD",json.toJson(physicsObjects))));
+    }
+    public static void removeFromClients(List<NetworkableUUID> networkableUUID) {
+        if (socket != null && socket.isOpen()) {
+            Json json = new Json();
+            socket.send(json.toJson(new Packet("rM", json.toJson(networkableUUID))));
+        }
     }
 }
