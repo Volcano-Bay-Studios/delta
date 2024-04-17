@@ -25,7 +25,7 @@ public class ObjectContext extends VisWindow {
         int i = 0;
         for (TextButtons button: buttons) {
             textButtons.add(new VisTextButton(button.name));
-            add(textButtons.get(i));
+            add(textButtons.get(i)).fillX().row();
             textButtons.get(i).addListener(button.changeListener);
             i++;
         }
