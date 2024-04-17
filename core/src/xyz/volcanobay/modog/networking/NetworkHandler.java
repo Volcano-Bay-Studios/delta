@@ -96,6 +96,15 @@ public class NetworkHandler {
         if (type.equals("rM")) {
             parseRemovalPacket(str);
         }
+        if (type.equals("cD")) {
+            parseCursorPacket(str);
+        }
+    }
+    public static void parseCursorPacket(String packet) {
+        Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.minimal);
+        JsonValue root = new JsonReader().parse(packet).child.next;
+        CursorHandeler.updateCursor(json.fromJson(Cursor.class, new JsonReader().parse(packet).child.next.asString()) );
     }
     public static void parseRemovalPacket(String packet) {
         if (!PhysicsHandler.world.isLocked()) {
@@ -174,6 +183,12 @@ public class NetworkHandler {
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.minimal);
         socket.send(json.toJson(new Packet("pD",json.toJson(physicsObjects))));
+    }
+    public static void sendCursor(Cursor cursor) {
+        Json json = new Json();
+        if (socket != null && socket.isOpen()) {
+            socket.send(json.toJson(new Packet("cD", json.toJson(cursor))));
+        }
     }
     public static void removeFromClients(List<NetworkableUUID> networkableUUID) {
         if (socket != null && socket.isOpen()) {

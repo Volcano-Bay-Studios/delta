@@ -45,7 +45,7 @@ public class SquareObject extends PhysicsObject {
     @Override
     public void createFixture() {
         PolygonShape groundBox = new PolygonShape();
-        fixtureScale = new Vector2(8,8);
+        fixtureScale = new Vector2(7.8f,7.8f);
         groundBox.setAsBox(fixtureScale.x/ PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
         body.createFixture(groundBox,1f);
         groundBox.dispose();

@@ -2,13 +2,12 @@ package xyz.volcanobay.modog;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Cursor;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.PopupMenu;
+import xyz.volcanobay.modog.networking.CursorHandeler;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
@@ -24,7 +23,7 @@ public class Delta extends ApplicationAdapter {
 	public static Logger LOGGER = Logger.getLogger("Delta");
 	public static DeltaStage stage;
 	private MenuBar menuBar;
-	public NetworkableUUID uuid = NetworkableUUID.randomUUID();
+	public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
 
 	@Override
 	public void create () {
@@ -34,6 +33,7 @@ public class Delta extends ApplicationAdapter {
 		VisUI.load(VisUI.SkinScale.X1);
 		float w = Gdx.graphics.getWidth();
 		float h = Gdx.graphics.getHeight();
+		System.out.println("Client UUID is "+uuid);
 
 		stage =  new DeltaStage(new ScreenViewport());
 		final Table root = new Table();

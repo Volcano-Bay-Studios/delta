@@ -218,8 +218,9 @@ public class PhysicsHandler {
         getMouseObject();
         Vector2 mouse = getMouseWorldPosition();
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && mouseJoint == null) {
+            if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && mouseJoint == null && staticMoveBody == null) {
                 if ((NetworkHandler.isHost || !getPhysicsObjectFromBody(mouseBody).restricted)) {
+                    grabPoint = new Vector2(mouse.x-mouseBody.getPosition().x,mouse.y-mouseBody.getPosition().y);
                     staticMoveBody = mouseBody;
                     if (!NetworkHandler.isHost) {
                         NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseBody));
@@ -237,13 +238,18 @@ public class PhysicsHandler {
                 mouseBody.setAwake(true);
 
             }
+            float spinSpeed = 5;
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                spinSpeed = 30;
+            if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
+                spinSpeed = 1;
             if (mouseJoint != null) {
                 mouseJoint.setTarget(getMouseWorldPosition());
                 if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-                    mouseJoint.getBodyB().setAngularVelocity(-1);
+                    mouseJoint.getBodyB().setAngularVelocity(spinSpeed);
                     lockRot = true;
                 } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-                    mouseJoint.getBodyB().setAngularVelocity(1);
+                    mouseJoint.getBodyB().setAngularVelocity(-spinSpeed);
                     lockRot = true;
                 } else if (lockRot) {
                     mouseJoint.getBodyB().setAngularVelocity(0);
@@ -254,7 +260,7 @@ public class PhysicsHandler {
                 NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseJoint.getBodyB()));
             }
             if (staticMoveBody != null) {
-                staticMoveBody.setTransform(getMouseWorldPosition(), staticMoveBody.getAngle());
+                staticMoveBody.setTransform(getMouseWorldPosition().sub(grabPoint), staticMoveBody.getAngle());
                 if (!Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                     staticMoveBody.setLinearVelocity(0, 0);
                     staticMoveBody.setAngularVelocity(0);

@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.networking.CursorHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.ObjectPicker;
@@ -65,6 +66,7 @@ public class RenderSystem {
         PhysicsHandler.renderObjects();
         batch.disableBlending();
         renderOOB();
+        CursorHandeler.renderCursors();
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
         PhysicsHandler.renderDebug();
@@ -114,6 +116,7 @@ public class RenderSystem {
         rayHandler.dispose();
         batch.dispose();
         img.dispose();
+        CursorHandeler.cursor.dispose();
     }
 
 }
