@@ -110,7 +110,6 @@ public class NetworkHandler {
     public static void parseCursorPacket(String packet) {
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.minimal);
-        JsonValue root = new JsonReader().parse(packet).child.next;
         CursorHandeler.updateCursor(json.fromJson(Cursor.class, new JsonReader().parse(packet).child.next.asString()) );
     }
     public static void parseRemovalPacket(String packet) {
@@ -145,7 +144,6 @@ public class NetworkHandler {
     }
 
     public static String packagePhysicsData(boolean onlyAwake) {
-        Array<Body> bodies = new Array<>();
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;
         for (PhysicsObject physicsObject: PhysicsHandler.physicsObjectHashMap.values()) {
@@ -177,7 +175,6 @@ public class NetworkHandler {
     public static void sendPhysicsObjects(List<PhysicsObject> physicsObjectList, boolean onlyAwake) {
         if (socket == null || !socket.isOpen())
             return;
-        Array<Body> bodies = new Array<>();
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;
         for (PhysicsObject physicsObject: physicsObjectList) {
