@@ -73,6 +73,11 @@ public class NetworkHandler {
 
         socket.connect();
     }
+    public static void periodic() {
+        if (isHost) {
+            packagePhysicsData(false);
+        }
+    }
     public static void handleFrame() {
         if (isHost && socket != null && socket.isOpen() && !PhysicsHandler.world.isLocked()) {
             String packed = packagePhysicsData(true);

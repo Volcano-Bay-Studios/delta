@@ -3,7 +3,6 @@
 - Add Joints System
 - Sync Joints
 - Add more objects
-- Only sync changing objects
 
 ## Gameplay
 - Energy

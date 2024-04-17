@@ -3,6 +3,7 @@ package xyz.volcanobay.modog;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuBar;
@@ -24,6 +25,7 @@ public class Delta extends ApplicationAdapter {
 	public static DeltaStage stage;
 	private MenuBar menuBar;
 	public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
+	public static boolean periodicScheduled;
 
 	@Override
 	public void create () {
@@ -54,6 +56,19 @@ public class Delta extends ApplicationAdapter {
 		stage.act();
 		stage.draw();
 		NetworkHandler.handleFrame();
+		if (!periodicScheduled) {
+			Timer.schedule(new Timer.Task() {
+				@Override
+				public void run() {
+					periodic();
+					periodicScheduled = false;
+				}
+			},10);
+			periodicScheduled = true;
+		}
+	}
+	public void periodic() {
+		NetworkHandler.periodic();
 	}
 
 	@Override
