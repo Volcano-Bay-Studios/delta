@@ -140,7 +140,7 @@ public class NetworkHandler {
             } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
                 bodyType = 2;
             }
-            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType));
+            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType,physicsObject.restricted));
             i++;
         }
         Json json = new Json();
@@ -168,7 +168,7 @@ public class NetworkHandler {
             } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
                 bodyType = 2;
             }
-            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType));
+            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType, physicsObject.required));
             i++;
         }
         Json json = new Json();

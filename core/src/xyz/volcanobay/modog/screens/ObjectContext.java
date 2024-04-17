@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisWindow;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
@@ -47,5 +48,11 @@ public class ObjectContext extends VisWindow {
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT) && PhysicsHandler.getPhysicsObjectFromBody(PhysicsHandler.mouseBody) != physicsObject) {
             remove();
         }
+    }
+
+    @Override
+    public boolean remove() {
+        PhysicsHandler.context = false;
+        return super.remove();
     }
 }

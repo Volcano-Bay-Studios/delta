@@ -10,13 +10,20 @@ import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.List;
 
-public class SquareObject extends PhysicsObject {
-    public SquareObject() {
+public class GirderObject extends PhysicsObject {
+    public GirderObject() {
         super();
     }
 
-    public SquareObject(Body body) {
+    public GirderObject(Body body) {
         super(body);
+    }
+
+    @Override
+    public void initialise() {
+        super.initialise();
+        type = "girder";
+        textureScale = new Vector2(0,0);
     }
 
     @Override
@@ -25,29 +32,22 @@ public class SquareObject extends PhysicsObject {
     }
 
     @Override
-    public SquareObject create(Body body) {
-        return new SquareObject(body);
-    }
-
-    @Override
-    public void initialise() {
-        super.initialise();
-        type = "crate";
+    public GirderObject create(Body body) {
+        return new GirderObject(body);
     }
 
     @Override
     public void pickTexture() {
-        texture = new Texture("crate.png");
+        texture = new Texture("girder.png");
     }
-
-
 
     @Override
     public void createFixture() {
         PolygonShape groundBox = new PolygonShape();
-        fixtureScale = new Vector2(8,8);
-        groundBox.setAsBox(fixtureScale.x/ PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
+        fixtureScale = new Vector2(150,5);
+        groundBox.setAsBox((fixtureScale.x/ PhysicsHandler.scaleDown), (fixtureScale.y/PhysicsHandler.scaleDown));
         body.createFixture(groundBox,1f);
+        body.getFixtureList().get(0).setRestitution(.3f);
         groundBox.dispose();
     }
 
@@ -56,4 +56,5 @@ public class SquareObject extends PhysicsObject {
         super.getContextOptions();
         return textButtons;
     }
+
 }

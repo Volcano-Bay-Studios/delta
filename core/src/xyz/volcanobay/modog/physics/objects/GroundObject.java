@@ -7,6 +7,7 @@ import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import xyz.volcanobay.modog.networking.NetworkableUUID;
+import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
 
@@ -15,6 +16,7 @@ import java.util.List;
 public class GroundObject extends PhysicsObject {
     public GroundObject() {
         super();
+        visible = false;
     }
 
     public GroundObject(Body body) {
@@ -41,14 +43,16 @@ public class GroundObject extends PhysicsObject {
 
     @Override
     public void pickTexture() {
-        texture = new Texture("ground.png");
+        texture = new Texture("girder.png");
     }
 
     @Override
     public void createFixture() {
         PolygonShape groundBox = new PolygonShape();
-        groundBox.setAsBox(200.0f, 10.0f);
+        fixtureScale = new Vector2(150,5);
+        groundBox.setAsBox((fixtureScale.x/ PhysicsHandler.scaleDown), (fixtureScale.y/PhysicsHandler.scaleDown));
         body.createFixture(groundBox,1f);
+        body.getFixtureList().get(0).setRestitution(.3f);
         groundBox.dispose();
     }
 

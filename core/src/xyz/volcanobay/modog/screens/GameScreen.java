@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.VisCheckBox;
 import com.kotcrab.vis.ui.widget.VisTextArea;
 import com.kotcrab.vis.ui.widget.VisWindow;
@@ -15,6 +16,8 @@ public class GameScreen extends VisWindow {
     public VisTextArea objectSelected;
     public GameScreen() {
         super("Game Menu");
+        TableUtils.setSpacingDefaults(this);
+        columnDefaults(0).left();
 
         isHost = new VisCheckBox("Is Hosting");
         objectSelected = new VisTextArea();
@@ -27,6 +30,7 @@ public class GameScreen extends VisWindow {
 
 
         add(isHost);
+        pack();
 //        add(objectSelected);
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);
     }

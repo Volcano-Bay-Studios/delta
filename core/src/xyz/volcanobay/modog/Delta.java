@@ -10,6 +10,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.MenuBar;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
@@ -23,6 +24,7 @@ public class Delta extends ApplicationAdapter {
 	public static Logger LOGGER = Logger.getLogger("Delta");
 	public static DeltaStage stage;
 	private MenuBar menuBar;
+	public NetworkableUUID uuid = NetworkableUUID.randomUUID();
 
 	@Override
 	public void create () {
@@ -63,9 +65,8 @@ public class Delta extends ApplicationAdapter {
 
 	@Override
 	public void dispose () {
-		RenderSystem.rayHandler.dispose();
-		RenderSystem.batch.dispose();
-		RenderSystem.img.dispose();
+
+		RenderSystem.dispose();
 		stage.dispose();
 		for (PhysicsObject object: PhysicsHandler.physicsObjectHashMap.values()) {
 			object.dispose();
