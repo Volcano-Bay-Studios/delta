@@ -90,7 +90,7 @@ public class PhysicsObject {
         processTexture();
     }
     public void tickPhysics() {
-        if (!required && body.getPosition().y < -90 && !markedForDeletion) {
+        if (!required && body.getPosition().y < -90 && !markedForDeletion && (NetworkHandler.isHost || !NetworkHandler.isConnected)) {
             PhysicsHandler.bodiesForDeletion.add(body);
             markedForDeletion = true;
         }
@@ -111,7 +111,7 @@ public class PhysicsObject {
     }
     public List<TextButtons> getContextOptions() {
         textButtons.clear();
-        if (NetworkHandler.isHost || !restricted) {
+        if ((NetworkHandler.isHost || (NetworkHandler.socket != null && !NetworkHandler.socket.isOpen())) || !restricted) {
             if (!required) {
                 newButton("Delete", new ChangeListener() {
                     @Override
@@ -162,6 +162,16 @@ public class PhysicsObject {
                 public void changed(ChangeEvent event, Actor actor) {
                     RenderSystem.followObject = PhysicsHandler.getPhysicsObjectFromBody(body);
                     actor.getParent().remove();
+
+                }
+            });
+            newButton("Zero Angle", new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    body.setTransform(body.getPosition(),0);
+                    body.setAngularVelocity(0);
+                    actor.getParent().remove();
+
                 }
             });
         }

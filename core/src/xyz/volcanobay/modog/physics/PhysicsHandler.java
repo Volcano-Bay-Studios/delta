@@ -256,6 +256,13 @@ public class PhysicsHandler {
                     mouseJoint.getBodyB().setFixedRotation(true);
                 }
             }
+            if (staticMoveBody != null) {
+                if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                    staticMoveBody.setTransform(staticMoveBody.getPosition(),staticMoveBody.getAngle()+(spinSpeed/100));
+                } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                    staticMoveBody.setTransform(staticMoveBody.getPosition(),staticMoveBody.getAngle()-(spinSpeed/100));
+                }
+            }
             if (!NetworkHandler.isHost && mouseJoint != null) {
                 NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseJoint.getBodyB()));
             }

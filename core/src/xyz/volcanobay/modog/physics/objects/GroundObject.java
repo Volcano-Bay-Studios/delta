@@ -2,10 +2,7 @@ package xyz.volcanobay.modog.physics.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.CircleShape;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
-import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.*;
 import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
@@ -34,6 +31,7 @@ public class GroundObject extends PhysicsObject {
     @Override
     public void tickPhysics() {
         super.tickPhysics();
+        body.setType(BodyDef.BodyType.StaticBody);
     }
 
     @Override
@@ -59,6 +57,7 @@ public class GroundObject extends PhysicsObject {
     @Override
     public List<TextButtons> getContextOptions() {
         super.getContextOptions();
+        textButtons.clear();
         return textButtons;
     }
 

@@ -75,7 +75,9 @@ public class NetworkHandler {
     }
     public static void handleFrame() {
         if (isHost && socket != null && socket.isOpen() && !PhysicsHandler.world.isLocked()) {
-            socket.send(packagePhysicsData());
+            String packed = packagePhysicsData(true);
+            if (packed != null)
+                socket.send(packed);
         }
         if (!isConnected && !connectWindowOpen)
             Delta.stage.addActor(new AddressPicker());
@@ -137,23 +139,27 @@ public class NetworkHandler {
         }
     }
 
-    public static String packagePhysicsData() {
+    public static String packagePhysicsData(boolean onlyAwake) {
         Array<Body> bodies = new Array<>();
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;
         for (PhysicsObject physicsObject: PhysicsHandler.physicsObjectHashMap.values()) {
-            Body body = physicsObject.body;
-            int bodyType = 0;
-            if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
-                bodyType = 1;
-            } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
-                bodyType = 2;
+            if (!onlyAwake || physicsObject.body.isAwake()) {
+                Body body = physicsObject.body;
+                int bodyType = 0;
+                if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
+                    bodyType = 1;
+                } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
+                    bodyType = 2;
+                }
+                physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid, bodyType, physicsObject.restricted));
+                i++;
             }
-            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType,physicsObject.restricted));
-            i++;
         }
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.minimal);
+        if (physicsObjects.isEmpty())
+            return null;
         return json.toJson(new Packet("pD",json.toJson(physicsObjects)));
     }
     public static void clientAddObject(PhysicsObject object) {
@@ -161,28 +167,31 @@ public class NetworkHandler {
             return;
         List<PhysicsObject> physicsObjectList = new ArrayList<>();
         physicsObjectList.add(object);
-        sendPhysicsObjects(physicsObjectList);
+        sendPhysicsObjects(physicsObjectList,true);
     }
-    public static void sendPhysicsObjects(List<PhysicsObject> physicsObjectList) {
+    public static void sendPhysicsObjects(List<PhysicsObject> physicsObjectList, boolean onlyAwake) {
         if (socket == null || !socket.isOpen())
             return;
         Array<Body> bodies = new Array<>();
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;
         for (PhysicsObject physicsObject: physicsObjectList) {
-            Body body = physicsObject.body;
-            int bodyType = 0;
-            if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
-                bodyType = 1;
-            } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
-                bodyType = 2;
+            if (!onlyAwake || physicsObject.body.isAwake()) {
+                Body body = physicsObject.body;
+                int bodyType = 0;
+                if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
+                    bodyType = 1;
+                } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
+                    bodyType = 2;
+                }
+                physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid, bodyType, physicsObject.required));
+                i++;
             }
-            physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid,bodyType, physicsObject.required));
-            i++;
         }
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.minimal);
-        socket.send(json.toJson(new Packet("pD",json.toJson(physicsObjects))));
+        if (!physicsObjects.isEmpty())
+            socket.send(json.toJson(new Packet("pD",json.toJson(physicsObjects))));
     }
     public static void sendCursor(Cursor cursor) {
         Json json = new Json();
