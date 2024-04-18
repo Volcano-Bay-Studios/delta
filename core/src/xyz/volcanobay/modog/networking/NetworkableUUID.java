@@ -138,4 +138,9 @@ public class NetworkableUUID implements Json.Serializable, Comparable<Networkabl
         mostSigBits = jsonData.child.asLong();
         leastSigBits = jsonData.child.next.asLong();
     }
+
+    @Override
+    public String toString() {
+        return "UUID: "+leastSigBits+mostSigBits;
+    }
 }

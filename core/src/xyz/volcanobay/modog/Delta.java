@@ -32,7 +32,7 @@ public class Delta extends ApplicationAdapter {
 		RenderSystem.initialize();
 		PhysicsHandler.initialize();
 		VisUI.load(VisUI.SkinScale.X1);
-		System.out.println("Client UUID is "+uuid);
+		System.out.println("Client UUID is "+uuid.toString());
 
 		stage =  new DeltaStage(new ScreenViewport());
 		final Table root = new Table();
