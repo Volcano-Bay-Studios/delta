@@ -9,3 +9,4 @@
 - Teams
 - Influence
 - Materials
+- Factory

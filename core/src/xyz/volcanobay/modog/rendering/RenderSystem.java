@@ -1,7 +1,6 @@
 package xyz.volcanobay.modog.rendering;
 
 import box2dLight.DirectionalLight;
-import box2dLight.PointLight;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -10,6 +9,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Joint;
+import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.networking.CursorHandeler;
@@ -20,8 +22,7 @@ import xyz.volcanobay.modog.screens.ObjectPicker;
 public class RenderSystem {
     public static OrthographicCamera camera;
     public static SpriteBatch batch;
-    public static Texture img;
-    public static Texture remove;
+
     public static Vector2 oldMouse;
     public static Vector2 oldCam;
     public static float scrolledAmount;
@@ -30,11 +31,16 @@ public class RenderSystem {
     public static float zoomSpeed;
     public static boolean hasPicker = false;
     public static DirectionalLight skylight;
+    // Images
+    public static Texture jointTexture;
+    public static Texture img;
+    public static Texture remove;
 
     public static void initialize(){
 
         img = new Texture("none.png");
         remove = new Texture("remove.png");
+        jointTexture = new Texture("joint.png");
         batch = new SpriteBatch();
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
@@ -65,6 +71,7 @@ public class RenderSystem {
         batch.enableBlending();
         PhysicsHandler.renderObjects();
         batch.disableBlending();
+        renderJoints();
         renderOOB();
         CursorHandeler.renderCursors();
         rayHandler.setCombinedMatrix(camera);
@@ -76,6 +83,27 @@ public class RenderSystem {
         batch.enableBlending();
         for (int i = (int) ((camera.position.x/2)-30); i < (int) ((camera.position.x/2)+30); i++) {
             batch.draw(remove, (i*2), -90.5f, 2, 1, 0, 0, remove.getWidth(), remove.getHeight(), false, false);
+        }
+        batch.disableBlending();
+    }
+    public static void drawJoint(Vector2 pos1, Vector2 pos2, int rand) {
+        float distance = (float) Math.sqrt(Math.pow(pos1.x-pos2.x,2)+Math.pow(pos1.y-pos2.y,2));
+        float angle = (float) Math.toDegrees(Math.atan2(pos2.y-pos1.y,pos2.x-pos1.x));
+//        batch.draw(jointTexture,pos1.x,pos1.y, distance, .1f, 0, 0, jointTexture.getWidth(), jointTexture.getHeight(), false, false);
+        batch.draw(jointTexture,pos1.x,pos1.y,0,0,(distance),.1f,1,1,angle,rand,0,8,jointTexture.getHeight(), false, false);
+    }
+    public static void renderJoints() {
+        batch.enableBlending();
+        Array<Joint> joints = new Array<>();
+        PhysicsHandler.world.getJoints(joints);
+        int i = 0;
+        for (Joint joint: joints) {
+            if (joint instanceof DistanceJoint distanceJoint) {
+                Vector2 pos1 = distanceJoint.getAnchorA();
+                Vector2 pos2 = distanceJoint.getAnchorB();
+                drawJoint(pos1,pos2,i%10);
+                i++;
+            }
         }
         batch.disableBlending();
     }
@@ -116,6 +144,7 @@ public class RenderSystem {
         rayHandler.dispose();
         batch.dispose();
         img.dispose();
+        jointTexture.dispose();
         CursorHandeler.cursor.dispose();
     }
 

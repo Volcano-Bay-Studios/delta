@@ -25,6 +25,7 @@ public class GroundObject extends PhysicsObject {
         super.initialise();
         type = "ground";
         required = true;
+        restricted = true;
         textureScale = new Vector2(0,0);
     }
 
@@ -57,7 +58,6 @@ public class GroundObject extends PhysicsObject {
     @Override
     public List<TextButtons> getContextOptions() {
         super.getContextOptions();
-        textButtons.clear();
         return textButtons;
     }
 

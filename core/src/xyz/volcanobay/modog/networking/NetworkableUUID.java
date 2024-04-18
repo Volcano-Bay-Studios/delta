@@ -4,7 +4,6 @@ import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 
 import java.security.SecureRandom;
-import java.util.UUID;
 
 public class NetworkableUUID implements Json.Serializable, Comparable<NetworkableUUID> {
     /*
@@ -110,7 +109,6 @@ public class NetworkableUUID implements Json.Serializable, Comparable<Networkabl
 
     /**
      * Static factory to retrieve a type 4 (pseudo randomly generated) UUID.
-     *
      * The {@code UUID} is generated using a cryptographically strong pseudo
      * random number generator.
      *
