@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import xyz.volcanobay.modog.Delta;
@@ -17,6 +18,7 @@ import xyz.volcanobay.modog.screens.ObjectContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PhysicsHandler {
@@ -39,7 +41,13 @@ public class PhysicsHandler {
     public static boolean context = false;
     public static boolean lockRot;
     public static float scaleDown = 32;
-
+    // Joint placement variables
+    public static boolean placingJoint;
+    public static int placementStep;
+    public static Body bodyA;
+    public static Body bodyB;
+    public static Vector2 anchorA;
+    public static Vector2 anchorB;
     public static void initialize() {
         addGround();
     }
@@ -161,9 +169,9 @@ public class PhysicsHandler {
                 ourBody.setLinearVelocity(physicsObject.vel);
                 ourBody.setAngularVelocity(physicsObject.angularVelocity);
                 ourPhysicsObject.restricted = physicsObject.restricted;
-                if (physicsObject.type == "0") {
+                if (physicsObject.bodyType == 0) {
                     ourPhysicsObject.body.setType(BodyDef.BodyType.StaticBody);
-                } else if (physicsObject.type == "2") {
+                } else if (physicsObject.bodyType == 2) {
                     ourPhysicsObject.body.setType(BodyDef.BodyType.KinematicBody);
                 } else {
                     ourPhysicsObject.body.setType(BodyDef.BodyType.DynamicBody);
@@ -217,7 +225,7 @@ public class PhysicsHandler {
 
         getMouseObject();
         Vector2 mouse = getMouseWorldPosition();
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !placingJoint) {
             if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && mouseJoint == null && staticMoveBody == null) {
                 if ((NetworkHandler.isHost || !getPhysicsObjectFromBody(mouseBody).restricted)) {
                     grabPoint = new Vector2(mouse.x-mouseBody.getPosition().x,mouse.y-mouseBody.getPosition().y);
@@ -268,6 +276,7 @@ public class PhysicsHandler {
             }
             if (staticMoveBody != null) {
                 staticMoveBody.setTransform(getMouseWorldPosition().sub(grabPoint), staticMoveBody.getAngle());
+                staticMoveBody.setAwake(true);
                 if (!Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
                     staticMoveBody.setLinearVelocity(0, 0);
                     staticMoveBody.setAngularVelocity(0);
@@ -279,6 +288,7 @@ public class PhysicsHandler {
             mouseJoint = null;
             lockRot = false;
         } else if (staticMoveBody != null) {
+            staticMoveBody.setAwake(false);
             staticMoveBody = null;
             lockRot = false;
         }
@@ -292,6 +302,46 @@ public class PhysicsHandler {
                 if (physicsObject != null && !context) {
                     Delta.stage.addActor(new ObjectContext(physicsObject, physicsObject.getContextOptions()));
                     context = true;
+                }
+            }
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && placingJoint) {
+            placingJoint = false;
+            bodyA = null;
+            bodyB = null;
+            anchorA = null;
+            anchorB = null;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && !placingJoint) {
+            placingJoint = true;
+            placementStep = 1;
+            bodyA = null;
+            bodyB = null;
+            anchorA = null;
+            anchorB = null;
+        }
+
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && placingJoint) {
+            if (mouseBody != null) {
+                if (placementStep == 1) {
+                    anchorA = mouse;
+                    bodyA = mouseBody;
+                    placementStep = 2;
+                }
+                if (placementStep == 2 && mouseBody != bodyA) {
+                    anchorB = mouse;
+                    bodyB = mouseBody;
+                    DistanceJointDef defJoint = new DistanceJointDef ();
+                    defJoint.length = 0;
+                    defJoint.initialize(bodyA, bodyB, anchorA, anchorB);
+                    defJoint.collideConnected = true;
+                    world.createJoint(defJoint);
+                    placementStep = 0;
+                    placingJoint = false;
+                    bodyA = null;
+                    bodyB = null;
+                    anchorA = null;
+                    anchorB = null;
                 }
             }
         }
@@ -320,7 +370,7 @@ public class PhysicsHandler {
         world.QueryAABB(fixture -> {
             mouseBody = fixture.getBody();
             return true;
-        }, mouse.x - .001f, mouse.y - .001f, mouse.x, mouse.y);
+        }, mouse.x, mouse.y, mouse.x, mouse.y);
     }
 
     public static void updatePhysicsObjectFromNetworkedObject(NetworkablePhysicsObject physicsObject) {
