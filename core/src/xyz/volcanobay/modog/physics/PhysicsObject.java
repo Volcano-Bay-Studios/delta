@@ -111,7 +111,7 @@ public class PhysicsObject {
     }
     public List<TextButtons> getContextOptions() {
         textButtons.clear();
-        if ((NetworkHandler.isHost || (NetworkHandler.socket != null && !NetworkHandler.socket.isOpen())) || !restricted) {
+        if ((NetworkHandler.isHost || !(NetworkHandler.socket != null && NetworkHandler.socket.isOpen())) || !restricted) {
             if (!required) {
                 newButton("Delete", new ChangeListener() {
                     @Override
@@ -121,6 +121,14 @@ public class PhysicsObject {
                     }
                 });
             }
+            newButton("Destroy Joints", new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    PhysicsHandler.bodiesForJointRemoval.add(body);
+                    actor.getParent().remove();
+
+                }
+            });
             if ((body.getType() == BodyDef.BodyType.StaticBody)) {
                 newButton("Unfreeze", new ChangeListener() {
                     @Override

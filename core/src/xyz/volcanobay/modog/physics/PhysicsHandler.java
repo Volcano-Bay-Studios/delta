@@ -6,9 +6,11 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
+import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
 import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
 import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
+import com.badlogic.gdx.utils.Array;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.NetworkablePhysicsObject;
@@ -26,7 +28,9 @@ public class PhysicsHandler {
     public static Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     public static boolean isDebug = false;
     public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectHashMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<NetworkableUUID, WorldJoint> jointConcurrentHashMap = new ConcurrentHashMap<>();
     public static List<Body> bodiesForDeletion = new ArrayList<>();
+    public static List<Body> bodiesForJointRemoval = new ArrayList<>();
     public static List<NetworkablePhysicsObject> newObjectsForAddition = new ArrayList<>();
     public static List<NetworkablePhysicsObject> objectsForUpdates = new ArrayList<>();
     public static MouseJoint mouseJoint;
@@ -51,8 +55,14 @@ public class PhysicsHandler {
     public static void initialize() {
         addGround();
     }
-
-
+    public static void addJoint(JointDef joint) {
+        NetworkableUUID uuid = NetworkableUUID.randomUUID();
+        while (jointConcurrentHashMap.containsKey(uuid))
+            uuid = NetworkableUUID.randomUUID();
+        Joint newJoint = world.createJoint(joint);
+        WorldJoint worldJoint = new WorldJoint(newJoint,uuid);
+        jointConcurrentHashMap.put(uuid,worldJoint);
+    }
     public static void addBasicPhysicsObject(float x, float y) {
 //        System.out.println("addBasicPhysicsObject");
 
@@ -153,6 +163,12 @@ public class PhysicsHandler {
                 world.destroyBody(body);
             }
         }
+        List<Body> processedBodies = new ArrayList<>();
+        for (Body body : bodiesForJointRemoval) {
+            deleteBodyJoints(body);
+            processedBodies.add(body);
+        }
+        bodiesForJointRemoval.removeAll(processedBodies);
         if (!uuidsForRemovalFromClients.isEmpty())
             NetworkHandler.removeFromClients(uuidsForRemovalFromClients);
         bodiesForDeletion.clear();
@@ -218,6 +234,29 @@ public class PhysicsHandler {
             }
         }
         return null;
+    }
+    public static WorldJoint getWorldJointFromJoint(Joint joint) {
+//        System.out.println("getPhysicsObjectFromBody");
+
+        for (WorldJoint object : jointConcurrentHashMap.values()) {
+            if (object.joint == joint) {
+                return object;
+            }
+        }
+        return null;
+    }
+    public static void deleteBodyJoints(Body body) {
+        Array<Joint> joints = new Array<>();
+        PhysicsHandler.world.getJoints(joints);
+        for (Joint joint: joints) {
+            if (joint.getBodyA().equals(body) || joint.getBodyB().equals(body)) {
+                WorldJoint worldJoint= getWorldJointFromJoint(joint);
+                if (worldJoint != null) {
+                    jointConcurrentHashMap.remove(worldJoint.uuid);
+                }
+                world.destroyJoint(joint);
+            }
+        }
     }
 
     public static void handleInput() {
@@ -335,7 +374,7 @@ public class PhysicsHandler {
                     defJoint.length = 0;
                     defJoint.initialize(bodyA, bodyB, anchorA, anchorB);
                     defJoint.collideConnected = true;
-                    world.createJoint(defJoint);
+                    addJoint(defJoint);
                     placementStep = 0;
                     placingJoint = false;
                     bodyA = null;
