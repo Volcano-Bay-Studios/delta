@@ -2,7 +2,7 @@ package xyz.volcanobay.modog.physics;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.Net;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
@@ -15,12 +15,12 @@ import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.NetworkableUUID;
+import xyz.volcanobay.modog.networking.NetworkableWorldJoint;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PhysicsHandler {
@@ -31,6 +31,7 @@ public class PhysicsHandler {
     public static ConcurrentHashMap<NetworkableUUID, WorldJoint> jointConcurrentHashMap = new ConcurrentHashMap<>();
     public static List<Body> bodiesForDeletion = new ArrayList<>();
     public static List<Body> bodiesForJointRemoval = new ArrayList<>();
+    public static List<WorldJoint> jointsForRemoval = new ArrayList<>();
     public static List<NetworkablePhysicsObject> newObjectsForAddition = new ArrayList<>();
     public static List<NetworkablePhysicsObject> objectsForUpdates = new ArrayList<>();
     public static MouseJoint mouseJoint;
@@ -61,6 +62,7 @@ public class PhysicsHandler {
             uuid = NetworkableUUID.randomUUID();
         Joint newJoint = world.createJoint(joint);
         WorldJoint worldJoint = new WorldJoint(newJoint,uuid);
+        NetworkHandler.sendJoint(worldJoint);
         jointConcurrentHashMap.put(uuid,worldJoint);
     }
     public static void addBasicPhysicsObject(float x, float y) {
@@ -169,10 +171,38 @@ public class PhysicsHandler {
             processedBodies.add(body);
         }
         bodiesForJointRemoval.removeAll(processedBodies);
+
+        List<WorldJoint> removedJoints = new ArrayList<>();
+        for (WorldJoint body : jointsForRemoval) {
+            world.destroyJoint(body.joint);
+            jointConcurrentHashMap.remove(body.uuid);
+            removedJoints.add(body);
+        }
+        jointsForRemoval.removeAll(removedJoints);
         if (!uuidsForRemovalFromClients.isEmpty())
             NetworkHandler.removeFromClients(uuidsForRemovalFromClients);
         bodiesForDeletion.clear();
     }
+    public static void updateJoints(NetworkableWorldJoint joint) {
+        if (!jointConcurrentHashMap.containsKey(joint.uuid)) {
+            if (physicsObjectHashMap.containsKey(joint.bodyAUUID) && physicsObjectHashMap.containsKey(joint.bodyAUUID)) {
+                DistanceJointDef jointDef = new DistanceJointDef();
+                Body bodyA = physicsObjectHashMap.get(joint.bodyAUUID).body;
+                Body bodyB = physicsObjectHashMap.get(joint.bodyBUUID).body;
+                jointDef.initialize(bodyA,bodyB,bodyA.getPosition().add(joint.localPointA),bodyB.getPosition().add(joint.localPointB));
+                jointDef.collideConnected = true;
+                DistanceJoint newJoint = (DistanceJoint) world.createJoint(jointDef);
+                newJoint.setLength(joint.length);
+                WorldJoint worldJoint = new WorldJoint(newJoint, joint.uuid);
+                jointConcurrentHashMap.put(joint.uuid, worldJoint);
+            }
+        } else {
+            WorldJoint ourJoint = jointConcurrentHashMap.get(joint.uuid);
+            DistanceJoint distanceJoint = (DistanceJoint) ourJoint.joint;
+            distanceJoint.setLength(joint.length);
+        }
+    }
+
     public static void updateObjects() {
 //        System.out.println("updateObjects");
 
@@ -247,16 +277,19 @@ public class PhysicsHandler {
     }
     public static void deleteBodyJoints(Body body) {
         Array<Joint> joints = new Array<>();
-        PhysicsHandler.world.getJoints(joints);
+        List<WorldJoint> jointsForClientRemoval = new ArrayList<>();
+        world.getJoints(joints);
         for (Joint joint: joints) {
             if (joint.getBodyA().equals(body) || joint.getBodyB().equals(body)) {
                 WorldJoint worldJoint= getWorldJointFromJoint(joint);
                 if (worldJoint != null) {
+                    jointsForClientRemoval.add(worldJoint);
                     jointConcurrentHashMap.remove(worldJoint.uuid);
                 }
                 world.destroyJoint(joint);
             }
         }
+        NetworkHandler.removeJoints(jointsForClientRemoval);
     }
 
     public static void handleInput() {

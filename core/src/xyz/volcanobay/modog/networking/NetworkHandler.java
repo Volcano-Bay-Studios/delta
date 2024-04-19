@@ -2,6 +2,7 @@ package xyz.volcanobay.modog.networking;
 
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
 import com.badlogic.gdx.utils.*;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSocketListener;
@@ -10,12 +11,16 @@ import com.kotcrab.vis.ui.util.dialog.Dialogs;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
+import xyz.volcanobay.modog.physics.WorldJoint;
 import xyz.volcanobay.modog.screens.AddressPicker;
 import xyz.volcanobay.modog.screens.GameScreen;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import static xyz.volcanobay.modog.physics.PhysicsHandler.getPhysicsObjectFromBody;
 
 public class NetworkHandler {
     public static WebSocket socket;
@@ -75,7 +80,7 @@ public class NetworkHandler {
     }
     public static void periodic() {
         if (isHost) {
-            packagePhysicsData(false);
+            fullResync();
         }
     }
     public static void handleFrame() {
@@ -101,18 +106,24 @@ public class NetworkHandler {
             parsePhysicsData(str);
         }
         if (type.equals("rM")) {
-            parseRemovalPacket(str);
+            parsePhysicsObjectRemovalPacket(str);
         }
         if (type.equals("cD")) {
             parseCursorPacket(str);
         }
+        if (type.equals("jS")) {
+            parseJointData(str);
+        }
+        if (type.equals("jR")) {
+            parseJointRemovalPacket(str);
+        }
     }
-    public static void parseCursorPacket(String packet) {
+    private static void parseCursorPacket(String packet) {
         Json json = new Json();
         json.setOutputType(JsonWriter.OutputType.minimal);
         CursorHandeler.updateCursor(json.fromJson(Cursor.class, new JsonReader().parse(packet).child.next.asString()) );
     }
-    public static void parseRemovalPacket(String packet) {
+    private static void parsePhysicsObjectRemovalPacket(String packet) {
         if (!PhysicsHandler.world.isLocked()) {
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.minimal);
@@ -127,7 +138,21 @@ public class NetworkHandler {
             PhysicsHandler.updateObjects();
         }
     }
-    public static void parsePhysicsData(String packet) {
+    public static void parseJointRemovalPacket(String packet){
+        Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.minimal);
+        JsonValue root = new JsonReader().parse(packet).child.next;
+        JsonValue rootArray = new JsonReader().parse(root.asString());
+        for (JsonValue value : rootArray) {
+            NetworkableWorldJoint networkableWorldJoint = json.fromJson(NetworkableWorldJoint.class, value.toJson(JsonWriter.OutputType.json));
+            if (networkableWorldJoint != null) {
+                WorldJoint ourJoint = PhysicsHandler.jointConcurrentHashMap.get(networkableWorldJoint.uuid);
+                PhysicsHandler.jointsForRemoval.add(ourJoint);
+            }
+        }
+        PhysicsHandler.updateObjects();
+    }
+    private static void parsePhysicsData(String packet) {
         if (!PhysicsHandler.world.isLocked()) {
             Json json = new Json();
             json.setOutputType(JsonWriter.OutputType.minimal);
@@ -142,7 +167,69 @@ public class NetworkHandler {
             PhysicsHandler.updateObjects();
         }
     }
-
+    private static void parseJointData(String packet) {
+            Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.minimal);
+            JsonValue root = new JsonReader().parse(packet).child.next;
+            JsonValue rootArray = new JsonReader().parse(root.asString());
+            for (JsonValue value : rootArray) {
+                NetworkableWorldJoint networkableWorldJoint = json.fromJson(NetworkableWorldJoint.class, value.toJson(JsonWriter.OutputType.json));
+                if (networkableWorldJoint != null) {
+                    PhysicsHandler.updateJoints(networkableWorldJoint);
+                }
+            }
+            PhysicsHandler.updateObjects();
+    }
+    public static void sendJoint(WorldJoint joint) {
+        if (socket != null && socket.isOpen()) {
+            List<WorldJoint> joints = new ArrayList<>();
+            joints.add(joint);
+            socket.send(packageJoints(joints));
+        }
+    }
+    public static void removeJoints(List<WorldJoint> joints) {
+        if (socket != null && socket.isOpen()) {
+            List<NetworkableWorldJoint> networkableWorldJoints = new ArrayList<>();
+            for (WorldJoint worldJoint : joints) {
+                NetworkableWorldJoint networkableWorldJoint = new NetworkableWorldJoint();
+                networkableWorldJoint.uuid = worldJoint.uuid;
+                networkableWorldJoints.add(networkableWorldJoint);
+            }
+            Json json = new Json();
+            json.setOutputType(JsonWriter.OutputType.minimal);
+            socket.send(json.toJson(new Packet("jR", json.toJson(networkableWorldJoints))));
+        }
+    }
+    public static String packageJoints(List<WorldJoint> worldJoints) {
+        List<NetworkableWorldJoint> networkableWorldJoints = new ArrayList<>();
+        for (WorldJoint worldJoint: worldJoints) {
+            NetworkableWorldJoint networkableWorldJoint = new NetworkableWorldJoint();
+            networkableWorldJoint.uuid = worldJoint.uuid;
+            PhysicsObject uuidA = getPhysicsObjectFromBody(worldJoint.joint.getBodyA());
+            PhysicsObject uuidB = getPhysicsObjectFromBody(worldJoint.joint.getBodyB());
+            if (uuidA != null && uuidB != null) {
+                networkableWorldJoint.bodyAUUID = uuidA.uuid;
+                networkableWorldJoint.bodyBUUID = uuidB.uuid;
+                networkableWorldJoint.localPointA = worldJoint.joint.getBodyA().localPoint2;
+                networkableWorldJoint.localPointB = worldJoint.joint.getBodyB().localPoint2;
+                networkableWorldJoint.length = ((DistanceJoint) worldJoint.joint).getLength();
+                networkableWorldJoints.add(networkableWorldJoint);
+            }
+        }
+        Json json = new Json();
+        json.setOutputType(JsonWriter.OutputType.minimal);
+        return json.toJson(new Packet("jS",json.toJson(networkableWorldJoints)));
+    }
+    public static void fullResync() {
+        if (isHost && socket != null && socket.isOpen() && !PhysicsHandler.world.isLocked()) {
+            String packed = packagePhysicsData(false);
+            if (packed != null)
+                socket.send(packed);
+            String packed1 = packageJoints(PhysicsHandler.jointConcurrentHashMap.values().stream().toList());
+            if (packed1 != null)
+                socket.send(packed1);
+        }
+    }
     public static String packagePhysicsData(boolean onlyAwake) {
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;

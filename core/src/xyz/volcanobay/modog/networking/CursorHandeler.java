@@ -30,8 +30,9 @@ public class CursorHandeler {
             cursors.get(data.uuid).pos = data.pos;
         } else {
             cursors.put(data.uuid, data);
-            if (NetworkHandler.isHost)
+            if (NetworkHandler.isHost) {
                 NetworkHandler.packagePhysicsData(false);
+            }
         }
     }
 }

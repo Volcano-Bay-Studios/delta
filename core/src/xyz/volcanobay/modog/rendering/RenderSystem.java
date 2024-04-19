@@ -86,14 +86,25 @@ public class RenderSystem {
         }
         batch.disableBlending();
     }
+    public static Vector2 getOffsetFromAngle(float angle, Vector2 offset) {
+        float inRadians = (float) Math.toRadians(angle);
+        return new Vector2((float) ( (float) (Math.cos(inRadians)*offset.x) - (float) (offset.x  * Math.sin(angle))),  ( (float) (Math.cos(inRadians)*offset.y) + (float) (offset.x * Math.sin(angle))));
+    }
     public static void drawJoint(Vector2 pos1, Vector2 pos2, int rand) {
         float distance = (float) Math.sqrt(Math.pow(pos1.x-pos2.x,2)+Math.pow(pos1.y-pos2.y,2));
         float angle = (float) Math.toDegrees(Math.atan2(pos2.y-pos1.y,pos2.x-pos1.x));
 //        batch.draw(jointTexture,pos1.x,pos1.y, distance, .1f, 0, 0, jointTexture.getWidth(), jointTexture.getHeight(), false, false);
-        batch.draw(jointTexture,pos1.x,pos1.y,0,0,(distance),.1f,1,1,angle,rand,0,8,jointTexture.getHeight(), false, false);
+        Vector2 offset = getOffsetFromAngle(angle,new Vector2(0f,-.05f));
+        batch.draw(jointTexture,pos1.x+offset.x,pos1.y+offset.y,0,-0 ,(distance),.1f,1,1,angle,rand,0,8,jointTexture.getHeight(), false, false);
     }
     public static void renderJoints() {
         batch.enableBlending();
+        if (PhysicsHandler.placementStep == 1) {
+            drawJoint(PhysicsHandler.getMouseWorldPosition().sub(0.05f,.05f),PhysicsHandler.getMouseWorldPosition().add(0.05f,-.05f),1);
+        }
+        if (PhysicsHandler.placementStep == 2) {
+            drawJoint(PhysicsHandler.anchorA,PhysicsHandler.getMouseWorldPosition(),1);
+        }
         Array<Joint> joints = new Array<>();
         PhysicsHandler.world.getJoints(joints);
         int i = 0;
