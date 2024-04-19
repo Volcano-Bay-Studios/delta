@@ -43,6 +43,13 @@ public class Delta extends ApplicationAdapter {
 		Cursor cursor = Gdx.graphics.newCursor(pixmap, 1 ,1);
 		pixmap.dispose();
 		Gdx.graphics.setCursor(cursor);
+		Timer.schedule(new Timer.Task() {
+			@Override
+			public void run() {
+				periodic();
+				tickPeriodic();
+			}
+		},0.05f);
 	}
 
 	@Override
@@ -66,6 +73,16 @@ public class Delta extends ApplicationAdapter {
 	}
 	public void periodic() {
 		NetworkHandler.periodic();
+	}
+	public void tickPeriodic() {
+		Timer.schedule(new Timer.Task() {
+			@Override
+			public void run() {
+				periodic();
+				tickPeriodic();
+			}
+		},0.05f);
+		PhysicsHandler.objectTickPeriodic();
 	}
 
 	@Override

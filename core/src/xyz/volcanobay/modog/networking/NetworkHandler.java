@@ -210,8 +210,8 @@ public class NetworkHandler {
             if (uuidA != null && uuidB != null) {
                 networkableWorldJoint.bodyAUUID = uuidA.uuid;
                 networkableWorldJoint.bodyBUUID = uuidB.uuid;
-                networkableWorldJoint.localPointA = worldJoint.joint.getBodyA().localPoint2;
-                networkableWorldJoint.localPointB = worldJoint.joint.getBodyB().localPoint2;
+                networkableWorldJoint.localPointA = worldJoint.joint.getAnchorA();
+                networkableWorldJoint.localPointB = worldJoint.joint.getAnchorB();
                 networkableWorldJoint.length = ((DistanceJoint) worldJoint.joint).getLength();
                 networkableWorldJoints.add(networkableWorldJoint);
             }

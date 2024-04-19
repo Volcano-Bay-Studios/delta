@@ -187,4 +187,13 @@ public class PhysicsObject {
         }
         return textButtons;
     }
+    public void tick() {}
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Body thisBody) {
+            return thisBody.equals(this.body);
+        }
+        return super.equals(obj);
+    }
 }

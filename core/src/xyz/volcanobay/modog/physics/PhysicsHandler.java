@@ -16,6 +16,7 @@ import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.networking.NetworkableWorldJoint;
+import xyz.volcanobay.modog.physics.callbacks.MachineListener;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
 
@@ -55,6 +56,7 @@ public class PhysicsHandler {
     public static Vector2 anchorB;
     public static void initialize() {
         addGround();
+        world.setContactListener(new MachineListener());
     }
     public static void addJoint(JointDef joint) {
         NetworkableUUID uuid = NetworkableUUID.randomUUID();
@@ -183,13 +185,21 @@ public class PhysicsHandler {
             NetworkHandler.removeFromClients(uuidsForRemovalFromClients);
         bodiesForDeletion.clear();
     }
+    public static void removeObject(PhysicsObject object) {
+        bodiesForDeletion.add(object.body);
+    }
+    public static void objectTickPeriodic() {
+        for (PhysicsObject object: physicsObjectHashMap.values()) {
+            object.tick();
+        }
+    }
     public static void updateJoints(NetworkableWorldJoint joint) {
         if (!jointConcurrentHashMap.containsKey(joint.uuid)) {
             if (physicsObjectHashMap.containsKey(joint.bodyAUUID) && physicsObjectHashMap.containsKey(joint.bodyAUUID)) {
                 DistanceJointDef jointDef = new DistanceJointDef();
                 Body bodyA = physicsObjectHashMap.get(joint.bodyAUUID).body;
                 Body bodyB = physicsObjectHashMap.get(joint.bodyBUUID).body;
-                jointDef.initialize(bodyA,bodyB,bodyA.getPosition().add(joint.localPointA),bodyB.getPosition().add(joint.localPointB));
+                jointDef.initialize(bodyA,bodyB,joint.localPointA,joint.localPointB);
                 jointDef.collideConnected = true;
                 DistanceJoint newJoint = (DistanceJoint) world.createJoint(jointDef);
                 newJoint.setLength(joint.length);
