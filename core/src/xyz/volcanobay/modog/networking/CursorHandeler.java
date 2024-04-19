@@ -13,6 +13,10 @@ import static xyz.volcanobay.modog.rendering.RenderSystem.batch;
 
 public class CursorHandeler {
     public static Texture cursor = new Texture("cursor.png");
+    public static Texture cursorRed = new Texture("cursor_red.png");
+    public static Texture cursorBlue = new Texture("cursor_blue.png");
+    public static Texture cursorLime = new Texture("cursor_lime.png");
+    public static Texture cursorYellow = new Texture("cursor_yellow.png");
     public static Cursor myCursor = new Cursor(Delta.uuid);
     public static ConcurrentHashMap<NetworkableUUID,Cursor> cursors = new ConcurrentHashMap<>();
 

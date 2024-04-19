@@ -134,6 +134,7 @@ public class PhysicsObject {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
                         body.setType(BodyDef.BodyType.DynamicBody);
+                        NetworkHandler.clientAddObject(body);
                         actor.getParent().remove();
                     }
                 });
@@ -142,6 +143,7 @@ public class PhysicsObject {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
                         body.setType(BodyDef.BodyType.StaticBody);
+                        NetworkHandler.clientAddObject(body);
                         actor.getParent().remove();
                     }
                 });

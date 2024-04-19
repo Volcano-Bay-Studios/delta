@@ -157,6 +157,10 @@ public class RenderSystem {
         img.dispose();
         jointTexture.dispose();
         CursorHandeler.cursor.dispose();
+        CursorHandeler.cursorRed.dispose();
+        CursorHandeler.cursorBlue.dispose();
+        CursorHandeler.cursorLime.dispose();
+        CursorHandeler.cursorYellow.dispose();
     }
 
 }

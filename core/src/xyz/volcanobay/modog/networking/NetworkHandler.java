@@ -259,6 +259,16 @@ public class NetworkHandler {
         physicsObjectList.add(object);
         sendPhysicsObjects(physicsObjectList,true);
     }
+    public static void clientAddObject(Body body) {
+        PhysicsObject object = getPhysicsObjectFromBody(body);
+        if (object != null) {
+            if (socket == null || !socket.isOpen())
+                return;
+            List<PhysicsObject> physicsObjectList = new ArrayList<>();
+            physicsObjectList.add(object);
+            sendPhysicsObjects(physicsObjectList, true);
+        }
+    }
     public static void sendPhysicsObjects(List<PhysicsObject> physicsObjectList, boolean onlyAwake) {
         if (socket == null || !socket.isOpen())
             return;
