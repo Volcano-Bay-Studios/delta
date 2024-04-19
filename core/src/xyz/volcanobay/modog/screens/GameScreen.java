@@ -6,10 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.util.TableUtils;
-import com.kotcrab.vis.ui.widget.VisCheckBox;
-import com.kotcrab.vis.ui.widget.VisSlider;
-import com.kotcrab.vis.ui.widget.VisTextArea;
-import com.kotcrab.vis.ui.widget.VisWindow;
+import com.kotcrab.vis.ui.widget.*;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 
@@ -17,6 +14,8 @@ public class GameScreen extends VisWindow {
     public VisCheckBox isHost;
     public VisTextArea objectSelected;
     public VisSlider visSlider;
+    public VisTextButton resync;
+    public VisTextArea coordinates;
     public GameScreen() {
         super("Game Menu");
         TableUtils.setSpacingDefaults(this);
@@ -25,10 +24,18 @@ public class GameScreen extends VisWindow {
         isHost = new VisCheckBox("Is Hosting");
         visSlider = new VisSlider(-10,10,1,false);
         objectSelected = new VisTextArea();
+        resync = new VisTextButton("Resync");
+        coordinates = new VisTextArea("?");
         isHost.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 NetworkHandler.isHost = isHost.isChecked();
+            }
+        });
+        resync.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                NetworkHandler.fullResync();
             }
         });
         visSlider.addListener(new ChangeListener() {
@@ -40,7 +47,9 @@ public class GameScreen extends VisWindow {
 
 
         add(isHost).row();
-        add(visSlider);
+        add(visSlider).row();
+        add(resync).row();
+        add(coordinates);
         pack();
 //        add(objectSelected);
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);
@@ -52,6 +61,8 @@ public class GameScreen extends VisWindow {
             remove();
         objectSelected.setText(PhysicsHandler.selectedPlaceableObject);
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);
+        Vector2 mouse = PhysicsHandler.getMouseWorldPosition();
+        coordinates.setText("X: "+(int)mouse.x+" Y: "+(int)mouse.y);
         super.draw(batch, parentAlpha);
     }
 
