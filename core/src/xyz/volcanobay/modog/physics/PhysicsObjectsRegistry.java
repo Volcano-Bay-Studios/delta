@@ -1,10 +1,7 @@
 package xyz.volcanobay.modog.physics;
 
 import xyz.volcanobay.modog.Delta;
-import xyz.volcanobay.modog.physics.objects.GirderObject;
-import xyz.volcanobay.modog.physics.objects.SquareObject;
-import xyz.volcanobay.modog.physics.objects.CircleObject;
-import xyz.volcanobay.modog.physics.objects.GroundObject;
+import xyz.volcanobay.modog.physics.objects.*;
 
 import java.util.HashMap;
 
@@ -26,6 +23,7 @@ public class PhysicsObjectsRegistry {
         registerNewObject("crate",new SquareObject());
         registerNewObject("ground",new GroundObject());
         registerNewObject("girder",new GirderObject());
+        registerNewObject("item",new MaterialObject());
     }
     public static PhysicsObject getFromRegistry(String name) {
         return physicsObjectHashMap.getOrDefault(name, null);

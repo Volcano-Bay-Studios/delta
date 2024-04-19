@@ -88,7 +88,7 @@ public class RenderSystem {
     }
     public static Vector2 getOffsetFromAngle(float angle, Vector2 offset) {
         float inRadians = (float) Math.toRadians(angle);
-        return new Vector2((float) ( (float) (Math.cos(inRadians)*offset.x) - (float) (offset.x  * Math.sin(angle))),  ( (float) (Math.cos(inRadians)*offset.y) + (float) (offset.x * Math.sin(angle))));
+        return new Vector2(((float) (Math.cos(inRadians)*offset.x) - (float) (offset.x  * Math.sin(angle))),  ( (float) (Math.cos(inRadians)*offset.y) + (float) (offset.x * Math.sin(angle))));
     }
     public static void drawJoint(Vector2 pos1, Vector2 pos2, int rand) {
         float distance = (float) Math.sqrt(Math.pow(pos1.x-pos2.x,2)+Math.pow(pos1.y-pos2.y,2));

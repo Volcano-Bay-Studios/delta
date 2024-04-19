@@ -6,5 +6,4 @@
 - Health
 - Teams
 - Influence
-- Materials
 - Factory

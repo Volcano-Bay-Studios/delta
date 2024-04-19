@@ -50,7 +50,7 @@ public class ObjectPicker extends VisWindow {
         int i = 0;
         for (PhysicsObject physicsObject : PhysicsObjectsRegistry.physicsObjectHashMap.values()) {
             if (physicsObject.visible) {
-                ObjectButton image = new ObjectButton(new SpriteDrawable(new Sprite(physicsObject.texture)),physicsObject.tooltip);
+                ObjectButton image = new ObjectButton(new SpriteDrawable(new Sprite(physicsObject.texture)),physicsObject.type);
                 image.addCaptureListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {

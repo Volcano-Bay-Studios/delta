@@ -54,7 +54,6 @@ public class GameScreen extends VisWindow {
 //        add(objectSelected);
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);
     }
-
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (!NetworkHandler.isConnected)
@@ -65,5 +64,4 @@ public class GameScreen extends VisWindow {
         coordinates.setText("X: "+(int)mouse.x+" Y: "+(int)mouse.y);
         super.draw(batch, parentAlpha);
     }
-
 }
