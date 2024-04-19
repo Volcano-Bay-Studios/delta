@@ -54,7 +54,6 @@ public class ObjectPicker extends VisWindow {
                 image.addCaptureListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
-                        System.out.println("AHH");
                         PhysicsHandler.selectedPlaceableObject = physicsObject.type;
                     }
                 });
