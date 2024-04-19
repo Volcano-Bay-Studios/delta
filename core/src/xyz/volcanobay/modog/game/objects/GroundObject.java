@@ -1,9 +1,8 @@
-package xyz.volcanobay.modog.physics.objects;
+package xyz.volcanobay.modog.game.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-import xyz.volcanobay.modog.networking.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;

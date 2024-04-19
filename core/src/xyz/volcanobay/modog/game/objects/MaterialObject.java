@@ -1,4 +1,4 @@
-package xyz.volcanobay.modog.physics.objects;
+package xyz.volcanobay.modog.game.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -10,12 +10,13 @@ import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.List;
 
-public class MachineObject  extends PhysicsObject {
-    public MachineObject() {
+public class MaterialObject  extends PhysicsObject {
+    public String item;
+    public MaterialObject() {
         super();
     }
 
-    public MachineObject(Body body) {
+    public MaterialObject(Body body) {
         super(body);
     }
 
@@ -25,22 +26,21 @@ public class MachineObject  extends PhysicsObject {
     }
 
     @Override
-    public MachineObject create(Body body) {
-        return new MachineObject(body);
+    public MaterialObject create(Body body) {
+        return new MaterialObject(body);
     }
 
     @Override
     public void initialise() {
         super.initialise();
         pickTexture();
-        type = "machine";
-    }
-    public void contact(Body body, PhysicsObject object) {
+        type = "item";
     }
 
     @Override
     public void pickTexture() {
-        texture = new Texture("crate.png");
+        item = "coal";
+        texture = new Texture(item+".png");
     }
 
 

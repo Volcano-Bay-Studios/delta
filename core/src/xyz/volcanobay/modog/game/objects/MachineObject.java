@@ -1,4 +1,4 @@
-package xyz.volcanobay.modog.physics.objects;
+package xyz.volcanobay.modog.game.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
@@ -10,12 +10,12 @@ import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.List;
 
-public class SquareObject extends PhysicsObject {
-    public SquareObject() {
+public class MachineObject  extends PhysicsObject {
+    public MachineObject() {
         super();
     }
 
-    public SquareObject(Body body) {
+    public MachineObject(Body body) {
         super(body);
     }
 
@@ -25,14 +25,17 @@ public class SquareObject extends PhysicsObject {
     }
 
     @Override
-    public SquareObject create(Body body) {
-        return new SquareObject(body);
+    public MachineObject create(Body body) {
+        return new MachineObject(body);
     }
 
     @Override
     public void initialise() {
         super.initialise();
-        type = "crate";
+        pickTexture();
+        type = "machine";
+    }
+    public void contact(Body body, PhysicsObject object) {
     }
 
     @Override
@@ -41,11 +44,10 @@ public class SquareObject extends PhysicsObject {
     }
 
 
-
     @Override
     public void createFixture() {
         PolygonShape groundBox = new PolygonShape();
-        fixtureScale = new Vector2(7.8f,7.8f);
+        fixtureScale = new Vector2((float) texture.getWidth() /2-.3f, (float) texture.getHeight() /2-.3f);
         groundBox.setAsBox(fixtureScale.x/ PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
         body.createFixture(groundBox,1f);
         groundBox.dispose();

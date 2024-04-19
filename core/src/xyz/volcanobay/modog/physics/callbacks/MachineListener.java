@@ -3,7 +3,7 @@ package xyz.volcanobay.modog.physics.callbacks;
 import com.badlogic.gdx.physics.box2d.*;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
-import xyz.volcanobay.modog.physics.objects.MachineObject;
+import xyz.volcanobay.modog.game.objects.MachineObject;
 
 public class MachineListener implements ContactListener {
     @Override

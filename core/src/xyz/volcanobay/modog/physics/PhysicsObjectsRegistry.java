@@ -1,7 +1,7 @@
 package xyz.volcanobay.modog.physics;
 
 import xyz.volcanobay.modog.Delta;
-import xyz.volcanobay.modog.physics.objects.*;
+import xyz.volcanobay.modog.game.objects.*;
 
 import java.util.HashMap;
 

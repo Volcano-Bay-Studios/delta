@@ -14,7 +14,7 @@ import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import xyz.volcanobay.modog.Delta;
-import xyz.volcanobay.modog.networking.CursorHandeler;
+import xyz.volcanobay.modog.game.CursorHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.ObjectPicker;
