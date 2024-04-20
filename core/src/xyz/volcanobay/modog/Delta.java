@@ -82,7 +82,8 @@ public class Delta extends ApplicationAdapter {
 				tickPeriodic();
 			}
 		},0.05f);
-		PhysicsHandler.objectTickPeriodic();
+		if (PhysicsHandler.simSpeed > 0)
+			PhysicsHandler.objectTickPeriodic();
 	}
 
 	@Override

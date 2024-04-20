@@ -30,17 +30,23 @@ public class MachineObject  extends PhysicsObject {
     @Override
     public void tick() {
         super.tick();
-        for (PhysicsObject object : objectsImTouching) {
-            float myDonatedCharge = charge/10;
-            float objectDonatedCharge = object.charge/10;
-            charge += objectDonatedCharge;
-            charge -= myDonatedCharge;
-            object.charge += myDonatedCharge;
-            object.charge -= objectDonatedCharge;
-            if (charge> DeltaConstants.maxCharge)
-                charge = DeltaConstants.maxCharge;
-            if (object.charge> DeltaConstants.maxCharge)
-                object.charge = DeltaConstants.maxCharge;
+        for (PhysicsObject objectB : objectsImTouching) {
+            if (this != null && objectB != null) {
+                float aDifference = this.getMaxCharge();
+                float bDifference = objectB.getMaxCharge();
+                float myDonatedCharge =     (this.charge/(aDifference));
+                float objectDonatedCharge = (objectB.charge/(bDifference));
+                myDonatedCharge = Math.min(this.charge,myDonatedCharge);
+                objectDonatedCharge = Math.min(objectB.charge,objectDonatedCharge);
+                this.charge += objectDonatedCharge;
+                this.charge -= myDonatedCharge;
+                objectB.charge += myDonatedCharge;
+                objectB.charge -= objectDonatedCharge;
+                if (this.charge> this.getMaxCharge())
+                    this.charge = this.getMaxCharge();
+                if (objectB.charge> objectB.getMaxCharge())
+                    objectB.charge = objectB.getMaxCharge();
+            }
         }
     }
 

@@ -18,16 +18,20 @@ public class WorldJoint {
         PhysicsObject objectA = getPhysicsObjectFromBody(joint.getBodyA());
         PhysicsObject objectB = getPhysicsObjectFromBody(joint.getBodyB());
         if (objectA != null && objectB != null) {
-        float myDonatedCharge = objectA.charge/10;
-        float objectDonatedCharge = objectB.charge/10;
+        float aDifference = objectA.getMaxCharge();
+        float bDifference = objectB.getMaxCharge();
+        float myDonatedCharge =     (objectA.charge/(aDifference));
+        float objectDonatedCharge = (objectB.charge/(bDifference));
+        myDonatedCharge = Math.min(objectA.charge,myDonatedCharge);
+        objectDonatedCharge = Math.min(objectB.charge,objectDonatedCharge);
         objectA.charge += objectDonatedCharge;
         objectA.charge -= myDonatedCharge;
         objectB.charge += myDonatedCharge;
         objectB.charge -= objectDonatedCharge;
-        if (objectA.charge> DeltaConstants.maxCharge)
-            objectA.charge = DeltaConstants.maxCharge;
-        if (objectB.charge> DeltaConstants.maxCharge)
-            objectB.charge = DeltaConstants.maxCharge;
+        if (objectA.charge> objectA.getMaxCharge())
+            objectA.charge = objectA.getMaxCharge();
+        if (objectB.charge> objectB.getMaxCharge())
+            objectB.charge = objectB.getMaxCharge();
         }
     }
 }

@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import xyz.volcanobay.modog.game.DeltaConstants;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.rendering.RenderSystem;
@@ -86,6 +87,9 @@ public class PhysicsObject {
     }
     public void createFixture() {
 
+    }
+    public float getMaxCharge() {
+        return DeltaConstants.maxCharge;
     }
     public void resize(Vector2 newSize) {
         scale = newSize;
