@@ -23,9 +23,9 @@ public class DeltaNetwork {
     protected static int hostPort;
     
     /**Used to control if the world should be simulated, as well as validating packet sides*/
-    protected static NetworkingSide networkingSide = null;
+    protected static NetworkingSide networkingSide = NetworkingSide.SERVER;
     /**When hostingType is local, packets are not sent since there is no server to send to*/
-    protected static ServerHostType hostingType = null;
+    protected static ServerHostType hostingType = ServerHostType.LOCAL;
     
     protected static List<ReceivedPacketData> packetProcessQueue = new ArrayList<>();
     
@@ -74,9 +74,10 @@ public class DeltaNetwork {
     }
     
     public static void sendPacketToAllClients(Packet packet) {
+        if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +1)
+            ByteBuffer.allocate(packetData.length +4)
                 .putInt(HostRoutingHeader.TO_ALL_CLIENTS.getId())
                 .put(packetData)
                 .array()
@@ -84,9 +85,10 @@ public class DeltaNetwork {
     }
     
     public static void sendPacketToAllOthers(Packet packet) {
+        if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +1)
+            ByteBuffer.allocate(packetData.length +4)
                 .putInt(HostRoutingHeader.TO_ALL_OTHERS.getId())
                 .put(packetData)
                 .array()
@@ -94,9 +96,10 @@ public class DeltaNetwork {
     }
     
     public static void sendPacketToClient(Packet packet, int clientConnectionIndex) {
+        if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +2)
+            ByteBuffer.allocate(packetData.length +8)
                 .putInt(HostRoutingHeader.TO_CLIENT.getId())
                 .putInt(clientConnectionIndex)
                 .put(packetData)
@@ -105,9 +108,10 @@ public class DeltaNetwork {
     }
     
     public static void sendPacketToServer(Packet packet) {
+        if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +1)
+            ByteBuffer.allocate(packetData.length +4)
                 .putInt(HostRoutingHeader.TO_SERVER.getId())
                 .put(packetData)
                 .array()

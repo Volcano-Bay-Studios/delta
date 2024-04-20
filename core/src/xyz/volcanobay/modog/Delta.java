@@ -54,10 +54,9 @@ public class Delta extends ApplicationAdapter {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                periodic();
                 tickPeriodic();
             }
-        }, 0.05f);
+        }, 0.01f);
     }
     
     @Override
@@ -65,37 +64,38 @@ public class Delta extends ApplicationAdapter {
         RenderSystem.render();
         stage.act();
         stage.draw();
-        if (!periodicScheduled) {
-            Timer.schedule(new Timer.Task() {
-                @Override
-                public void run() {
-                    periodic();
-                    periodicScheduled = false;
-                }
-            }, 10);
-            periodicScheduled = true;
-        }
+//        if (!periodicScheduled) {
+//            Timer.schedule(new Timer.Task() {
+//                @Override
+//                public void run() {
+//                    periodic();
+//                    periodicScheduled = false;
+//                }
+//            }, 20);
+//            periodicScheduled = true;
+//        }
     }
     
-    public void periodic() {
-        DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
-        DeltaNetwork.readDataTick();
-        
-        PhysicsHandler.handleInput();
-        PhysicsHandler.physicsStep();
-        
-        DeltaNetwork.sendDataTick();
-    }
+//    public void periodic() {
+//        tickPeriodic();
+//    }
     
     public void tickPeriodic() {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                periodic();
+//                periodic();
                 tickPeriodic();
             }
-        }, 0.05f);
+        }, 0.01f);
         PhysicsHandler.objectTickPeriodic();
+        DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
+        DeltaNetwork.readDataTick();
+    
+        PhysicsHandler.handleInput();
+        PhysicsHandler.physicsStep();
+    
+        DeltaNetwork.sendDataTick();
     }
     
     @Override

@@ -18,10 +18,10 @@ public abstract class Packet {
     public abstract void write(NetworkByteWriteStream stream);
     
     public void assertSide(RelativeNetworkSide currentSide) {
-        PacketDirection[] packetDirectionAnnotations = getClass().getAnnotationsByType(PacketDirection.class);
-        if (packetDirectionAnnotations.length != 1)
-            throw new RuntimeException("Wrong number of annotations on packet, did you define the packet direction");
-        PacketDirection direction = packetDirectionAnnotations[0];
+        PacketDirection direction = getClass().getAnnotation(PacketDirection.class);
+        if (direction == null)
+            throw new RuntimeException("Couldn't find direction assertion for packet class  "
+                + getClass() + ", did you define the packet direction annotation?");
         NetworkingSide side = currentSide.of(direction.value());
         assert side == null || DeltaNetwork.networkingSide.equals(side);
     }
