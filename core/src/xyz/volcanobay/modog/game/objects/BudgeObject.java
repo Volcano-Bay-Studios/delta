@@ -49,19 +49,18 @@ public class BudgeObject extends MachineObject {
             objectLight.setDistance((float) (lampIntensity*2+(Math.random()/50f)));
             objectLight.setColor(0,1,0,.5f);
             isWorking = Math.abs(Math.toDegrees(body.getAngle()) - targetAngle) > 1;
+            float goal = ((float) (Math.toDegrees(body.getAngle()) - targetAngle)/-1.2f);
+            body.setAngularDamping(10f);
+            body.setAngularVelocity(goal);
             if (isWorking) {
                 RenderSystem.batch.draw(working,body.getPosition().x-5.025f,body.getPosition().y-6,5,6, on.getWidth(), on.getHeight(),(1)/ PhysicsHandler.scaleDown,(1)/PhysicsHandler.scaleDown, 0,0,0,on.getWidth(),on.getHeight(),false,false);
-                float goal = (float) (Math.toDegrees(body.getAngle()) - targetAngle);
                 charge -= goal/200;
-                body.setAngularDamping(1f);
-                body.setAngularVelocity(goal/-1.2f);
             } else {
                 RenderSystem.batch.draw(on,body.getPosition().x-5.025f,body.getPosition().y-6,5,6, on.getWidth(), on.getHeight(),(1)/ PhysicsHandler.scaleDown,(1)/PhysicsHandler.scaleDown, 0,0,0,on.getWidth(),on.getHeight(),false,false);
-                body.setAngularDamping(1f);
-                body.setAngularVelocity(0);
             }
         } else {
             objectLight.setActive(false);
+            body.setAngularDamping(0f);
         }
     }
 

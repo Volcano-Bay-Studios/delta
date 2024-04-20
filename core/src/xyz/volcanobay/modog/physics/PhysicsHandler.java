@@ -465,7 +465,7 @@ public class PhysicsHandler {
         world.QueryAABB(fixture -> {
             mouseBody = fixture.getBody();
             return true;
-        }, mouse.x, mouse.y, mouse.x, mouse.y);
+        }, mouse.x+1, mouse.y+1, mouse.x-1, mouse.y-1);
     }
 
     public static void updatePhysicsObjectFromNetworkedObject(NetworkablePhysicsObject physicsObject) {
