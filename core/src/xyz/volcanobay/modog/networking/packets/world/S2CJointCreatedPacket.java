@@ -19,8 +19,7 @@ public class S2CJointCreatedPacket extends Packet {
         this.object = object;
     }
     
-    public S2CJointCreatedPacket(NetworkByteReadStream writeStream) {
-        super(writeStream);
+    public S2CJointCreatedPacket() {
     }
     
     @Override

@@ -24,6 +24,8 @@ class NetworkListener implements WebSocketListener {
         Dialogs.showOKDialog(Delta.stage, "Connected!", "Connected to " + DeltaNetwork.hostIp + " on " + DeltaNetwork.hostPort);
         DeltaNetwork.connected = true;
         Delta.stage.addActor(new GameScreen());
+    
+        NetworkConnectionsManager.searchForConnectionsOnNetwork();
         return false;
     }
     

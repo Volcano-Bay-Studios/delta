@@ -21,10 +21,6 @@ public class S2CRespondConnectionAssignmentsPacket extends Packet {
     public S2CRespondConnectionAssignmentsPacket() {
     }
     
-    public S2CRespondConnectionAssignmentsPacket(NetworkByteReadStream readStream) {
-        super(readStream);
-    }
-    
     @Override
     public void receive(NetworkByteReadStream stream) {
         NetworkConnectionsManager.cancelAssignmentsRequestListener();

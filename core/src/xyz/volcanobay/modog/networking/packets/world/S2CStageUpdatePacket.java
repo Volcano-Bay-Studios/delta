@@ -27,10 +27,6 @@ public class S2CStageUpdatePacket extends Packet {
         jointConcurrentHashMap = PhysicsHandler.jointMap;
     }
     
-    public S2CStageUpdatePacket(NetworkByteReadStream networkByteReadStream) {
-        super(networkByteReadStream);
-    }
-    
     @Override
     public void receive(NetworkByteReadStream stream) {
     
@@ -42,7 +38,7 @@ public class S2CStageUpdatePacket extends Packet {
     
     @Override
     public DeltaPacket getType() {
-        return DeltaPacket.S2CStageUpdatePacket;
+        return DeltaPacket.UPDATE_STAGE;
     }
     
 }

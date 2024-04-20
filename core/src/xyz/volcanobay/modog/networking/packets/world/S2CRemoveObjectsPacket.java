@@ -15,13 +15,14 @@ import java.util.UUID;
 
 @PacketDirection(NetworkingDirection.S2C)
 public class S2CRemoveObjectsPacket extends Packet {
+    
     List<NetworkableUUID> objectsForClientRemoval;
+    
     public S2CRemoveObjectsPacket(List<NetworkableUUID> objectsForClientRemoval) {
         this.objectsForClientRemoval = objectsForClientRemoval;
     }
     
-    public S2CRemoveObjectsPacket(NetworkByteReadStream stream) {
-        super(stream);
+    public S2CRemoveObjectsPacket() {
     }
     
     @Override
@@ -30,7 +31,7 @@ public class S2CRemoveObjectsPacket extends Packet {
         objectsForClientRemoval = new ArrayList<>(size);
         for (int i = 0; i < size; i++)
             objectsForClientRemoval.add(i, stream.readUUID());
-    
+        
         for (NetworkableUUID uuid : objectsForClientRemoval)
             PhysicsHandler.physicsObjectMap.remove(uuid);
     }

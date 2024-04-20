@@ -18,16 +18,18 @@ public class NetworkByteReadStream {
     }
     
     public byte[] readBytes(int readLength) {
-        if (position + readLength >= length)
-            throw new IndexOutOfBoundsException("Tried to read past the end of a network byte stream");
-        byte[] bytes = Arrays.copyOfRange(data, position, readLength);
+        if (position + readLength > length)
+            throw new IndexOutOfBoundsException("Tried to read past the end of a network byte stream at " + position + " for " + readLength + " bytes for length " + length);
+        byte[] bytes = Arrays.copyOfRange(data, position, position + readLength);
         position += readLength;
         return bytes;
     }
     
     public byte readByte() {
+        if (position + 1 > length)
+            throw new IndexOutOfBoundsException("Tried to read past the end of a network byte stream at " + position + " for 1  byte for length " + length);
         byte b = data[position];
-        position +=1;
+        position += 1;
         return b;
     }
     
@@ -53,7 +55,7 @@ public class NetworkByteReadStream {
     }
     
     public boolean readByteBool() {
-        return readInt() != 0;
+        return readByte() != 0;
     }
     
 }

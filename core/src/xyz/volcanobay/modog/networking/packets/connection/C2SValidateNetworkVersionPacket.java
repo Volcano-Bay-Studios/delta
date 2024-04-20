@@ -16,10 +16,6 @@ public class C2SValidateNetworkVersionPacket extends Packet {
     public C2SValidateNetworkVersionPacket() {
     }
     
-    public C2SValidateNetworkVersionPacket(NetworkByteReadStream readStream) {
-        super(readStream);
-    }
-    
     @Override
     public void receive(NetworkByteReadStream stream) {
     
@@ -34,7 +30,7 @@ public class C2SValidateNetworkVersionPacket extends Packet {
     
     @Override
     public DeltaPacket getType() {
-        return DeltaPacket.C2SValidateNetworkVersionPacket;
+        return DeltaPacket.VALIDATE_PACKET_VERSION;
     }
     
 }

@@ -15,10 +15,6 @@ public class S2CUnimportantPacket extends Packet {
     public S2CUnimportantPacket() {
     }
     
-    public S2CUnimportantPacket(NetworkByteReadStream networkByteReadStream) {
-        super(networkByteReadStream);
-    }
-    
     @Override
     public void receive(NetworkByteReadStream stream) {
         //Nothing to see here officer

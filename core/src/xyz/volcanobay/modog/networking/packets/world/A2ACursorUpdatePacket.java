@@ -19,15 +19,13 @@ public class A2ACursorUpdatePacket extends Packet {
         this.cursor = cursor;
     }
     
-    public A2ACursorUpdatePacket(NetworkByteReadStream readStream) {
-        super(readStream);
-    }
+    public A2ACursorUpdatePacket() {}
     
     @Override
     public void receive(NetworkByteReadStream stream) {
         NetworkableUUID uuid = stream.readUUID();
         
-        if (CursorHandler.cursors.containsKey(uuid))
+        if (!CursorHandler.cursors.containsKey(uuid))
             CursorHandler.cursors.put(uuid, new Cursor(uuid));
         
         cursor = CursorHandler.cursors.get(uuid);
@@ -44,7 +42,7 @@ public class A2ACursorUpdatePacket extends Packet {
     
     @Override
     public DeltaPacket getType() {
-        return DeltaPacket.A2ACursorUpdateStatePacket;
+        return DeltaPacket.CURSOR_UPDATE_PACKET;
     }
     
 }

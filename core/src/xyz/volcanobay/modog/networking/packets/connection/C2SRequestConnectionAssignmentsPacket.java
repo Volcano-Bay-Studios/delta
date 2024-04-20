@@ -17,10 +17,6 @@ public class C2SRequestConnectionAssignmentsPacket extends Packet {
     public C2SRequestConnectionAssignmentsPacket() {
     }
     
-    public C2SRequestConnectionAssignmentsPacket(NetworkByteReadStream readStream) {
-        super(readStream);
-    }
-    
     @Override
     public void receive(NetworkByteReadStream stream) {
     

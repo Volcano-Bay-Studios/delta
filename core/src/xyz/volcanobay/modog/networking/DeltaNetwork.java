@@ -16,14 +16,21 @@ public class DeltaNetwork {
     protected static WebSocket socket;
     
     protected static boolean connected = false;
+    
     protected static boolean enabled = false;
     
     protected static String hostIp = null;
+    
     protected static int hostPort;
     
-    /**Used to control if the world should be simulated, as well as validating packet sides*/
+    /**
+     * Used to control if the world should be simulated, as well as validating packet sides
+     */
     protected static NetworkingSide networkingSide = NetworkingSide.SERVER;
-    /**When hostingType is local, packets are not sent since there is no server to send to*/
+    
+    /**
+     * When hostingType is local, packets are not sent since there is no server to send to
+     */
     protected static ServerHostType hostingType = ServerHostType.LOCAL;
     
     protected static List<ReceivedPacketData> packetProcessQueue = new ArrayList<>();
@@ -34,19 +41,26 @@ public class DeltaNetwork {
     public static void connectAsLocal() {
         
         System.out.println("Setting DeltaNetwork to work in local");
-    
+        
         networkingSide = NetworkingSide.SERVER;
         hostingType = ServerHostType.LOCAL;
         
     }
     
-    public static void connect(String ip, int port) {
     
-        System.out.println("Attempting to connect to "+ip+":"+port);
-        socket = WebSockets.newSocket(WebSockets.toWebSocketUrl(ip,port));
+    public static void initialiseConnectedGame() {
+        
+        System.out.println("Successfully connected to game, syncing world state");
+        //Todo, sync worldstate dumass
+    }
+    
+    public static void connect(String ip, int port) {
+        
+        System.out.println("Attempting to connect to " + ip + ":" + port);
+        socket = WebSockets.newSocket(WebSockets.toWebSocketUrl(ip, port));
         socket.setSendGracefully(true);
         socket.addListener(new NetworkListener(ip, port));
-    
+        
         socket.connect();
         
     }
@@ -58,8 +72,9 @@ public class DeltaNetwork {
         
         sendPacketToAllClients(new S2CStageUpdatePacket());
     }
+    
     public static void readDataTick() {
-        for (ReceivedPacketData receivedPacketData : packetProcessQueue) {
+        for (ReceivedPacketData receivedPacketData : new ArrayList<>(packetProcessQueue)) {
             PacketProcessor.processPacketData(receivedPacketData);
         }
     }
@@ -68,7 +83,7 @@ public class DeltaNetwork {
         if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +4)
+            ByteBuffer.allocate(packetData.length + 4)
                 .putInt(PacketRoutingHeader.TO_ALL_CLIENTS.getId())
                 .put(packetData)
                 .array()
@@ -79,7 +94,7 @@ public class DeltaNetwork {
         if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +4)
+            ByteBuffer.allocate(packetData.length + 4)
                 .putInt(PacketRoutingHeader.TO_ALL_OTHERS.getId())
                 .put(packetData)
                 .array()
@@ -90,7 +105,7 @@ public class DeltaNetwork {
         if (!DeltaNetwork.isConnected() || DeltaNetwork.isActive()) return;
         byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length +8)
+            ByteBuffer.allocate(packetData.length + 8)
                 .putInt(PacketRoutingHeader.TO_CLIENT.getId())
                 .putInt(clientConnectionIndex)
                 .put(packetData)
@@ -105,8 +120,8 @@ public class DeltaNetwork {
     public static void sendPacketToServer(Packet packet) {
         if (!DeltaNetwork.isConnected()) return;
         byte[] packetData = PacketProcessor.getRawPacketData(packet);
-        PacketProcessor.packAndSend(
-            ByteBuffer.allocate(packetData.length +4)
+        PacketProcessor.send(
+            ByteBuffer.allocate(packetData.length + 4)
                 .putInt(PacketRoutingHeader.TO_SERVER.getId())
                 .put(packetData)
                 .array()
@@ -117,7 +132,9 @@ public class DeltaNetwork {
         return hostingType.equals(ServerHostType.EXTERNAL) && networkingSide.equals(NetworkingSide.SERVER);
     }
     
-    /**Clients can only be on external servers so no need to specify*/
+    /**
+     * Clients can only be on external servers so no need to specify
+     */
     public static boolean isClientSide() {
         return hostingType.equals(ServerHostType.EXTERNAL) && networkingSide.equals(NetworkingSide.CLIENT);
     }
@@ -163,6 +180,8 @@ public class DeltaNetwork {
         return hostingType;
     }
     
-    public record ReceivedPacketData(byte[] data) { }
+    public record ReceivedPacketData(byte[] data) {
+    
+    }
     
 }

@@ -9,22 +9,19 @@ import java.util.List;
 
 public class NetworkByteWriteStream {
     
-    List<Byte> stream;
+    List<Byte> bytes;
     
     public NetworkByteWriteStream() {
-        stream = new ArrayList<>();
+        bytes = new ArrayList<>();
     }
     
-    public void writeBytes(Byte[] bytes) {
-        stream.addAll(List.of(bytes));
-    }
     public void writeBytes(byte[] bytes) {
         for (Byte b : bytes)
-            stream.add(b);
+            this.bytes.add(b);
     }
     
     public void writeByte(byte b) {
-        stream.add(b);
+        bytes.add(b);
     }
     
     public void writeFloat(float f) {
@@ -59,8 +56,8 @@ public class NetworkByteWriteStream {
     
     /**Returns a byte array of the stream's contents*/
     public byte[] getBytes() {
-        byte[] bytes = new byte[stream.size()];
-        for(int i = 0; i < stream.size(); i++) bytes[i] = stream.get(i);
+        byte[] bytes = new byte[this.bytes.size()];
+        for(int i = 0; i < this.bytes.size(); i++) bytes[i] = this.bytes.get(i);
         return bytes;
     }
     

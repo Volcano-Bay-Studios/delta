@@ -21,8 +21,7 @@ public class S2CRemoveJointsPacket extends Packet {
         this.objectsForClientRemoval = objectsForClientRemoval;
     }
     
-    public S2CRemoveJointsPacket(NetworkByteReadStream stream) {
-        super(stream);
+    public S2CRemoveJointsPacket() {
     }
     
     @Override

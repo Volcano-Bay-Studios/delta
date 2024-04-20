@@ -8,10 +8,7 @@ import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
 
 public abstract class Packet {
     
-    public Packet() {};
-    public Packet(NetworkByteReadStream stream) {
-        receive(stream);
-    }
+    public Packet() {}
     
     /**Fill in the fields from the read stream*/
     public abstract void receive(NetworkByteReadStream stream);

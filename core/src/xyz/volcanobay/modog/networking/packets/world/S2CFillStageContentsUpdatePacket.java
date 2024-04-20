@@ -27,10 +27,6 @@ public class S2CFillStageContentsUpdatePacket extends Packet {
     public S2CFillStageContentsUpdatePacket() {
     }
     
-    public S2CFillStageContentsUpdatePacket(NetworkByteReadStream networkByteReadStream) {
-        super(networkByteReadStream);
-    }
-    
     @Override
     public void receive(NetworkByteReadStream stream) {
         ConcurrentHashMap<NetworkableUUID, PhysicsObject> newPhysicsObjects = new ConcurrentHashMap<>();

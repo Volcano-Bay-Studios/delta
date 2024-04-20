@@ -9,6 +9,7 @@ import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
 
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static xyz.volcanobay.modog.networking.DeltaNetwork.LAST_PACKET_ID;
 
@@ -23,15 +24,12 @@ public enum DeltaPacket {
     S2CJointCreatedPacket(S2CJointCreatedPacket::new),
     S2CRemoveJointsPacket(S2CRemoveJointsPacket::new),
     S2CRemoveObjectsPacket(S2CRemoveObjectsPacket::new),
-    S2CStageUpdatePacket(S2CStageUpdatePacket::new),
     S2CRespondConnectionAssignmentsPacket(S2CRespondConnectionAssignmentsPacket::new),
-    C2SRequestConnectionAssignmentsPacket(C2SRequestConnectionAssignmentsPacket::new),
-    C2SValidateNetworkVersionPacket(C2SValidateNetworkVersionPacket::new),
-    A2ACursorUpdateStatePacket(A2AObjectUpdateStatePacket::new);
-    final Function<NetworkByteReadStream, Packet> packetFactory;
+    C2SRequestConnectionAssignmentsPacket(C2SRequestConnectionAssignmentsPacket::new);
+    final Supplier<Packet> packetFactory;
     final int id;
     
-    DeltaPacket(Function<NetworkByteReadStream, Packet> packetFactory) {
+    DeltaPacket(Supplier<Packet> packetFactory) {
         this.packetFactory = packetFactory;
         this.id = LAST_PACKET_ID;
         LAST_PACKET_ID++;

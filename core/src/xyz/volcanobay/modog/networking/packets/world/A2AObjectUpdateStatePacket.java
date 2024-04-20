@@ -1,5 +1,6 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
+import xyz.volcanobay.modog.LogUtils;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
@@ -22,13 +23,13 @@ public class A2AObjectUpdateStatePacket extends Packet {
         this.object = object;
     }
     
-    public A2AObjectUpdateStatePacket(NetworkByteReadStream writeStream) {
-        super(writeStream);
+    public A2AObjectUpdateStatePacket() {
     }
     
     @Override
     public void receive(NetworkByteReadStream stream) {
         NetworkableUUID uuid = stream.readUUID();
+        System.out.println(uuid);
         if (PhysicsHandler.physicsObjectMap.containsKey(uuid)) {
             stream.readString();//Skip over the specified type
             PhysicsHandler.physicsObjectMap.get(uuid)
@@ -44,8 +45,13 @@ public class A2AObjectUpdateStatePacket extends Packet {
     
     @Override
     public void write(NetworkByteWriteStream stream) {
+        System.out.println("asdg");
+        LogUtils.logBytes(stream.getBytes());
         stream.writeUUID(object.uuid);
-        object.writeAllStateToNetwork(stream);
+        object.writeNewToNetwork(stream);
+    
+        System.out.println("uhni");
+        LogUtils.logBytes(stream.getBytes());
     }
     
     @Override

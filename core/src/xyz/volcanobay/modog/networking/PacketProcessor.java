@@ -1,5 +1,6 @@
 package xyz.volcanobay.modog.networking;
 
+import xyz.volcanobay.modog.LogUtils;
 import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
 import xyz.volcanobay.modog.networking.enums.RelativeNetworkSide;
 import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
@@ -9,22 +10,30 @@ public class PacketProcessor {
     
     public static void processPacketData(DeltaNetwork.ReceivedPacketData receivedPacketData) {
         byte[] bytes = receivedPacketData.data();
+    
+        LogUtils.logBytes(bytes);
+        
         NetworkByteReadStream readStream = new NetworkByteReadStream(bytes);
         
         int hostRoutingDirection = readStream.readInt();
+        int hostRoutingAdditional = 0;
         PacketRoutingHeader routingHeader = PacketRoutingHeader.values()[hostRoutingDirection];
+        
+        if (routingHeader == PacketRoutingHeader.TO_CLIENT)
+            hostRoutingAdditional = readStream.readInt();
+        
         int packetId = readStream.readInt();
         DeltaPacket packetSource = DeltaPacket.getPacketById(packetId);
         
-        if (!routingHeader.shouldReadOnCurrentConnection(packetSource, readStream))
+        if (!routingHeader.shouldReadOnCurrentConnection(packetSource, hostRoutingAdditional))
             return;
     
-        Packet packet = packetSource.packetFactory.apply(readStream);
+        Packet packet = packetSource.packetFactory.get();
         packet.assertSide(RelativeNetworkSide.FROM);
         packet.receive(readStream);
     }
     
-    public static void packAndSend(byte[] array) {
+    public static void send(byte[] array) {
         DeltaNetwork.socket.send(array);
     }
     

@@ -22,15 +22,14 @@ public enum PacketRoutingHeader {
         return id;
     }
     
-    public boolean shouldReadOnCurrentConnection(DeltaPacket packetType, NetworkByteReadStream readStream) {
+    public boolean shouldReadOnCurrentConnection(DeltaPacket packetType, int additional) {
         if (packetType == DeltaPacket.S2CRespondConnectionAssignmentsPacket && NetworkConnectionsManager.isAwaiting)
             return true;
         if (NetworkConnectionsManager.isAwaiting)
             return false;
     
         if (this.equals(TO_CLIENT)) {
-            int targetedClient = readStream.readInt();
-            return targetedClient == NetworkConnectionsManager.selfConnectionId;
+            return additional == NetworkConnectionsManager.selfConnectionId;
         }
         if (this.equals(TO_SERVER))
             return DeltaNetwork.isNetworkOwner();
