@@ -9,15 +9,17 @@ import com.kotcrab.vis.ui.widget.VisTextButton;
 import com.kotcrab.vis.ui.widget.VisTextField;
 import com.kotcrab.vis.ui.widget.VisValidatableTextField;
 import com.kotcrab.vis.ui.widget.VisWindow;
-import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.networking.DeltaNetwork;
 
 public class AddressPicker extends VisWindow {
     VisTextField textField;
     VisValidatableTextField validatableTextField;
     VisTextButton textButton;
+    
+    boolean connectWindowOpen;
     public AddressPicker() {
         super("Enter IP:                         Port:");
-        NetworkHandler.connectWindowOpen = true;
+        connectWindowOpen = true;
         TableUtils.setSpacingDefaults(this);
         columnDefaults(0).left();
 
@@ -33,7 +35,7 @@ public class AddressPicker extends VisWindow {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 int port = Integer.parseInt(validatableTextField.getText());
-                NetworkHandler.joinServer(textField.getText(),port);
+                DeltaNetwork.connect(textField.getText(),port);
             }
         });
 
@@ -44,14 +46,14 @@ public class AddressPicker extends VisWindow {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         setPosition(Gdx.graphics.getWidth(), 18);
-        if (NetworkHandler.isConnected)
+        if (DeltaNetwork.isConnected())
             remove();
         super.draw(batch, parentAlpha);
     }
 
     @Override
     public boolean remove() {
-        NetworkHandler.connectWindowOpen = false;
+        connectWindowOpen = false;
         return super.remove();
     }
 }

@@ -14,7 +14,7 @@ import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import xyz.volcanobay.modog.Delta;
-import xyz.volcanobay.modog.game.CursorHandeler;
+import xyz.volcanobay.modog.game.CursorHandler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.ObjectPicker;
@@ -73,7 +73,7 @@ public class RenderSystem {
         batch.disableBlending();
         renderJoints();
         renderOOB();
-        CursorHandeler.renderCursors();
+        CursorHandler.renderCursors();
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
         PhysicsHandler.renderDebug();
@@ -156,11 +156,11 @@ public class RenderSystem {
         batch.dispose();
         img.dispose();
         jointTexture.dispose();
-        CursorHandeler.cursor.dispose();
-        CursorHandeler.cursorRed.dispose();
-        CursorHandeler.cursorBlue.dispose();
-        CursorHandeler.cursorLime.dispose();
-        CursorHandeler.cursorYellow.dispose();
+        CursorHandler.cursor.dispose();
+        CursorHandler.cursorRed.dispose();
+        CursorHandler.cursorBlue.dispose();
+        CursorHandler.cursorLime.dispose();
+        CursorHandler.cursorYellow.dispose();
     }
 
 }

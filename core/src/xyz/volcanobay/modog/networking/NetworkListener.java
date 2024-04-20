@@ -18,37 +18,36 @@ class NetworkListener implements WebSocketListener {
     }
     @Override
     public boolean onOpen(WebSocket webSocket) {
-        NetworkHandler.connectedIp = ip;
-        NetworkHandler.connectedPort = port;
+        DeltaNetwork.hostIp = ip;
+        DeltaNetwork.hostPort = port;
         System.out.println("Connected to websocket server!");
-        Dialogs.showOKDialog(Delta.stage, "Connected!", "Connected to " + NetworkHandler.connectedIp + NetworkHandler.connectedPort);
-        NetworkHandler.isConnected = true;
+        Dialogs.showOKDialog(Delta.stage, "Connected!", "Connected to " + DeltaNetwork.hostIp + " on " + DeltaNetwork.hostPort);
+        DeltaNetwork.connected = true;
         Delta.stage.addActor(new GameScreen());
         return false;
     }
     
     @Override
     public boolean onClose(WebSocket webSocket, int closeCode, String reason) {
-        NetworkHandler.isConnected = false;
+        DeltaNetwork.connected = false;
         Dialogs.showOKDialog(Delta.stage, "Disconnected from server", "[" + closeCode + " ]" + reason);
         return false;
     }
     
     @Override
     public boolean onMessage(WebSocket webSocket, String packet) {
-        NetworkHandler.packetProcessQueue.add(packet.getBytes(StandardCharsets.UTF_8));
         return false;
     }
     
     @Override
     public boolean onMessage(WebSocket webSocket, byte[] packet) {
-        NetworkHandler.packetProcessQueue.add(packet);
+        DeltaNetwork.packetProcessQueue.add(new DeltaNetwork.ReceivedPacketData(packet));
         return false;
     }
     
     @Override
     public boolean onError(WebSocket webSocket, Throwable error) {
-        NetworkHandler.isConnected = false;
+        DeltaNetwork.connected = false;
         Dialogs.showErrorDialog(Delta.stage, "A network error occured: ", error.getMessage());
         System.out.println("A network error occured!");
         return false;
