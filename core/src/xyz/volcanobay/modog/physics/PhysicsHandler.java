@@ -480,4 +480,74 @@ public class PhysicsHandler {
             }
         }
     }
+    public static List<WorldJoint> getObjectJoints(PhysicsObject object) {
+        List<WorldJoint> jointObjects = new ArrayList<>();
+        for (WorldJoint joint : jointConcurrentHashMap.values()) {
+            if (joint.joint.getBodyA().equals(object.body) || joint.joint.getBodyB().equals(object.body)) {
+                jointObjects.add(joint);
+            }
+        }
+        return jointObjects;
+    }
+    public static List<PhysicsObject> getContraption(PhysicsObject object,List<PhysicsObject> oldObjects) {
+        List<PhysicsObject> contraptionObjects = new ArrayList<>(oldObjects);
+        List<WorldJoint> objectJoints = new ArrayList<>(getObjectJoints(object));
+        if (objectJoints.isEmpty()) {
+            contraptionObjects.add(object);
+            return contraptionObjects;
+        } else {
+            for (WorldJoint joint: objectJoints) {
+                if (joint.joint.getBodyA() != object.body) {
+                    PhysicsObject object1 = getPhysicsObjectFromBody(joint.joint.getBodyA());
+                    if (object1 != null && !contraptionObjects.contains(object1)) {
+                        contraptionObjects.add(object1);
+                    }
+                } else
+                if (joint.joint.getBodyB() != object.body) {
+                    PhysicsObject object1 = getPhysicsObjectFromBody(joint.joint.getBodyB());
+                    if (object1 != null && !contraptionObjects.contains(object1)) {
+                        contraptionObjects.add(object1);
+                    }
+                }
+            }
+        }
+        List<PhysicsObject> objectsToCheck = new ArrayList<>(contraptionObjects);
+        for (PhysicsObject object1: objectsToCheck) {
+            if (!oldObjects.contains(object1))
+                getContraption(object1,contraptionObjects);
+        }
+        for (PhysicsObject object1: contraptionObjects) {
+            if (!oldObjects.contains(object1))
+                oldObjects.add(object1);
+        }
+        return contraptionObjects;
+    }
+    public static List<PhysicsObject> getContraption(PhysicsObject object) {
+        List<PhysicsObject> contraptionObjects = new ArrayList<>();
+        List<WorldJoint> objectJoints = new ArrayList<>(getObjectJoints(object));
+        if (objectJoints.isEmpty()) {
+            contraptionObjects.add(object);
+            return contraptionObjects;
+        } else {
+            for (WorldJoint joint: objectJoints) {
+                if (joint.joint.getBodyA() != object.body) {
+                    PhysicsObject object1 = getPhysicsObjectFromBody(joint.joint.getBodyA());
+                    if (object1 != null && !contraptionObjects.contains(object1)) {
+                        contraptionObjects.add(object1);
+                    }
+                } else
+                if (joint.joint.getBodyB() != object.body) {
+                    PhysicsObject object1 = getPhysicsObjectFromBody(joint.joint.getBodyB());
+                    if (object1 != null && !contraptionObjects.contains(object1)) {
+                        contraptionObjects.add(object1);
+                    }
+                }
+            }
+        }
+        List<PhysicsObject> objectsToCheck = new ArrayList<>(contraptionObjects);
+        for (PhysicsObject object1: objectsToCheck) {
+            getContraption(object1,contraptionObjects);
+        }
+        return contraptionObjects;
+    }
 }

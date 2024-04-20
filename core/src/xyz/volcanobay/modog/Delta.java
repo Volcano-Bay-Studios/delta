@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
+import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
@@ -59,6 +60,7 @@ public class Delta extends ApplicationAdapter {
 		PhysicsHandler.physicsStep();
 		stage.act();
 		stage.draw();
+		InputHandeler.render();
 		NetworkHandler.handleFrame();
 		if (!periodicScheduled) {
 			Timer.schedule(new Timer.Task() {

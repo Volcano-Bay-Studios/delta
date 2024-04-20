@@ -3,8 +3,14 @@ package xyz.volcanobay.modog.game.objects;
 import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.rendering.RenderSystem;
+import xyz.volcanobay.modog.screens.TextButtons;
+
+import java.util.List;
 
 public class BudgeObject extends MachineObject {
     Texture on = new Texture("budge_ok.png");
@@ -88,5 +94,19 @@ public class BudgeObject extends MachineObject {
         objectLight.remove(true);
         working.dispose();
         on.dispose();
+    }
+    public BudgeObject getSelf() { return this; }
+
+    @Override
+    public List<TextButtons> getContextOptions() {
+        newButton("Control", new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                InputHandeler.controlledContraption = getSelf();
+                actor.getParent().remove();
+            }
+        });
+        return super.getContextOptions();
+
     }
 }
