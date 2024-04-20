@@ -19,12 +19,12 @@ import static xyz.volcanobay.modog.physics.PhysicsHandler.physicsObjectMap;
 
 /**Called when a client joins to send them the state of everything in the world*/
 @PacketDirection(NetworkingDirection.S2C)
-public class S2CFillStageContentsUpdatePacket extends Packet {
+public class S2CFillLevelContentsPacket extends Packet {
     
     /**
      * Data ethically sourced from static fields in PhysicsHandler.java, so nothing is needed
      */
-    public S2CFillStageContentsUpdatePacket() {
+    public S2CFillLevelContentsPacket() {
     }
     
     @Override

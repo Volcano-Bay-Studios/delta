@@ -1,5 +1,7 @@
 package xyz.volcanobay.modog.physics;
 
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.game.objects.*;
 
@@ -31,6 +33,13 @@ public class PhysicsObjectsRegistry {
     
     public static PhysicsObject getFromRegistry(String name) {
         return physicsObjectHashMap.getOrDefault(name, null);
+    }
+    public static PhysicsObject getBaseInstanceFromRegistry(String name) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+    
+        Body body = PhysicsHandler.world.createBody(bodyDef);
+        return physicsObjectHashMap.getOrDefault(name, null).create(body);
     }
     
 }

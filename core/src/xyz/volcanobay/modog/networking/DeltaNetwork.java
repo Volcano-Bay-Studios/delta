@@ -5,6 +5,8 @@ import com.github.czyzby.websocket.WebSockets;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
 import xyz.volcanobay.modog.networking.enums.ServerHostType;
 import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
+import xyz.volcanobay.modog.networking.packets.connection.C2SRequestConnectionAssignmentsPacket;
+import xyz.volcanobay.modog.networking.packets.world.C2SRequestFillLevelContents;
 import xyz.volcanobay.modog.networking.packets.world.S2CStageUpdatePacket;
 
 import java.nio.ByteBuffer;
@@ -51,7 +53,8 @@ public class DeltaNetwork {
     public static void initialiseConnectedGame() {
         
         System.out.println("Successfully connected to game, syncing world state");
-        //Todo, sync worldstate dumass
+        DeltaNetwork.sendPacketToServer(new C2SRequestFillLevelContents());
+        
     }
     
     public static void connect(String ip, int port) {
@@ -77,6 +80,7 @@ public class DeltaNetwork {
         for (ReceivedPacketData receivedPacketData : new ArrayList<>(packetProcessQueue)) {
             PacketProcessor.processPacketData(receivedPacketData);
         }
+        packetProcessQueue = new ArrayList<>();
     }
     
     public static void sendPacketToAllClients(Packet packet) {

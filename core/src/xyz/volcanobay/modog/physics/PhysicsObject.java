@@ -279,7 +279,7 @@ public class PhysicsObject {
     }
     
     public static PhysicsObject readNewFromNetwork(NetworkByteReadStream stream) {
-        PhysicsObject newObject = PhysicsObjectsRegistry.getFromRegistry(stream.readString());
+        PhysicsObject newObject = PhysicsObjectsRegistry.getBaseInstanceFromRegistry(stream.readString());
         newObject.readAllStateFromNetwork(stream);
         return newObject;
     }

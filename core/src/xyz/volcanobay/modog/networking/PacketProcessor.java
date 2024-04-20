@@ -10,8 +10,6 @@ public class PacketProcessor {
     
     public static void processPacketData(DeltaNetwork.ReceivedPacketData receivedPacketData) {
         byte[] bytes = receivedPacketData.data();
-    
-        LogUtils.logBytes(bytes);
         
         NetworkByteReadStream readStream = new NetworkByteReadStream(bytes);
         

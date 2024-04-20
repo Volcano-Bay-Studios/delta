@@ -5,10 +5,8 @@ import xyz.volcanobay.modog.networking.packets.connection.S2CRespondConnectionAs
 import xyz.volcanobay.modog.networking.packets.world.*;
 import xyz.volcanobay.modog.networking.packets.S2CUnimportantPacket;
 import xyz.volcanobay.modog.networking.packets.connection.C2SValidateNetworkVersionPacket;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
 
 import java.util.Arrays;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static xyz.volcanobay.modog.networking.DeltaNetwork.LAST_PACKET_ID;
@@ -20,12 +18,13 @@ public enum DeltaPacket {
     CURSOR_UPDATE_PACKET(A2ACursorUpdatePacket::new),
     //TODO RENAME TO ACTUAL ENUIM NAMES ICBA
     A2AObjectUpdateStatePacket(A2AObjectUpdateStatePacket::new),
-    S2CFillStageContentsUpdatePacket(S2CFillStageContentsUpdatePacket::new),
+    S2CFillStageContentsUpdatePacket(S2CFillLevelContentsPacket::new),
     S2CJointCreatedPacket(S2CJointCreatedPacket::new),
     S2CRemoveJointsPacket(S2CRemoveJointsPacket::new),
     S2CRemoveObjectsPacket(S2CRemoveObjectsPacket::new),
     S2CRespondConnectionAssignmentsPacket(S2CRespondConnectionAssignmentsPacket::new),
-    C2SRequestConnectionAssignmentsPacket(C2SRequestConnectionAssignmentsPacket::new);
+    C2SRequestConnectionAssignmentsPacket(C2SRequestConnectionAssignmentsPacket::new),
+    C2SRequestFillLevelContents(C2SRequestFillLevelContents::new);
     final Supplier<Packet> packetFactory;
     final int id;
     

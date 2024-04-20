@@ -45,13 +45,8 @@ public class A2AObjectUpdateStatePacket extends Packet {
     
     @Override
     public void write(NetworkByteWriteStream stream) {
-        System.out.println("asdg");
-        LogUtils.logBytes(stream.getBytes());
         stream.writeUUID(object.uuid);
         object.writeNewToNetwork(stream);
-    
-        System.out.println("uhni");
-        LogUtils.logBytes(stream.getBytes());
     }
     
     @Override

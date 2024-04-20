@@ -9,11 +9,12 @@ import java.util.HashMap;
 
 public class NetworkConnectionsManager {
     
+    public static int NEXT_ASSIGNED_CONNECTION_ID = 1;
     public static HashMap<Integer, NetworkConnection> connections = new HashMap<>();
     
-    public static Timer searchTimer;
+    public static Timer.Task searchTimer;
     public static boolean isAwaiting = true;
-    public static int selfConnectionId;
+    public static int selfConnectionId = 0;
     
     public static void searchForConnectionsOnNetwork() {
         if (!DeltaNetwork.isConnected())
@@ -21,7 +22,7 @@ public class NetworkConnectionsManager {
     
         System.out.println("Searching for server on network...");
         DeltaNetwork.sendPacketToAllOthers(new C2SRequestConnectionAssignmentsPacket());
-        Timer.schedule(new Timer.Task() {
+        Timer.schedule(searchTimer = new Timer.Task() {
             @Override public void run() { onGetConnectionsOnNetworkFail(); }
         }, 3);
     }
@@ -35,8 +36,8 @@ public class NetworkConnectionsManager {
     }
     
     public static void cancelAssignmentsRequestListener() {
-        System.out.println("Search for server successful, becoming the beta...");
-        searchTimer.clear();
+        System.out.println("Search for server successful, found " + connections.size() + " connections becoming the beta...");
+        searchTimer.cancel();
         isAwaiting = false;
         DeltaNetwork.setEnabled(true);
         DeltaNetwork.setNetworkingSide(NetworkingSide.CLIENT);

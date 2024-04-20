@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static xyz.volcanobay.modog.networking.NetworkConnectionsManager.NEXT_ASSIGNED_CONNECTION_ID;
+
 @PacketDirection(NetworkingDirection.S2C)
 public class S2CRespondConnectionAssignmentsPacket extends Packet {
     
@@ -23,8 +25,11 @@ public class S2CRespondConnectionAssignmentsPacket extends Packet {
     
     @Override
     public void receive(NetworkByteReadStream stream) {
+        if (!NetworkConnectionsManager.isAwaiting) return;
+        
         NetworkConnectionsManager.cancelAssignmentsRequestListener();
         
+        NetworkConnectionsManager.selfConnectionId = stream.readInt();
         NetworkConnectionsManager.connections = new HashMap<>();
         int length = stream.readInt();
         
@@ -37,6 +42,7 @@ public class S2CRespondConnectionAssignmentsPacket extends Packet {
     
     @Override
     public void write(NetworkByteWriteStream stream) {
+        stream.writeInt(NEXT_ASSIGNED_CONNECTION_ID);
         stream.writeInt(NetworkConnectionsManager.connections.size());
         
         for (NetworkConnection connection : NetworkConnectionsManager.connections.values()) {
