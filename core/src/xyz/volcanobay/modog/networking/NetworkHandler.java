@@ -31,6 +31,7 @@ public class NetworkHandler {
     public static String connectedIp;
     public static int connectedPort;
     public static List<byte[]> packetProcessQueue = new ArrayList<>();
+    public static boolean hasAuthority;
     
     public static void initalise(){
     }
@@ -63,6 +64,7 @@ public class NetworkHandler {
             parsePacket(bytes);
         }
         packetProcessQueue.removeAll(processing);
+        hasAuthority = socket == null || socket.isClosed() || isHost;
     }
     
     public static void parsePacket(byte[] bytes) {
