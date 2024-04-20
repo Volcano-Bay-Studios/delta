@@ -1,4 +1,4 @@
-package xyz.volcanobay.modog.physics.objects;
+package xyz.volcanobay.modog.game.objects;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;

@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.networking.NetworkHandler;
-import xyz.volcanobay.modog.networking.NetworkableUUID;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;

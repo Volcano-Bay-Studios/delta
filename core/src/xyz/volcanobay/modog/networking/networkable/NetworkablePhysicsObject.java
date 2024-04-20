@@ -1,10 +1,6 @@
-package xyz.volcanobay.modog.networking;
+package xyz.volcanobay.modog.networking.networkable;
 
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.JsonValue;
-
-import java.util.UUID;
 
 public class NetworkablePhysicsObject {
     public Vector2 pos;

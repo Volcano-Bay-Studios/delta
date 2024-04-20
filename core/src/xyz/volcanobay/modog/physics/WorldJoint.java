@@ -1,7 +1,7 @@
 package xyz.volcanobay.modog.physics;
 
 import com.badlogic.gdx.physics.box2d.Joint;
-import xyz.volcanobay.modog.networking.NetworkableUUID;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 
 public class WorldJoint {
     public Joint joint;

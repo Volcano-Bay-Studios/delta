@@ -1,7 +1,7 @@
-package xyz.volcanobay.modog.networking;
+package xyz.volcanobay.modog.game;
 
 import com.badlogic.gdx.math.Vector2;
-import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 
 public class Cursor {

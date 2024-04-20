@@ -1,4 +1,4 @@
-package xyz.volcanobay.modog.networking;
+package xyz.volcanobay.modog.networking.networkable;
 
 import com.badlogic.gdx.math.Vector2;
 

@@ -1,12 +1,11 @@
-package xyz.volcanobay.modog.networking;
+package xyz.volcanobay.modog.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.math.Vector2;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.volcanobay.modog.rendering.RenderSystem.batch;
