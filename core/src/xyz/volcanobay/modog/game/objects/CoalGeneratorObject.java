@@ -49,9 +49,9 @@ public class CoalGeneratorObject extends MachineObject {
                 if (Objects.equals(item.item, "coal") && activeTime < 800 && (!item.clientUsed || NetworkHandler.hasAuthority)) {
                     if (!(activeTime > 0))
                         progressAnimation();
-                    activeTime = activeTime + 200;
-                    if (activeTime > 1000)
-                        activeTime = 1000;
+                    activeTime = activeTime + 500;
+                    if (activeTime > 3000)
+                        activeTime = 3000;
                     if (NetworkHandler.hasAuthority)
                         PhysicsHandler.removeObject(object);
                     else

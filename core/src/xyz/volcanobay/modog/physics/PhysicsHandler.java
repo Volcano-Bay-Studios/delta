@@ -454,6 +454,14 @@ public class PhysicsHandler {
 //                return 0;
 //            }
 //        },mouse,mouse.add(0,1f));
+        for (PhysicsObject object: physicsObjectHashMap.values()) {
+            for (Fixture fixture: object.body.getFixtureList()) {
+                if (fixture.testPoint(mouse.x, mouse.y)) {
+                    mouseBody = object.body;
+                    return;
+                }
+            }
+        }
         world.QueryAABB(fixture -> {
             mouseBody = fixture.getBody();
             return true;

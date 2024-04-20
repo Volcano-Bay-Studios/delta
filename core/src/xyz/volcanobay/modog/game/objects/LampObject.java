@@ -35,7 +35,7 @@ public class LampObject extends MachineObject {
     public void render() {
         super.render();
         if (charge> 1) {
-            float lampIntensity = charge / (charge +1);
+            float lampIntensity = charge-1 / (charge);
             texture = on;
             objectLight.setActive(true);
             objectLight.setPosition(body.getPosition());
