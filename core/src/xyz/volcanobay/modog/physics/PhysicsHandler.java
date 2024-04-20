@@ -163,6 +163,8 @@ public class PhysicsHandler {
                     mouseJoint = null;
                 }
                 uuidsForRemovalFromClients.add(object.uuid);
+                object.dispose();
+                MachineListener.removeFromAll(object);
                 physicsObjectHashMap.remove(object.uuid);
                 world.destroyBody(body);
             }

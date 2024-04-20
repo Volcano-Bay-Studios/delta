@@ -8,9 +8,11 @@ import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MachineObject  extends PhysicsObject {
+    List<PhysicsObject> objectsImTouching = new ArrayList<>();
     public MachineObject() {
         super();
     }
@@ -35,7 +37,11 @@ public class MachineObject  extends PhysicsObject {
         pickTexture();
         type = "machine";
     }
-    public void contact(Body body, PhysicsObject object) {
+    public void contact(PhysicsObject object) {
+        objectsImTouching.add(object);
+    }
+    public void removeContact(PhysicsObject object) {
+        objectsImTouching.remove(object);
     }
 
     @Override

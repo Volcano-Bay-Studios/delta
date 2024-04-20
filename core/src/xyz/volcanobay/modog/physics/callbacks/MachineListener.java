@@ -14,9 +14,9 @@ public class MachineListener implements ContactListener {
         PhysicsObject physicsObjectB = PhysicsHandler.getPhysicsObjectFromBody(bodyB);
         if (physicsObjectA != null && physicsObjectB != null) {
             if (physicsObjectA instanceof MachineObject machine) {
-                machine.contact(bodyB, physicsObjectB);
+                machine.contact(physicsObjectB);
             } else if (physicsObjectB instanceof MachineObject machine) {
-                machine.contact(bodyA,physicsObjectA);
+                machine.contact(physicsObjectA);
             }
         } else
             return;
@@ -24,7 +24,25 @@ public class MachineListener implements ContactListener {
 
     @Override
     public void endContact(Contact contact) {
-
+        Body bodyA = contact.getFixtureA().getBody();
+        Body bodyB = contact.getFixtureB().getBody();
+        PhysicsObject physicsObjectA = PhysicsHandler.getPhysicsObjectFromBody(bodyA);
+        PhysicsObject physicsObjectB = PhysicsHandler.getPhysicsObjectFromBody(bodyB);
+        if (physicsObjectA != null && physicsObjectB != null) {
+            if (physicsObjectA instanceof MachineObject machine) {
+                machine.removeContact(physicsObjectB);
+            } else if (physicsObjectB instanceof MachineObject machine) {
+                machine.removeContact(physicsObjectA);
+            }
+        } else
+            return;
+    }
+    public static void removeFromAll(PhysicsObject object) {
+        for (PhysicsObject object1 : PhysicsHandler.physicsObjectHashMap.values()) {
+            if (object1 instanceof MachineObject machineObject) {
+                machineObject.removeContact(object);
+            }
+        }
     }
 
     @Override
