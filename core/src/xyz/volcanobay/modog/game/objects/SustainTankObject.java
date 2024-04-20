@@ -42,10 +42,10 @@ public class SustainTankObject extends MachineObject {
             if (body.getPosition().y < targetHeight) {
                 body.applyForceToCenter(0,appliedPower*100,true);
                 body.setLinearDamping(10f);
-                charge -= appliedPower/5;
+                charge -= appliedPower/20;
             }
-//            int index = (int) Math.ceil(charge/getMaxCharge()*7.1);
-//            RenderSystem.batch.draw(fluid,body.getPosition().x-1.99f,body.getPosition().y-9.48f, 1.99f,9.48f, 4, 19,(1)/ PhysicsHandler.scaleDown,(1)/PhysicsHandler.scaleDown,(float) Math.toDegrees(body.getAngle()),index*4,0,4,19,false,false);
+            int index = (int) Math.min(20,appliedPower*1);
+            RenderSystem.batch.draw(fluid,body.getPosition().x-18,body.getPosition().y-10, 18,10, 36, 20,(1)/ PhysicsHandler.scaleDown,(1)/PhysicsHandler.scaleDown,(float) Math.toDegrees(body.getAngle()),0,index,4,19,false,false);
         } else {
             objectLight.setActive(false);
             body.setLinearDamping(0f);
