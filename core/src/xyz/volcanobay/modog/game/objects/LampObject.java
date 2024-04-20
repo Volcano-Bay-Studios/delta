@@ -35,11 +35,11 @@ public class LampObject extends MachineObject {
     public void render() {
         super.render();
         if (charge> 1) {
-            float lampIntensity = charge / charge +1;
+            float lampIntensity = charge / (charge +1);
             texture = on;
             objectLight.setActive(true);
             objectLight.setPosition(body.getPosition());
-            objectLight.setDistance((float) (lampIntensity+(Math.random()/50f)));
+            objectLight.setDistance((float) (lampIntensity*3+(Math.random()/50f)));
             objectLight.setColor(0.99f,0.65f,0.23f,.5f);
         } else {
             objectLight.setActive(false);

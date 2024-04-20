@@ -74,6 +74,7 @@ public class MachineObject  extends PhysicsObject {
         fixtureScale = new Vector2((float) texture.getWidth() /2-.3f, (float) texture.getHeight() /2-.3f);
         groundBox.setAsBox(fixtureScale.x/ PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
         body.createFixture(groundBox,1f);
+        body.getFixtureList().get(0).setDensity(4f);
         groundBox.dispose();
     }
 

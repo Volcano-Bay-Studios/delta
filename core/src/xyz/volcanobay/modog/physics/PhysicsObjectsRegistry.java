@@ -27,6 +27,7 @@ public class PhysicsObjectsRegistry {
         registerNewObject("coal_generator",new CoalGeneratorObject());
         registerNewObject("lamp",new LampObject());
         registerNewObject("cable",new CableObject());
+        registerNewObject("budge",new BudgeObject());
     }
     public static PhysicsObject getFromRegistry(String name) {
         return physicsObjectHashMap.getOrDefault(name, null);

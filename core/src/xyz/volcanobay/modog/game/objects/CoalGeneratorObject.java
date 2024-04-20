@@ -12,8 +12,12 @@ import java.util.Objects;
 
 public class CoalGeneratorObject extends MachineObject {
     float activeTime = 0;
-    Texture on = new Texture("coal_generator_on.png");
+    Texture on1 = new Texture("coal_generator_on_1.png");
+    Texture on2 = new Texture("coal_generator_on_2.png");
+    Texture on3 = new Texture("coal_generator_on_3.png");
     Texture off = new Texture("coal_generator_off.png");
+    int animationStep = 1;
+    int animationTicks;
     PointLight objectLight;
     public CoalGeneratorObject() {
         super();
@@ -31,10 +35,20 @@ public class CoalGeneratorObject extends MachineObject {
     @Override
     public void tick() {
         super.tick();
+        if (activeTime > 0) {
+            animationTicks++;
+            if (animationTicks > 9) {
+                progressAnimation();
+                animationTicks = 0;
+            }
+        } else
+            animationTicks = 0;
         activeTime--;
         for (PhysicsObject object : objectsImTouching) {
             if (object instanceof MaterialObject item) {
                 if (Objects.equals(item.item, "coal") && activeTime < 800 && (!item.clientUsed || NetworkHandler.hasAuthority)) {
+                    if (!(activeTime > 0))
+                        progressAnimation();
                     activeTime = activeTime + 200;
                     if (activeTime > 1000)
                         activeTime = 1000;
@@ -46,11 +60,22 @@ public class CoalGeneratorObject extends MachineObject {
             }
         }
     }
+    public void progressAnimation() {
+        animationStep++;
+        if (animationStep>3)
+            animationStep = 1;
+
+        if (animationStep == 1)
+            texture = on1;
+        if (animationStep == 2)
+            texture = on2;
+        if (animationStep == 3)
+            texture = on3;
+    }
 
     @Override
     public void render() {
         if (activeTime> 0) {
-            texture = on;
             charge += 1f;
             objectLight.setActive(true);
             objectLight.setPosition(body.getPosition().add(0,0));
@@ -90,6 +115,8 @@ public class CoalGeneratorObject extends MachineObject {
             objectLight = null;
         }
         off.dispose();
-        on.dispose();
+        on1.dispose();
+        on2.dispose();
+        on3.dispose();
     }
 }

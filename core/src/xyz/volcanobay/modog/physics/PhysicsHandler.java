@@ -229,6 +229,7 @@ public class PhysicsHandler {
                 ourBody.setLinearVelocity(physicsObject.vel);
                 ourBody.setAngularVelocity(physicsObject.angularVelocity);
                 ourPhysicsObject.restricted = physicsObject.restricted;
+                ourPhysicsObject.charge = physicsObject.charge;
                 if (physicsObject.bodyType == 0) {
                     ourPhysicsObject.body.setType(BodyDef.BodyType.StaticBody);
                 } else if (physicsObject.bodyType == 2) {

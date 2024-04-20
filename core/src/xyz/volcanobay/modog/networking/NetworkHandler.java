@@ -222,7 +222,7 @@ public class NetworkHandler {
                 } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
                     bodyType = 2;
                 }
-                physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid, bodyType, physicsObject.restricted));
+                physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid, bodyType, physicsObject.restricted,physicsObject.charge));
                 i++;
             }
         }
@@ -266,7 +266,7 @@ public class NetworkHandler {
                 } else if (physicsObject.body.getType() == BodyDef.BodyType.KinematicBody) {
                     bodyType = 2;
                 }
-                physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid, bodyType, physicsObject.required));
+                physicsObjects.add(new NetworkablePhysicsObject(body.getPosition(), body.getLinearVelocity(), body.getAngle(), body.getAngularVelocity(), physicsObject.type, i, physicsObject.uuid, bodyType, physicsObject.required,physicsObject.charge));
                 i++;
             }
         }
