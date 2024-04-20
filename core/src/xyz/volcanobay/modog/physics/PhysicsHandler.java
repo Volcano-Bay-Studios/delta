@@ -185,6 +185,9 @@ public class PhysicsHandler {
         if (!uuidsForRemovalFromClients.isEmpty())
             NetworkHandler.removeFromClients(uuidsForRemovalFromClients);
         bodiesForDeletion.clear();
+        for (WorldJoint joint: jointConcurrentHashMap.values()) {
+            joint.propagatePower();
+        }
     }
     public static void removeObject(PhysicsObject object) {
         bodiesForDeletion.add(object.body);

@@ -51,7 +51,7 @@ public class CoalGeneratorObject extends MachineObject {
     public void render() {
         if (activeTime> 0) {
             texture = on;
-            charge += 0.1f;
+            charge += 1f;
             objectLight.setActive(true);
             objectLight.setPosition(body.getPosition().add(0,0));
             objectLight.setDistance((float) (2+(Math.random()/50f)));
