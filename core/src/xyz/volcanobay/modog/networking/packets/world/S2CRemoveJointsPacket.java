@@ -1,5 +1,6 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
+import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @PacketDirection(NetworkingDirection.S2C)
 public class S2CRemoveJointsPacket extends Packet {
+    
     List<NetworkableUUID> objectsForClientRemoval;
     public S2CRemoveJointsPacket(List<NetworkableUUID> objectsForClientRemoval) {
         this.objectsForClientRemoval = objectsForClientRemoval;
@@ -39,6 +41,11 @@ public class S2CRemoveJointsPacket extends Packet {
         stream.writeInt(objectsForClientRemoval.size());
         for (NetworkableUUID uuid : objectsForClientRemoval)
             stream.writeUUID(uuid);
+    }
+    
+    @Override
+    public DeltaPacket getType() {
+        return DeltaPacket.S2CRemoveJointsPacket;
     }
     
 }

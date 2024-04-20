@@ -1,6 +1,7 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
 import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
@@ -47,4 +48,8 @@ public class A2AObjectUpdateStatePacket extends Packet {
         object.writeAllStateToNetwork(stream);
     }
     
+    @Override
+    public DeltaPacket getType() {
+        return DeltaPacket.A2AObjectUpdateStatePacket;
+    }
 }

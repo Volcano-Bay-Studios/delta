@@ -1,4 +1,5 @@
-package xyz.volcanobay.modog.networking.packets;
+package xyz.volcanobay.modog.networking.packets.connection;
+
 
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.networking.DeltaPacket;
@@ -11,12 +12,12 @@ import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
 import java.util.Arrays;
 
 @PacketDirection(NetworkingDirection.C2S)
-public class C2SValidateNetworkVersionPacket extends Packet {
+public class C2SRequestConnectionAssignmentsPacket extends Packet {
     
-    public C2SValidateNetworkVersionPacket() {
+    public C2SRequestConnectionAssignmentsPacket() {
     }
     
-    public C2SValidateNetworkVersionPacket(NetworkByteReadStream readStream) {
+    public C2SRequestConnectionAssignmentsPacket(NetworkByteReadStream readStream) {
         super(readStream);
     }
     
@@ -30,6 +31,11 @@ public class C2SValidateNetworkVersionPacket extends Packet {
         //Check some data about the network and that it is the same
         stream.writeInt(Delta.NETWORKING_VERSION);
         stream.writeInt((int) Arrays.stream(DeltaPacket.values()).count());
+    }
+    
+    @Override
+    public DeltaPacket getType() {
+        return DeltaPacket.C2SRequestConnectionAssignmentsPacket;
     }
     
 }

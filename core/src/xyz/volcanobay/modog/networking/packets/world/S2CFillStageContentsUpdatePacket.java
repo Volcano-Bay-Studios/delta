@@ -1,5 +1,6 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
+import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
@@ -69,6 +70,11 @@ public class S2CFillStageContentsUpdatePacket extends Packet {
             stream.writeUUID(entry.getKey());
             entry.getValue().writeNewToNetwork(stream);
         }
+    }
+    
+    @Override
+    public DeltaPacket getType() {
+        return DeltaPacket.S2CFillStageContentsUpdatePacket;
     }
     
 }

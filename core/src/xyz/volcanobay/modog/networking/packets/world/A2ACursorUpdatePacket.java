@@ -2,6 +2,7 @@ package xyz.volcanobay.modog.networking.packets.world;
 
 import xyz.volcanobay.modog.game.Cursor;
 import xyz.volcanobay.modog.game.CursorHandler;
+import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
@@ -39,6 +40,11 @@ public class A2ACursorUpdatePacket extends Packet {
         stream.writeUUID(cursor.uuid);
         stream.writeVector2(cursor.pos);
         stream.writeInt(cursor.color);
+    }
+    
+    @Override
+    public DeltaPacket getType() {
+        return DeltaPacket.A2ACursorUpdateStatePacket;
     }
     
 }

@@ -3,11 +3,9 @@ package xyz.volcanobay.modog.networking;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSockets;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
-import xyz.volcanobay.modog.networking.enums.RelativeNetworkSide;
 import xyz.volcanobay.modog.networking.enums.ServerHostType;
-import xyz.volcanobay.modog.networking.enums.HostRoutingHeader;
+import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
 import xyz.volcanobay.modog.networking.packets.world.S2CStageUpdatePacket;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -18,6 +16,7 @@ public class DeltaNetwork {
     protected static WebSocket socket;
     
     protected static boolean connected = false;
+    protected static boolean enabled = false;
     
     protected static String hostIp = null;
     protected static int hostPort;
@@ -65,20 +64,12 @@ public class DeltaNetwork {
         }
     }
     
-    //>Sending to server
-    protected static byte[] getRawPacketData(Packet packet) {
-        packet.assertSide(RelativeNetworkSide.FROM);
-        NetworkByteWriteStream writeStream = new NetworkByteWriteStream();
-        packet.write(writeStream);
-        return writeStream.getBytes();
-    }
-    
     public static void sendPacketToAllClients(Packet packet) {
         if (!DeltaNetwork.isConnected()) return;
-        byte[] packetData = getRawPacketData(packet);
+        byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
             ByteBuffer.allocate(packetData.length +4)
-                .putInt(HostRoutingHeader.TO_ALL_CLIENTS.getId())
+                .putInt(PacketRoutingHeader.TO_ALL_CLIENTS.getId())
                 .put(packetData)
                 .array()
         );
@@ -86,33 +77,37 @@ public class DeltaNetwork {
     
     public static void sendPacketToAllOthers(Packet packet) {
         if (!DeltaNetwork.isConnected()) return;
-        byte[] packetData = getRawPacketData(packet);
+        byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
             ByteBuffer.allocate(packetData.length +4)
-                .putInt(HostRoutingHeader.TO_ALL_OTHERS.getId())
+                .putInt(PacketRoutingHeader.TO_ALL_OTHERS.getId())
                 .put(packetData)
                 .array()
         );
     }
     
     public static void sendPacketToClient(Packet packet, int clientConnectionIndex) {
-        if (!DeltaNetwork.isConnected()) return;
-        byte[] packetData = getRawPacketData(packet);
+        if (!DeltaNetwork.isConnected() || DeltaNetwork.isActive()) return;
+        byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
             ByteBuffer.allocate(packetData.length +8)
-                .putInt(HostRoutingHeader.TO_CLIENT.getId())
+                .putInt(PacketRoutingHeader.TO_CLIENT.getId())
                 .putInt(clientConnectionIndex)
                 .put(packetData)
                 .array()
         );
     }
     
+    private static boolean isActive() {
+        return !NetworkConnectionsManager.isAwaiting;
+    }
+    
     public static void sendPacketToServer(Packet packet) {
         if (!DeltaNetwork.isConnected()) return;
-        byte[] packetData = getRawPacketData(packet);
-        socket.send(
+        byte[] packetData = PacketProcessor.getRawPacketData(packet);
+        PacketProcessor.packAndSend(
             ByteBuffer.allocate(packetData.length +4)
-                .putInt(HostRoutingHeader.TO_SERVER.getId())
+                .putInt(PacketRoutingHeader.TO_SERVER.getId())
                 .put(packetData)
                 .array()
         );
@@ -131,9 +126,25 @@ public class DeltaNetwork {
         return networkingSide.equals(NetworkingSide.SERVER);
     }
     
+    public static void setNetworkingSide(NetworkingSide networkingSide) {
+        DeltaNetwork.networkingSide = networkingSide;
+    }
+    
+    public static void setHostingType(ServerHostType hostingType) {
+        DeltaNetwork.hostingType = hostingType;
+    }
+    
+    public static void setEnabled(boolean enabled) {
+        DeltaNetwork.enabled = enabled;
+    }
+    
     //>Getters
     public static boolean isConnected() {
         return connected;
+    }
+    
+    public static boolean isEnabled() {
+        return enabled;
     }
     
     public static String getHostIp() {

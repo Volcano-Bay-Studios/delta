@@ -17,6 +17,8 @@ public abstract class Packet {
     public abstract void receive(NetworkByteReadStream stream);
     public abstract void write(NetworkByteWriteStream stream);
     
+    public abstract DeltaPacket getType();
+    
     public void assertSide(RelativeNetworkSide currentSide) {
         PacketDirection direction = getClass().getAnnotation(PacketDirection.class);
         if (direction == null)

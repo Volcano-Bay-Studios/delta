@@ -1,8 +1,10 @@
 package xyz.volcanobay.modog.networking;
 
+import xyz.volcanobay.modog.networking.packets.connection.C2SRequestConnectionAssignmentsPacket;
+import xyz.volcanobay.modog.networking.packets.connection.S2CRespondConnectionAssignmentsPacket;
 import xyz.volcanobay.modog.networking.packets.world.*;
 import xyz.volcanobay.modog.networking.packets.S2CUnimportantPacket;
-import xyz.volcanobay.modog.networking.packets.C2SValidateNetworkVersionPacket;
+import xyz.volcanobay.modog.networking.packets.connection.C2SValidateNetworkVersionPacket;
 import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
 
 import java.util.Arrays;
@@ -21,8 +23,11 @@ public enum DeltaPacket {
     S2CJointCreatedPacket(S2CJointCreatedPacket::new),
     S2CRemoveJointsPacket(S2CRemoveJointsPacket::new),
     S2CRemoveObjectsPacket(S2CRemoveObjectsPacket::new),
-    S2CStageUpdatePacket(S2CStageUpdatePacket::new)
-    ;
+    S2CStageUpdatePacket(S2CStageUpdatePacket::new),
+    S2CRespondConnectionAssignmentsPacket(S2CRespondConnectionAssignmentsPacket::new),
+    C2SRequestConnectionAssignmentsPacket(C2SRequestConnectionAssignmentsPacket::new),
+    C2SValidateNetworkVersionPacket(C2SValidateNetworkVersionPacket::new),
+    A2ACursorUpdateStatePacket(A2AObjectUpdateStatePacket::new);
     final Function<NetworkByteReadStream, Packet> packetFactory;
     final int id;
     
