@@ -3,6 +3,7 @@ package xyz.volcanobay.modog.game.objects;
 import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
+import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.rendering.RenderSystem;
@@ -33,11 +34,14 @@ public class CoalGeneratorObject extends MachineObject {
         activeTime--;
         for (PhysicsObject object : objectsImTouching) {
             if (object instanceof MaterialObject item) {
-                if (Objects.equals(item.item, "coal") && activeTime < 800) {
+                if (Objects.equals(item.item, "coal") && activeTime < 800 && (!item.clientUsed || NetworkHandler.hasAuthority)) {
                     activeTime = activeTime + 200;
                     if (activeTime > 1000)
                         activeTime = 1000;
-                    PhysicsHandler.removeObject(object);
+                    if (NetworkHandler.hasAuthority)
+                        PhysicsHandler.removeObject(object);
+                    else
+                        item.clientUsed = true;
                 }
             }
         }
@@ -47,6 +51,7 @@ public class CoalGeneratorObject extends MachineObject {
     public void render() {
         if (activeTime> 0) {
             texture = on;
+            charge += 0.1f;
             objectLight.setActive(true);
             objectLight.setPosition(body.getPosition().add(0,0));
             objectLight.setDistance((float) (2+(Math.random()/50f)));
@@ -84,5 +89,7 @@ public class CoalGeneratorObject extends MachineObject {
             objectLight.remove(true);
             objectLight = null;
         }
+        off.dispose();
+        on.dispose();
     }
 }

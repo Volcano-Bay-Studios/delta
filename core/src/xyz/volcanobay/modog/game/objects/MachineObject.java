@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
+import xyz.volcanobay.modog.game.DeltaConstants;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
@@ -24,6 +25,23 @@ public class MachineObject  extends PhysicsObject {
     @Override
     public void tickPhysics() {
         super.tickPhysics();
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        for (PhysicsObject object : objectsImTouching) {
+            float myDonatedCharge = charge/10;
+            float objectDonatedCharge = object.charge/10;
+            charge += objectDonatedCharge;
+            charge -= myDonatedCharge;
+            object.charge += myDonatedCharge;
+            object.charge -= objectDonatedCharge;
+            if (charge> DeltaConstants.maxCharge)
+                charge = DeltaConstants.maxCharge;
+            if (object.charge> DeltaConstants.maxCharge)
+                object.charge = DeltaConstants.maxCharge;
+        }
     }
 
     @Override

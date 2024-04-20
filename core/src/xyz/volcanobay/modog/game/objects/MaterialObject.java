@@ -11,6 +11,7 @@ import xyz.volcanobay.modog.screens.TextButtons;
 import java.util.List;
 
 public class MaterialObject  extends PhysicsObject {
+    public boolean clientUsed = false;
     public String item;
     public MaterialObject() {
         super();

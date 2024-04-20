@@ -28,6 +28,8 @@ public class PhysicsObject {
     public String tooltip = "Nothing to see here!";
     public boolean markedForDeletion = false;
     public boolean restricted = false;
+    public float conductivity;
+    public float charge;
     /**
      * Constructor for Registry
      * Do NOT use this, instead get a physics object from the registry {@link PhysicsObjectsRegistry }
@@ -111,7 +113,7 @@ public class PhysicsObject {
     }
     public List<TextButtons> getContextOptions() {
         textButtons.clear();
-        if ((NetworkHandler.isHost || !(NetworkHandler.socket != null && NetworkHandler.socket.isOpen())) || !restricted) {
+        if (NetworkHandler.hasAuthority || !restricted) {
             if (!required) {
                 newButton("Delete", new ChangeListener() {
                     @Override

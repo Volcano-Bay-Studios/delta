@@ -9,11 +9,13 @@ import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.*;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.rendering.RenderSystem;
 
 public class GameScreen extends VisWindow {
     public VisCheckBox isHost;
     public VisTextArea objectSelected;
-    public VisSlider visSlider;
+    public VisSlider gravitySlider;
+    public VisSlider ambientLightSlider;
     public VisTextButton resync;
     public VisTextArea coordinates;
     public GameScreen() {
@@ -22,10 +24,20 @@ public class GameScreen extends VisWindow {
         columnDefaults(0).left();
 
         isHost = new VisCheckBox("Is Hosting");
-        visSlider = new VisSlider(-10,10,1,false);
+        gravitySlider = new VisSlider(-10,10,1,false);
+        ambientLightSlider = new VisSlider(0,1,.1f,false);
+        ambientLightSlider.setValue(0.5f);
         objectSelected = new VisTextArea();
         resync = new VisTextButton("Resync");
         coordinates = new VisTextArea("?");
+        coordinates.setReadOnly(true);
+        ambientLightSlider.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                RenderSystem.rayHandler.setAmbientLight(ambientLightSlider.getValue());
+                RenderSystem.skylight.setColor(1,1,1,ambientLightSlider.getValue());
+            }
+        });
         isHost.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -38,16 +50,17 @@ public class GameScreen extends VisWindow {
                 NetworkHandler.fullResync();
             }
         });
-        visSlider.addListener(new ChangeListener() {
+        gravitySlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                PhysicsHandler.world.setGravity(new Vector2(0,visSlider.getValue()));
+                PhysicsHandler.world.setGravity(new Vector2(0, gravitySlider.getValue()));
             }
         });
 
 
         add(isHost).row();
-        add(visSlider).row();
+        add(gravitySlider).row();
+        add(ambientLightSlider).row();
         add(resync).row();
         add(coordinates);
         pack();

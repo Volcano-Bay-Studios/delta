@@ -7,14 +7,14 @@ import xyz.volcanobay.modog.rendering.RenderSystem;
 public class Cursor {
     public NetworkableUUID uuid;
     public Vector2 pos;
-    public int color = (int) (Math.random()*4);
+    public int color = (int) Math.round(Math.random()*3f);
     public Cursor() {}
     public Cursor(NetworkableUUID uuid) {
         this.uuid = uuid;
     }
     public void render() {
         if (color == 0) {
-            RenderSystem.batch.draw(CursorHandeler.cursor, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandeler.cursor.getWidth(), CursorHandeler.cursor.getHeight(), false, false);
+            RenderSystem.batch.draw(CursorHandeler.cursorYellow, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandeler.cursor.getWidth(), CursorHandeler.cursor.getHeight(), false, false);
         }
         if (color == 1) {
             RenderSystem.batch.draw(CursorHandeler.cursorRed, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandeler.cursor.getWidth(), CursorHandeler.cursor.getHeight(), false, false);
@@ -24,12 +24,6 @@ public class Cursor {
         }
         if (color == 3) {
             RenderSystem.batch.draw(CursorHandeler.cursorLime, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandeler.cursor.getWidth(), CursorHandeler.cursor.getHeight(), false, false);
-        }
-        if (color == 4) {
-            RenderSystem.batch.draw(CursorHandeler.cursorYellow, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandeler.cursor.getWidth(), CursorHandeler.cursor.getHeight(), false, false);
-        }
-        if (color == 5) {
-            RenderSystem.batch.draw(CursorHandeler.cursor, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandeler.cursor.getWidth(), CursorHandeler.cursor.getHeight(), false, false);
         }
     }
 }
