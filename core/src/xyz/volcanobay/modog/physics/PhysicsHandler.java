@@ -11,6 +11,7 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
@@ -223,7 +224,7 @@ public class PhysicsHandler {
         List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
         for (NetworkablePhysicsObject physicsObject: networkablePhysicsObjects) {
             PhysicsObject ourPhysicsObject = physicsObjectHashMap.get(physicsObject.uuid);
-            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (mouseJoint == null || ourPhysicsObject.body != mouseJoint.getBodyB()) && (!NetworkHandler.isHost || !ourPhysicsObject.restricted)) {
+            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (InputHandeler.playerControlledObjects == null || !InputHandeler.playerControlledObjects.contains(ourPhysicsObject)) && (!NetworkHandler.isHost || !ourPhysicsObject.restricted)) {
                 Body ourBody = ourPhysicsObject.body;
                 ourBody.setTransform(physicsObject.pos, physicsObject.angle);
                 ourBody.setLinearVelocity(physicsObject.vel);
@@ -359,7 +360,11 @@ public class PhysicsHandler {
                 }
             }
             if (!NetworkHandler.isHost && mouseJoint != null) {
-                NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseJoint.getBodyB()));
+                PhysicsObject mouseObject = getPhysicsObjectFromBody(mouseJoint.getBodyB());
+                if (mouseObject != null) {
+                    InputHandeler.playerControlledObjects = getContraption(mouseObject);
+                    NetworkHandler.sendPhysicsObjects(InputHandeler.playerControlledObjects,false);
+                }
             }
             if (staticMoveBody != null) {
                 staticMoveBody.setTransform(getMouseWorldPosition().sub(grabPoint), staticMoveBody.getAngle());
@@ -373,6 +378,7 @@ public class PhysicsHandler {
             mouseJoint.getBodyB().setFixedRotation(false);
             world.destroyJoint(mouseJoint);
             mouseJoint = null;
+            InputHandeler.playerControlledObjects = null;
             lockRot = false;
         } else if (staticMoveBody != null) {
             staticMoveBody.setAwake(false);

@@ -99,6 +99,7 @@ public class BudgeObject extends MachineObject {
 
     @Override
     public List<TextButtons> getContextOptions() {
+        super.getContextOptions();
         newButton("Control", new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -106,7 +107,6 @@ public class BudgeObject extends MachineObject {
                 actor.getParent().remove();
             }
         });
-        return super.getContextOptions();
-
+        return textButtons;
     }
 }
