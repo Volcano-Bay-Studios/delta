@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PhysicsHandler {
-    public static World world = new World(new Vector2(0, -30), true);
+    public static World world = new World(new Vector2(0, 0), true);
     public static Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     public static boolean isDebug = false;
     public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectHashMap = new ConcurrentHashMap<>();
@@ -153,6 +153,9 @@ public class PhysicsHandler {
             world.step(1 / 120f, 6, 2);
             for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
                 physicsObject.tickPhysics();
+                if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
+                    physicsObject.body.applyForceToCenter(0,-physicsObject.getGravity()*physicsObject.body.getMass(),false);
+                }
             }
         }
         List<NetworkableUUID> uuidsForRemovalFromClients = new ArrayList<>();
@@ -468,10 +471,6 @@ public class PhysicsHandler {
                 }
             }
         }
-        world.QueryAABB(fixture -> {
-            mouseBody = fixture.getBody();
-            return true;
-        }, mouse.x+1, mouse.y+1, mouse.x-1, mouse.y-1);
     }
 
     public static void updatePhysicsObjectFromNetworkedObject(NetworkablePhysicsObject physicsObject) {
@@ -489,7 +488,7 @@ public class PhysicsHandler {
     public static List<WorldJoint> getObjectJoints(PhysicsObject object) {
         List<WorldJoint> jointObjects = new ArrayList<>();
         for (WorldJoint joint : jointConcurrentHashMap.values()) {
-            if (joint.joint.getBodyA().equals(object.body) || joint.joint.getBodyB().equals(object.body)) {
+            if ((joint.joint.getBodyA() != null && joint.joint.getBodyB() != null) && (joint.joint.getBodyA().equals(object.body) || joint.joint.getBodyB().equals(object.body))) {
                 jointObjects.add(joint);
             }
         }

@@ -15,5 +15,8 @@ public class InputHandeler {
         if (!NetworkHandler.isHost && controlledContraption != null) {
             NetworkHandler.sendPhysicsObjects(PhysicsHandler.getContraption(controlledContraption),false);
         }
+        if (controlledContraption != null) {
+            playerControlledObjects = PhysicsHandler.getContraption(controlledContraption);
+        }
     }
 }

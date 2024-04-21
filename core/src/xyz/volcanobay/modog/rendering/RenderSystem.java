@@ -49,17 +49,19 @@ public class RenderSystem {
         camera.zoom = 1;
         camera.update();
 
-
         rayHandler = new RayHandler(PhysicsHandler.world);
         rayHandler.setShadows(true);
         rayHandler.setAmbientLight(0.5f);
         skylight = new  DirectionalLight(rayHandler,4000,new Color(1,1,1,.5f),-90);
-
+        rayHandler.setBlur(true);
+        rayHandler.setBlurNum(6);
+        RayHandler.useDiffuseLight(false);
     }
     public static void render() {
         handleInput();
         camera.update();
         batch.setProjectionMatrix(camera.combined);
+        rayHandler.setBlurNum(2);
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
         camera.viewportHeight = 30 * (h / w);
@@ -74,10 +76,10 @@ public class RenderSystem {
         renderJoints();
         renderOOB();
         CursorHandeler.renderCursors();
-        rayHandler.setCombinedMatrix(camera);
-        rayHandler.updateAndRender();
         PhysicsHandler.renderDebug();
         batch.end();
+        rayHandler.setCombinedMatrix(camera);
+        rayHandler.updateAndRender();
     }
     public static void renderOOB() {
         batch.enableBlending();

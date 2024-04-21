@@ -2,11 +2,12 @@ package xyz.volcanobay.modog.game.objects;
 
 import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 
-public class SustainTankObject extends MachineObject {
+public class SustainTankObject extends LogicObject {
     Texture fluid = new Texture("sustain.png");
     PointLight objectLight;
     float targetHeight = 10;
@@ -27,6 +28,14 @@ public class SustainTankObject extends MachineObject {
     @Override
     public void tick() {
         super.tick();
+    }
+
+    @Override
+    public void control(Vector2 movementVector, float angleGoal) {
+        super.control(movementVector, angleGoal);
+        if (charge>1) {
+            targetHeight += movementVector.y / 30;
+        }
     }
 
     @Override

@@ -10,12 +10,12 @@ import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.List;
 
-public class SquareObject extends PhysicsObject {
-    public SquareObject() {
+public class CrateObject extends MachineObject {
+    public CrateObject() {
         super();
     }
 
-    public SquareObject(Body body) {
+    public CrateObject(Body body) {
         super(body);
     }
 
@@ -25,8 +25,8 @@ public class SquareObject extends PhysicsObject {
     }
 
     @Override
-    public SquareObject create(Body body) {
-        return new SquareObject(body);
+    public CrateObject create(Body body) {
+        return new CrateObject(body);
     }
 
     @Override

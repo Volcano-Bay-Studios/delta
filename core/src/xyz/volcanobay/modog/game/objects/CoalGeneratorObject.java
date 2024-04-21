@@ -46,7 +46,7 @@ public class CoalGeneratorObject extends MachineObject {
         activeTime--;
         for (PhysicsObject object : objectsImTouching) {
             if (object instanceof MaterialObject item) {
-                if (Objects.equals(item.item, "coal") && activeTime < 800 && (!item.clientUsed || NetworkHandler.hasAuthority)) {
+                if (Objects.equals(item.material.type, "coal") && activeTime < 800 && (!item.clientUsed || NetworkHandler.hasAuthority)) {
                     if (!(activeTime > 0))
                         progressAnimation();
                     activeTime = activeTime + 500;

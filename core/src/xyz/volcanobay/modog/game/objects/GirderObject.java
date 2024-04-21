@@ -48,6 +48,7 @@ public class GirderObject extends PhysicsObject {
         groundBox.setAsBox((fixtureScale.x/ PhysicsHandler.scaleDown), (fixtureScale.y/PhysicsHandler.scaleDown));
         body.createFixture(groundBox,1f);
         body.getFixtureList().get(0).setRestitution(.3f);
+        body.getFixtureList().get(0).setFriction(.8f);
         groundBox.dispose();
     }
 

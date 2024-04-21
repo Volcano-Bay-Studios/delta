@@ -20,7 +20,7 @@ public class PhysicsObjectsRegistry {
 
     public static void registerObjects() {
         registerNewObject("wheel",new CircleObject());
-        registerNewObject("crate",new SquareObject());
+        registerNewObject("crate",new CrateObject());
         registerNewObject("ground",new GroundObject());
         registerNewObject("girder",new GirderObject());
         registerNewObject("item",new MaterialObject());
@@ -30,6 +30,7 @@ public class PhysicsObjectsRegistry {
         registerNewObject("budge",new BudgeObject());
         registerNewObject("battery",new BatteryObject());
         registerNewObject("sustain_tank",new SustainTankObject());
+        registerNewObject("mini_thruster",new MiniThrusterObject());
     }
     public static PhysicsObject getFromRegistry(String name) {
         return physicsObjectHashMap.getOrDefault(name, null);

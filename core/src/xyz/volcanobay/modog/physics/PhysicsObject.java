@@ -112,6 +112,9 @@ public class PhysicsObject {
     public void dispose() {
         texture.dispose();
     }
+    public float getGravity() {
+        return Math.min(30,Math.max(0,(body.getPosition().y*-0.3f)+30));
+    }
     public void newButton(String string, ChangeListener changeListener) {
         textButtons.add(new TextButtons(string,changeListener));
     }

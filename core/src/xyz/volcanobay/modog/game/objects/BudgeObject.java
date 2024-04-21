@@ -1,12 +1,16 @@
 package xyz.volcanobay.modog.game.objects;
 
 import box2dLight.PointLight;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.TextButtons;
 
@@ -19,6 +23,7 @@ public class BudgeObject extends MachineObject {
     public int workingTime;
     public boolean isWorking = false;
     public float targetAngle = 0;
+    public float movementAngle;
     public BudgeObject() {
         super();
     }
@@ -30,6 +35,31 @@ public class BudgeObject extends MachineObject {
     @Override
     public void tickPhysics() {
         super.tickPhysics();
+        if (charge > 1 && this.equals(InputHandeler.controlledContraption) && InputHandeler.playerControlledObjects != null) {
+            Vector2 moveVector = new Vector2(0,0);
+            if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+                moveVector.add(0,1);
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+                moveVector.add(-1,0);
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+                moveVector.add(0,-1);
+            }
+            if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+                moveVector.add(1,0);
+            }
+            if (moveVector.x == 0 && moveVector.y == 0) {
+                movementAngle = -1;
+            } else {
+                movementAngle = (float) Math.atan2(moveVector.x, moveVector.y);
+                for (PhysicsObject object : InputHandeler.playerControlledObjects) {
+                    if (object instanceof LogicObject logicObject) {
+                        logicObject.control(moveVector,targetAngle);
+                    }
+                }
+            }
+        }
     }
 
 
@@ -100,13 +130,24 @@ public class BudgeObject extends MachineObject {
     @Override
     public List<TextButtons> getContextOptions() {
         super.getContextOptions();
-        newButton("Control", new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                InputHandeler.controlledContraption = getSelf();
-                actor.getParent().remove();
-            }
-        });
+        if (InputHandeler.controlledContraption == null || InputHandeler.controlledContraption != getSelf()) {
+            newButton("Control", new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    InputHandeler.controlledContraption = getSelf();
+                    actor.getParent().remove();
+                }
+            });
+
+        } else {
+            newButton("Uncontrol", new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    InputHandeler.controlledContraption = null;
+                    actor.getParent().remove();
+                }
+            });
+        }
         return textButtons;
     }
 }
