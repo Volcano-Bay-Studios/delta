@@ -106,7 +106,7 @@ public class DeltaNetwork {
     }
     
     public static void sendPacketToClient(Packet packet, int clientConnectionIndex) {
-        if (!DeltaNetwork.isConnected() || DeltaNetwork.isActive()) return;
+        if (!DeltaNetwork.isConnected() || !DeltaNetwork.isActive()) return;
         byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
             ByteBuffer.allocate(packetData.length + 8)

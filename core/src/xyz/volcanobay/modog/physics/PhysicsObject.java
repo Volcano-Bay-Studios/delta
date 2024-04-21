@@ -244,13 +244,13 @@ public class PhysicsObject {
      * Sync position and velocity, called every tick by the StageUpdatePacket
      */
     public void writePhysicsStateToNetwork(NetworkByteWriteStream writeStream) {
+        writeStream.writeInt(body.getType().ordinal());
         writeStream.writeVector2(body.getPosition());
         writeStream.writeFloat(body.getAngle());
         
         writeStream.writeVector2(body.getLinearVelocity());
         writeStream.writeFloat(body.getAngularVelocity());
         
-        writeStream.writeInt(body.getType().ordinal());
         writeStream.writeByteBool(required);
     }
     
@@ -264,23 +264,28 @@ public class PhysicsObject {
         writeStateToNetwork(stream);
     }
     
-    public void readStateFromNetwork(NetworkByteReadStream readStream) {
+    public void readStateFromNetwork(NetworkByteReadStream stream) {
     
     }
     
-    public void readPhysicsStateFromNetwork(NetworkByteReadStream readStream) {
-        body.setTransform(readStream.readVector2(), readStream.readFloat());
+    public void readPhysicsStateFromNetwork(NetworkByteReadStream stream) {
+        body.setType(BodyDef.BodyType.values()[stream.readInt()]);
         
-        body.setLinearVelocity(readStream.readVector2());
-        body.setAngularVelocity(readStream.readFloat());
+        body.setTransform(stream.readVector2(), stream.readFloat());
         
-        body.setType(BodyDef.BodyType.values()[readStream.readInt()]);
-        required = readStream.readByteBool();
+        body.setLinearVelocity(stream.readVector2());
+        body.setAngularVelocity(stream.readFloat());
+        
+        required = stream.readByteBool();
     }
     
     public static PhysicsObject readNewFromNetwork(NetworkByteReadStream stream) {
-        PhysicsObject newObject = PhysicsObjectsRegistry.getBaseInstanceFromRegistry(stream.readString());
+        String objectId = stream.readString();
+        BodyDef.BodyType type = BodyDef.BodyType.values()[stream.readInt()];
+        stream.seek(-4);
+        PhysicsObject newObject = PhysicsObjectsRegistry.createInstanceFromRegistry(objectId, type);
         newObject.readAllStateFromNetwork(stream);
+        newObject.createFixture();
         return newObject;
     }
     

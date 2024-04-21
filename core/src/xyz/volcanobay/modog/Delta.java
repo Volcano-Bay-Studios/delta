@@ -89,7 +89,7 @@ public class Delta extends ApplicationAdapter {
             }
         }, 0.01f);
         PhysicsHandler.objectTickPeriodic();
-        DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
+        //DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
         DeltaNetwork.readDataTick();
     
         PhysicsHandler.handleInput();

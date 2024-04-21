@@ -39,8 +39,8 @@ public class A2AObjectUpdateStatePacket extends Packet {
             object.uuid = uuid;
             PhysicsHandler.physicsObjectMap.put(object.uuid, object);
         }
-        if (DeltaNetwork.isExternalServer())
-            NetworkingCalls.updateObjectState(object);
+//        if (DeltaNetwork.isExternalServer())
+//            NetworkingCalls.updateObjectState(object);
     }
     
     @Override

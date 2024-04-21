@@ -58,4 +58,8 @@ public class NetworkByteReadStream {
         return readByte() != 0;
     }
     
+    public void seek(int i) {
+        position += i;
+    }
+    
 }

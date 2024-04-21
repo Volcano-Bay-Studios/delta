@@ -19,7 +19,7 @@ public class CursorHandler {
     public static Texture cursorLime = new Texture("cursor_lime.png");
     public static Texture cursorYellow = new Texture("cursor_yellow.png");
     public static Cursor myCursor = new Cursor(Delta.uuid);
-    public static ConcurrentHashMap<NetworkableUUID ,Cursor> cursors = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<NetworkableUUID, Cursor> cursors = new ConcurrentHashMap<>();
 
     public static void renderCursors() {
         myCursor.pos = PhysicsHandler.getMouseWorldPosition();

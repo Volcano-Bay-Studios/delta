@@ -3,9 +3,12 @@ package xyz.volcanobay.modog.physics;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.core.annotations.Nullable;
 import xyz.volcanobay.modog.game.objects.*;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 public class PhysicsObjectsRegistry {
     
@@ -34,12 +37,14 @@ public class PhysicsObjectsRegistry {
     public static PhysicsObject getFromRegistry(String name) {
         return physicsObjectHashMap.getOrDefault(name, null);
     }
-    public static PhysicsObject getBaseInstanceFromRegistry(String name) {
+    
+    public static PhysicsObject createInstanceFromRegistry(String name, BodyDef.BodyType type) {
         BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.type = type;
     
         Body body = PhysicsHandler.world.createBody(bodyDef);
-        return physicsObjectHashMap.getOrDefault(name, null).create(body);
+        //Note that the UUID is overridable, so the returned objects uuid is not necessarily the one used
+        return physicsObjectHashMap.getOrDefault(name, null).create(body).setUuid(NetworkableUUID.randomUUID());
     }
     
 }

@@ -17,6 +17,7 @@ public class C2SRequestFillLevelContents extends Packet {
     
     @Override
     public void receive(NetworkByteReadStream stream) {
+        System.out.println("Syncing level data to client");
         DeltaNetwork.sendPacketToClient(new S2CFillLevelContentsPacket(), stream.readInt());
     }
     

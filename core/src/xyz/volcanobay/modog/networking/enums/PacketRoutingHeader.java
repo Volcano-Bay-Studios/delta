@@ -29,7 +29,7 @@ public enum PacketRoutingHeader {
             return false;
     
         if (this.equals(TO_CLIENT)) {
-            return additional == NetworkConnectionsManager.selfConnectionId;
+            return true;//additional == NetworkConnectionsManager.selfConnectionId
         }
         if (this.equals(TO_SERVER))
             return DeltaNetwork.isNetworkOwner();

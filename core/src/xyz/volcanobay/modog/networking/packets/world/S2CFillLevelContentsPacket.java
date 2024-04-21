@@ -29,23 +29,29 @@ public class S2CFillLevelContentsPacket extends Packet {
     
     @Override
     public void receive(NetworkByteReadStream stream) {
+        System.out.println("Received level data ton");
         ConcurrentHashMap<NetworkableUUID, PhysicsObject> newPhysicsObjects = new ConcurrentHashMap<>();
         ConcurrentHashMap<NetworkableUUID, WorldJoint> newJoints = new ConcurrentHashMap<>();
         
         //Load in the ones from the network
         int objectsLength = stream.readInt();
         for (int i = 0; i < objectsLength; i++) {
-            newPhysicsObjects.put(stream.readUUID(), PhysicsObject.readNewFromNetwork(stream));
+            NetworkableUUID uuid = stream.readUUID();
+            newPhysicsObjects.put(uuid, PhysicsObject.readNewFromNetwork(stream).setUuid(uuid));
         }
         int jointsLength = stream.readInt();
         for (int i = 0; i < jointsLength; i++) {
-            newJoints.put(stream.readUUID(), WorldJoint.readNewFromNetwork(stream));
+            WorldJoint worldJoint = WorldJoint.readNewFromNetwork(stream);
+            newJoints.put(worldJoint.uuid, worldJoint);
         }
         
         //Delete the old stage contents
-        for (Map.Entry<NetworkableUUID, PhysicsObject> entry : newPhysicsObjects.entrySet()) {
-            entry.getValue().dispose();
+        for (Map.Entry<NetworkableUUID, PhysicsObject> entry : physicsObjectMap.entrySet()) {
             PhysicsHandler.world.destroyBody(entry.getValue().body);
+            entry.getValue().dispose();
+        }
+        for (Map.Entry<NetworkableUUID, WorldJoint> entry : jointMap.entrySet()) {
+            PhysicsHandler.world.destroyJoint(entry.getValue().joint);
         }
     
         //And replace with the read ones
@@ -63,7 +69,6 @@ public class S2CFillLevelContentsPacket extends Packet {
         
         stream.writeInt(jointMap.size());
         for (Map.Entry<NetworkableUUID, WorldJoint> entry : jointMap.entrySet()) {
-            stream.writeUUID(entry.getKey());
             entry.getValue().writeNewToNetwork(stream);
         }
     }

@@ -102,9 +102,7 @@ public class PhysicsHandler {
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(registryObject).create(body).setUuid(uuid);
         physicsObjectMap.put(uuid, newPhysicsObject);
         newPhysicsObject.createFixture();
-        if (!DeltaNetwork.isNetworkOwner()) {
-            DeltaNetwork.sendPacketToServer(new A2AObjectUpdateStatePacket(newPhysicsObject));
-        }
+        DeltaNetwork.sendPacketToAllOthers(new A2AObjectUpdateStatePacket(newPhysicsObject));
     }
 
     public static void addNetworkedObject(NetworkablePhysicsObject physicsObject) {
@@ -358,10 +356,10 @@ public class PhysicsHandler {
                     staticMoveBody.setTransform(staticMoveBody.getPosition(),staticMoveBody.getAngle()-(spinSpeed/100));
                 }
             }
-            if (!DeltaNetwork.isNetworkOwner() && mouseJoint != null) {
-                NetworkingCalls.updateObjectState(mouseObject);
-                NetworkingCalls.updateObjectState(mouseJoint.getBodyB());
-            }
+//            if (mouseJoint != null) {
+//                NetworkingCalls.updateObjectState(mouseObject);
+//                NetworkingCalls.updateObjectState(mouseJoint.getBodyB());
+//            }
             if (staticMoveBody != null) {
                 staticMoveBody.setTransform(getMouseWorldPosition().sub(grabPoint), staticMoveBody.getAngle());
                 staticMoveBody.setAwake(true);
@@ -382,7 +380,7 @@ public class PhysicsHandler {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             Vector2 mousePos = getMouseWorldPosition();
-            addObjectFromRegistry(mousePos.x, mouse.y,selectedPlaceableObject);
+            addObjectFromRegistry(mousePos.x, mouse.y, selectedPlaceableObject);
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             if (mouseBody != null) {
