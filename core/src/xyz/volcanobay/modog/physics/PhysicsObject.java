@@ -196,6 +196,12 @@ public class PhysicsObject {
         }
         return textButtons;
     }
+    public PhysicsObject getSelf() {
+        return this;
+    }
+    public void killMyself() {
+        PhysicsHandler.bodiesForDeletion.add(body);
+    }
     public void tick() {}
 
     @Override

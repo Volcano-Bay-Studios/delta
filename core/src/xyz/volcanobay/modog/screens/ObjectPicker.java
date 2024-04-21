@@ -11,10 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable;
 import com.kotcrab.vis.ui.layout.GridGroup;
 import com.kotcrab.vis.ui.util.TableUtils;
-import com.kotcrab.vis.ui.widget.VisImage;
-import com.kotcrab.vis.ui.widget.VisImageButton;
-import com.kotcrab.vis.ui.widget.VisTable;
-import com.kotcrab.vis.ui.widget.VisWindow;
+import com.kotcrab.vis.ui.widget.*;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
@@ -26,12 +23,17 @@ import java.util.List;
 public class ObjectPicker extends VisWindow {
     boolean started;
     List<VisImage> imageList = new ArrayList<>();
+    VisTextArea tooltip;
 
     ScrollPane scrollPane;
     public ObjectPicker() {
         super("Object Picker");
         TableUtils.setSpacingDefaults(this);
         columnDefaults(0).left();
+
+        tooltip = new VisTextArea();
+        tooltip.setReadOnly(true);
+        tooltip.setText("Nothing to see here!");
 
         started = true;
         RenderSystem.hasPicker = true;
@@ -76,6 +78,16 @@ public class ObjectPicker extends VisWindow {
             remove();
         }
         started = false;
+        if (PhysicsHandler.mouseBody != null) {
+            PhysicsObject physicsObject = PhysicsHandler.getPhysicsObjectFromBody(PhysicsHandler.mouseBody);
+            if (physicsObject != null) {
+                tooltip.setText(physicsObject.tooltip);
+            } else {
+                tooltip.setText("Nothing to see here!");
+            }
+        } else {
+            tooltip.setText("Nothing to see here!");
+        }
     }
 
     @Override

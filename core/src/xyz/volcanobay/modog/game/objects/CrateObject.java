@@ -33,6 +33,8 @@ public class CrateObject extends MachineObject {
     public void initialise() {
         super.initialise();
         type = "crate";
+        inventorySize = 20;
+        givesUpInventory = true;
     }
 
     @Override

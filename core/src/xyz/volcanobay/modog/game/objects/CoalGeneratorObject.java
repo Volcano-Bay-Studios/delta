@@ -3,12 +3,8 @@ package xyz.volcanobay.modog.game.objects;
 import box2dLight.PointLight;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.physics.box2d.Body;
-import xyz.volcanobay.modog.networking.NetworkHandler;
-import xyz.volcanobay.modog.physics.PhysicsHandler;
-import xyz.volcanobay.modog.physics.PhysicsObject;
+import xyz.volcanobay.modog.game.Material;
 import xyz.volcanobay.modog.rendering.RenderSystem;
-
-import java.util.Objects;
 
 public class CoalGeneratorObject extends MachineObject {
     float activeTime = 0;
@@ -19,6 +15,7 @@ public class CoalGeneratorObject extends MachineObject {
     int animationStep = 1;
     int animationTicks;
     PointLight objectLight;
+
     public CoalGeneratorObject() {
         super();
     }
@@ -44,25 +41,22 @@ public class CoalGeneratorObject extends MachineObject {
         } else
             animationTicks = 0;
         activeTime--;
-        for (PhysicsObject object : objectsImTouching) {
-            if (object instanceof MaterialObject item) {
-                if (Objects.equals(item.material.type, "coal") && activeTime < 800 && (!item.clientUsed || NetworkHandler.hasAuthority)) {
-                    if (!(activeTime > 0))
-                        progressAnimation();
-                    activeTime = activeTime + 500;
-                    if (activeTime > 3000)
-                        activeTime = 3000;
-                    if (NetworkHandler.hasAuthority)
-                        PhysicsHandler.removeObject(object);
-                    else
-                        item.clientUsed = true;
-                }
+        Material coal = getMaterial("coal");
+        if (coal != null) {
+            if (activeTime < 800) {
+                if (!(activeTime > 0))
+                    progressAnimation();
+                activeTime = activeTime + 500;
+                if (activeTime > 3000)
+                    activeTime = 3000;
+                removeMaterial("coal",1);
             }
         }
     }
+
     public void progressAnimation() {
         animationStep++;
-        if (animationStep>3)
+        if (animationStep > 3)
             animationStep = 1;
 
         if (animationStep == 1)
@@ -75,12 +69,12 @@ public class CoalGeneratorObject extends MachineObject {
 
     @Override
     public void render() {
-        if (activeTime> 0) {
+        if (activeTime > 0) {
             charge += 1f;
             objectLight.setActive(true);
-            objectLight.setPosition(body.getPosition().add(0,0));
-            objectLight.setDistance((float) (2+(Math.random()/50f)));
-            objectLight.setColor(0.99f,0.49f,0.23f,.5f);
+            objectLight.setPosition(body.getPosition().add(0, 0));
+            objectLight.setDistance((float) (2 + (Math.random() / 50f)));
+            objectLight.setColor(0.99f, 0.49f, 0.23f, .5f);
         } else {
             objectLight.setActive(false);
             texture = off;
@@ -93,15 +87,17 @@ public class CoalGeneratorObject extends MachineObject {
     public void initialise() {
         super.initialise();
         type = "coal_generator";
-        objectLight = new PointLight(RenderSystem.rayHandler,50);
-        objectLight.setDistance((float) (2+(Math.random()/50f)));
-        objectLight.setColor(0.99f,0.49f,0.23f,0.5f);
+        objectLight = new PointLight(RenderSystem.rayHandler, 50);
+        objectLight.setDistance((float) (2 + (Math.random() / 50f)));
+        objectLight.setColor(0.99f, 0.49f, 0.23f, 0.5f);
+        inventorySize = 5;
     }
 
     @Override
     public CoalGeneratorObject create(Body body) {
         return new CoalGeneratorObject(body);
     }
+
     @Override
     public void pickTexture() {
         texture = new Texture("coal_generator_off.png");

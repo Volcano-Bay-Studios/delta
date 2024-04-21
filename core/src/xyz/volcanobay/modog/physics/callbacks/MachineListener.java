@@ -15,7 +15,8 @@ public class MachineListener implements ContactListener {
         if (physicsObjectA != null && physicsObjectB != null) {
             if (physicsObjectA instanceof MachineObject machine) {
                 machine.contact(physicsObjectB);
-            } else if (physicsObjectB instanceof MachineObject machine) {
+            }
+            if (physicsObjectB instanceof MachineObject machine) {
                 machine.contact(physicsObjectA);
             }
         } else
@@ -31,7 +32,8 @@ public class MachineListener implements ContactListener {
         if (physicsObjectA != null && physicsObjectB != null) {
             if (physicsObjectA instanceof MachineObject machine) {
                 machine.removeContact(physicsObjectB);
-            } else if (physicsObjectB instanceof MachineObject machine) {
+            }
+            if (physicsObjectB instanceof MachineObject machine) {
                 machine.removeContact(physicsObjectA);
             }
         } else

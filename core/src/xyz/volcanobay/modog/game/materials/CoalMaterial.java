@@ -6,5 +6,6 @@ public class CoalMaterial extends Material {
     public CoalMaterial() {
         texture = "coal";
         type = "coal";
+        amount = 1;
     }
 }

@@ -12,6 +12,8 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.game.InputHandeler;
+import xyz.volcanobay.modog.game.Material;
+import xyz.volcanobay.modog.game.objects.MaterialObject;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
@@ -98,6 +100,22 @@ public class PhysicsHandler {
         newPhysicsObject.createFixture();
         if (!NetworkHandler.isHost) {
             NetworkHandler.clientAddObject(newPhysicsObject);
+        }
+    }
+    public static void addMaterialObject(Vector2 pos, Material material) {
+        if (NetworkHandler.hasAuthority) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(pos);
+
+        Body body = world.createBody(bodyDef);
+        NetworkableUUID uuid = NetworkableUUID.randomUUID();
+        while (physicsObjectHashMap.containsKey(uuid))
+            uuid = NetworkableUUID.randomUUID();
+        MaterialObject newPhysicsObject = (MaterialObject) new MaterialObject().create(body).setUuid(uuid);
+        newPhysicsObject.material = material;
+        physicsObjectHashMap.put(uuid, newPhysicsObject);
+        newPhysicsObject.createFixture();
         }
     }
 

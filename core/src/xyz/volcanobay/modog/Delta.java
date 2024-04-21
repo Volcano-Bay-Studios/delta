@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.game.InputHandeler;
+import xyz.volcanobay.modog.game.MaterialRegistry;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
@@ -30,6 +31,7 @@ public class Delta extends ApplicationAdapter {
 	@Override
 	public void create () {
 		PhysicsObjectsRegistry.registerObjects();
+		MaterialRegistry.registerMaterials();
 		RenderSystem.initialize();
 		PhysicsHandler.initialize();
 		VisUI.load(VisUI.SkinScale.X1);
