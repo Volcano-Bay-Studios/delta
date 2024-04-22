@@ -49,9 +49,19 @@ public class CoalGeneratorObject extends MachineObject {
                 activeTime = activeTime + 500;
                 if (activeTime > 3000)
                     activeTime = 3000;
-                removeMaterial("coal",1);
+                removeMaterial("coal", 1);
             }
         }
+    }
+
+    @Override
+    public void initialise() {
+        super.initialise();
+        type = "coal_generator";
+        objectLight = new PointLight(RenderSystem.rayHandler, 50);
+        objectLight.setDistance((float) (2 + (Math.random() / 50f)));
+        objectLight.setColor(0.99f, 0.49f, 0.23f, 0.5f);
+        inventorySize = 5;
     }
 
     public void progressAnimation() {
@@ -83,15 +93,6 @@ public class CoalGeneratorObject extends MachineObject {
         super.render();
     }
 
-    @Override
-    public void initialise() {
-        super.initialise();
-        type = "coal_generator";
-        objectLight = new PointLight(RenderSystem.rayHandler, 50);
-        objectLight.setDistance((float) (2 + (Math.random() / 50f)));
-        objectLight.setColor(0.99f, 0.49f, 0.23f, 0.5f);
-        inventorySize = 5;
-    }
 
     @Override
     public CoalGeneratorObject create(Body body) {

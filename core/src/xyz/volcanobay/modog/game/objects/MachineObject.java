@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import xyz.volcanobay.modog.game.Material;
 import xyz.volcanobay.modog.game.MaterialRegistry;
+import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
@@ -184,6 +185,7 @@ public class MachineObject  extends PhysicsObject {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     getSelf().emptyInventory();
+                    SoundHandeler.playSound(body.getPosition(),"empty",false);
                     actor.getParent().remove();
                 }
             });

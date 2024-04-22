@@ -11,6 +11,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.game.MaterialRegistry;
+import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
@@ -89,6 +90,7 @@ public class Delta extends ApplicationAdapter {
 				tickPeriodic();
 			}
 		},0.05f);
+		SoundHandeler.handleSoundEvents();
 		if (PhysicsHandler.simSpeed > 0)
 			PhysicsHandler.objectTickPeriodic();
 	}
