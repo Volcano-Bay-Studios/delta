@@ -87,6 +87,7 @@ public class BudgeObject extends MachineObject {
             isWorking = Math.abs(Math.toDegrees(body.getAngle()) - targetAngle) > 1;
             float goal = ((float) (Math.toDegrees(body.getAngle()) - targetAngle)/-1.2f);
             body.setAngularDamping(10f);
+            body.setLinearDamping(1f);
             body.setAngularVelocity(goal);
             if (isWorking) {
                 RenderSystem.batch.draw(working,body.getPosition().x-5.025f,body.getPosition().y-6,5,6, on.getWidth(), on.getHeight(),(1)/ PhysicsHandler.scaleDown,(1)/PhysicsHandler.scaleDown, 0,0,0,on.getWidth(),on.getHeight(),false,false);
@@ -97,6 +98,7 @@ public class BudgeObject extends MachineObject {
         } else {
             objectLight.setActive(false);
             body.setAngularDamping(0f);
+            body.setLinearDamping(0);
         }
     }
 

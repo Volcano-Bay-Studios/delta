@@ -18,6 +18,7 @@ import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
 import xyz.volcanobay.modog.rendering.DeltaStage;
 import xyz.volcanobay.modog.rendering.RenderSystem;
+import xyz.volcanobay.modog.rendering.SkyRenderer;
 import xyz.volcanobay.modog.screens.AddressPicker;
 
 import java.util.logging.Logger;
@@ -94,6 +95,7 @@ public class Delta extends ApplicationAdapter {
 	public void resize(int width, int height) {
 		if (width == 0 && height == 0) return; //see https://github.com/libgdx/libgdx/issues/3673#issuecomment-177606278
 		stage.getViewport().update(width, height, true);
+		SkyRenderer.resize(width,height);
 		PopupMenu.removeEveryMenu(stage);
 	}
 

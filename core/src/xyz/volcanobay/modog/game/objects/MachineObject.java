@@ -19,9 +19,11 @@ import java.util.List;
 public class MachineObject  extends PhysicsObject {
     List<PhysicsObject> objectsImTouching = new ArrayList<>();
     public HashMap<String,Integer> inventory = new HashMap<>();
+    List<String> filter = new ArrayList<>();
     public int inventorySize;
     public int inventoryUsed;
     public boolean givesUpInventory;
+    public boolean contactCharge;
     public MachineObject() {
         super();
     }
@@ -120,7 +122,7 @@ public class MachineObject  extends PhysicsObject {
                     }
                 }
             }
-            if (objectB != null) {
+            if (objectB != null && contactCharge) {
                 float aDifference = this.getMaxCharge();
                 float bDifference = objectB.getMaxCharge();
                 float myDonatedCharge =     (this.charge/(aDifference));

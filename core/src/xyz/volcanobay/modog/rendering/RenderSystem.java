@@ -42,6 +42,7 @@ public class RenderSystem {
         remove = new Texture("remove.png");
         jointTexture = new Texture("joint.png");
         batch = new SpriteBatch();
+        SkyRenderer.initialize();
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
         camera = new OrthographicCamera(30, 30 * (h / w));
@@ -66,11 +67,11 @@ public class RenderSystem {
         float h = Gdx.graphics.getHeight();
         camera.viewportHeight = 30 * (h / w);
 
-        ScreenUtils.clear(0.3f, 0.3f, 0.3f, 1);
+        ScreenUtils.clear(0, 0, 0, 1);
         batch.begin();
-
 //        batch.draw(img, 0, 0);
         batch.enableBlending();
+        SkyRenderer.render();
         PhysicsHandler.renderObjects();
         batch.disableBlending();
         renderJoints();
