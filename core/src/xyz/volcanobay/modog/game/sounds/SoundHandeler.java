@@ -1,4 +1,4 @@
-package xyz.volcanobay.modog.game;
+package xyz.volcanobay.modog.game.sounds;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.math.Vector2;
