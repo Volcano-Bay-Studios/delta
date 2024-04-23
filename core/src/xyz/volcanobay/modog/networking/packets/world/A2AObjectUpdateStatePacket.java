@@ -1,15 +1,12 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
-import xyz.volcanobay.modog.LogUtils;
-import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.DeltaPacket;
-import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 
@@ -27,7 +24,7 @@ public class A2AObjectUpdateStatePacket extends Packet {
     }
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         NetworkableUUID uuid = stream.readUUID();
         System.out.println(uuid);
         if (PhysicsHandler.physicsObjectMap.containsKey(uuid)) {
@@ -44,7 +41,7 @@ public class A2AObjectUpdateStatePacket extends Packet {
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
         stream.writeUUID(object.uuid);
         object.writeNewToNetwork(stream);
     }

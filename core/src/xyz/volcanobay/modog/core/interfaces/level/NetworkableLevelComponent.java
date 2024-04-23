@@ -6,8 +6,8 @@ import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.networking.enums.ComponentNetworkUpdateType;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 public abstract class NetworkableLevelComponent {
 
@@ -29,24 +29,21 @@ public abstract class NetworkableLevelComponent {
         else return (stateChanged ? ComponentNetworkUpdateType.FULL_STATE : ComponentNetworkUpdateType.ONLY_PHYSICS);
     }
 
-    public void writeToNetwork(NetworkByteWriteStream stream) {
-
+    public void writeToNetwork(NetworkWriteStream stream) {
+        stream.writeByteInt(getUpdateType().getId());
     }
 
-    /**
-     * @param level el level que se da nuevos componentes
-     * */
-    public void readFromNetwork(NetworkByteReadStream stream, NetworkableLevel level) {
-
+    public void readFromNetwork(NetworkReadStream stream) {
+        ComponentNetworkUpdateType.getById(stream.readByteInt());
     }
 
-    public abstract void writePhysicsStateToNetwork(NetworkByteWriteStream stream);
-    public abstract void readPhysicsStateFromNetwork(NetworkByteReadStream stream);
+    public abstract void writePhysicsStateToNetwork(NetworkWriteStream stream);
+    public abstract void readPhysicsStateFromNetwork(NetworkReadStream stream);
 
-    public abstract void writeStateToNetwork(NetworkByteWriteStream stream);
-    public abstract void readStateFromNetwork(NetworkByteReadStream stream);
+    public abstract void writeStateToNetwork(NetworkWriteStream stream);
+    public abstract void readStateFromNetwork(NetworkReadStream stream);
 
-    public abstract void writeNewToNetwork(NetworkByteWriteStream stream);
+    public abstract void writeNewToNetwork(NetworkWriteStream stream);
 
     public boolean isDelegatedTo(NetworkableUUID connection) {
         return (delegatedTo == null && (DeltaNetwork.isNetworkOwner()
@@ -68,5 +65,9 @@ public abstract class NetworkableLevelComponent {
 
     public void notifyStateChanged() {
         this.stateChanged = true;
+    }
+
+    /**Optional method to initialise stuff in a clear way*/
+    public void initialiseFromNetwork() {
     }
 }

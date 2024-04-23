@@ -1,19 +1,18 @@
 package xyz.volcanobay.modog.networking;
 
-import xyz.volcanobay.modog.LogUtils;
 import xyz.volcanobay.modog.core.annotations.Nullable;
 import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
 import xyz.volcanobay.modog.networking.enums.RelativeNetworkSide;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 public class PacketProcessor {
     
     public static void processPacketData(DeltaNetwork.ReceivedPacketData receivedPacketData) {
         byte[] bytes = receivedPacketData.data();
         
-        NetworkByteReadStream readStream = new NetworkByteReadStream(bytes);
+        NetworkReadStream readStream = new NetworkReadStream(bytes);
         
         int hostRoutingDirection = readStream.readInt();
         @Nullable NetworkableUUID directedUUID = null;
@@ -40,7 +39,7 @@ public class PacketProcessor {
     //>Sending to server
     protected static byte[] getRawPacketData(Packet packet) {
         packet.assertSide(RelativeNetworkSide.FROM);
-        NetworkByteWriteStream writeStream = new NetworkByteWriteStream();
+        NetworkWriteStream writeStream = new NetworkWriteStream();
         writeStream.writeInt(packet.getType().ordinal());
         packet.write(writeStream);
         return writeStream.getBytes();

@@ -7,8 +7,8 @@ import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 @PacketDirection(NetworkingDirection.A2A)
 public class A2ACursorUpdatePacket extends Packet {
@@ -22,7 +22,7 @@ public class A2ACursorUpdatePacket extends Packet {
     public A2ACursorUpdatePacket() {}
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         NetworkableUUID uuid = stream.readUUID();
         
         if (!CursorHandler.cursors.containsKey(uuid))
@@ -34,7 +34,7 @@ public class A2ACursorUpdatePacket extends Packet {
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
         stream.writeUUID(cursor.uuid);
         stream.writeVector2(cursor.pos);
         stream.writeInt(cursor.color);

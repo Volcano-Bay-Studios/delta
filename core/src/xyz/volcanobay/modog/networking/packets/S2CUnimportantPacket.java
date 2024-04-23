@@ -4,8 +4,8 @@ import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 import java.util.ConcurrentModificationException;
 
@@ -16,7 +16,7 @@ public class S2CUnimportantPacket extends Packet {
     }
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         //Nothing to see here officer
         ConcurrentModificationException err = new ConcurrentModificationException("null");
         err.setStackTrace(
@@ -28,7 +28,7 @@ public class S2CUnimportantPacket extends Packet {
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
     
     }
     

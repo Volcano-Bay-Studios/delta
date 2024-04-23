@@ -4,8 +4,8 @@ import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.WorldJoint;
 
@@ -23,13 +23,13 @@ public class S2CJointCreatedPacket extends Packet {
     }
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         object = WorldJoint.readNewFromNetwork(stream);
         PhysicsHandler.jointMap.put(object.uuid, object);
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
         object.writeNewToNetwork(stream);
     }
     

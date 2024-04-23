@@ -6,13 +6,13 @@ import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class NetworkByteReadStream {
+public class NetworkReadStream {
     
     final byte[] data;
     final int length;
     int position = 0;
     
-    public NetworkByteReadStream(byte[] bytes) {
+    public NetworkReadStream(byte[] bytes) {
         data = bytes;
         length = bytes.length;
     }
@@ -57,9 +57,13 @@ public class NetworkByteReadStream {
     public boolean readByteBool() {
         return readByte() != 0;
     }
-    
+
+    public int readByteInt() {
+        return readByte();
+    }
+
     public void seek(int i) {
         position += i;
     }
-    
+
 }

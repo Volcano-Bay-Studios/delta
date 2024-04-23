@@ -5,13 +5,12 @@ import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @PacketDirection(NetworkingDirection.S2C)
 public class S2CRemoveObjectsPacket extends Packet {
@@ -26,7 +25,7 @@ public class S2CRemoveObjectsPacket extends Packet {
     }
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         int size = stream.readInt();
         objectsForClientRemoval = new ArrayList<>(size);
         for (int i = 0; i < size; i++)
@@ -37,7 +36,7 @@ public class S2CRemoveObjectsPacket extends Packet {
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
         stream.writeInt(objectsForClientRemoval.size());
         for (NetworkableUUID uuid : objectsForClientRemoval)
             stream.writeUUID(uuid);

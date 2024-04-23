@@ -7,8 +7,8 @@ import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
 import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 import static xyz.volcanobay.modog.physics.PhysicsHandler.getPhysicsObjectFromBody;
 import static xyz.volcanobay.modog.physics.PhysicsHandler.physicsObjectMap;
@@ -23,7 +23,7 @@ public class WorldJoint extends NetworkableLevelComponent {
         this.uuid = uuid;
     }
     
-    public void writeNewToNetwork(NetworkByteWriteStream writeStream) {
+    public void writeNewToNetwork(NetworkWriteStream writeStream) {
         writeStream.writeUUID(uuid);
         
         PhysicsObject objectA = getPhysicsObjectFromBody(joint.getBodyA());
@@ -39,7 +39,7 @@ public class WorldJoint extends NetworkableLevelComponent {
         writeStream.writeFloat(((DistanceJoint) joint).getLength());
     }
 
-    public static WorldJoint readNewFromNetwork(NetworkByteReadStream readStream) {
+    public static WorldJoint readNewFromNetwork(NetworkReadStream readStream) {
         WorldJoint worldJoint = new WorldJoint();
     
         worldJoint.uuid = readStream.readUUID();
@@ -70,12 +70,12 @@ public class WorldJoint extends NetworkableLevelComponent {
     }
 
     @Override
-    public void writeToNetwork(NetworkByteWriteStream stream) {
+    public void writeToNetwork(NetworkWriteStream stream) {
         stream.writeFloat(((DistanceJoint) joint).getLength());
     }
 
     @Override
-    public void readFromNetwork(NetworkByteReadStream stream) {
+    public void readFromNetwork(NetworkReadStream stream) {
         ((DistanceJoint) joint).setLength(stream.readFloat());
     }
 }

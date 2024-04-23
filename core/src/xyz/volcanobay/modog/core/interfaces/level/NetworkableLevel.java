@@ -1,8 +1,9 @@
 package xyz.volcanobay.modog.core.interfaces.level;
 
+import xyz.volcanobay.modog.game.NetworkLevelComponentConstructor;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 import java.util.HashMap;
 
@@ -10,13 +11,13 @@ public interface NetworkableLevel extends Level {
 
     HashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents();
 
-    void write(NetworkByteWriteStream stream);
-    void read(NetworkByteReadStream stream);
+    void write(NetworkWriteStream stream);
+    void read(NetworkReadStream stream);
 
     /**
-     * Stream expecting to read, needs to be cooberated with write functions in {@link NetworkableLevelComponent#writeNewToNetwork(NetworkByteWriteStream)}:
-     * [componentType : String]
+     * Stream expecting to read, needs to be cooberated with write functions in {@link NetworkableLevelComponent#writeNewToNetwork(NetworkWriteStream)}:
+     * [componentType : int -> LevelComponentNetworkConstructor]
      * */
-    NetworkableLevelComponent resolveNewLevelComponent(NetworkByteReadStream stream);
+    NetworkLevelComponentConstructor resolveNewLevelComponentConstructor(NetworkReadStream stream);
 
 }

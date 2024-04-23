@@ -8,8 +8,8 @@ import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 import java.util.HashMap;
 
@@ -20,7 +20,7 @@ public class S2CRespondConnectionAssignmentsPacket extends Packet {
     }
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         if (!NetworkConnectionsManager.isAwaiting) return;
 
         System.out.println("Received response to request for network assignments");
@@ -38,7 +38,7 @@ public class S2CRespondConnectionAssignmentsPacket extends Packet {
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
         stream.writeInt(NetworkConnectionsManager.connections.size());
         
         for (NetworkConnection connection : NetworkConnectionsManager.connections.values()) {

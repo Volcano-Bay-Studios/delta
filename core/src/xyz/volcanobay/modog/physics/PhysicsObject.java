@@ -10,8 +10,8 @@ import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.TextButtons;
 
@@ -238,14 +238,14 @@ public class PhysicsObject extends NetworkableLevelComponent {
     /**
      * Sync properties NOT position and velocity
      */
-    public void writeStateToNetwork(NetworkByteWriteStream writeStream) {
+    public void writeStateToNetwork(NetworkWriteStream writeStream) {
 
     }
 
     /**
      * Sync position and velocity, called every tick by the StageUpdatePacket
      */
-    public void writePhysicsStateToNetwork(NetworkByteWriteStream writeStream) {
+    public void writePhysicsStateToNetwork(NetworkWriteStream writeStream) {
         writeStream.writeInt(body.getType().ordinal());
         writeStream.writeVector2(body.getPosition());
         writeStream.writeFloat(body.getAngle());
@@ -256,21 +256,21 @@ public class PhysicsObject extends NetworkableLevelComponent {
         writeStream.writeByteBool(required);
     }
 
-    public void writeNewToNetwork(NetworkByteWriteStream stream) {
+    public void writeNewToNetwork(NetworkWriteStream stream) {
         stream.writeString(type);
         writeAllStateToNetwork(stream);
     }
 
-    public void writeAllStateToNetwork(NetworkByteWriteStream stream) {
+    public void writeAllStateToNetwork(NetworkWriteStream stream) {
         writePhysicsStateToNetwork(stream);
         writeStateToNetwork(stream);
     }
 
-    public void readStateFromNetwork(NetworkByteReadStream stream) {
+    public void readStateFromNetwork(NetworkReadStream stream) {
 
     }
 
-    public void readPhysicsStateFromNetwork(NetworkByteReadStream stream) {
+    public void readPhysicsStateFromNetwork(NetworkReadStream stream) {
         body.setType(BodyDef.BodyType.values()[stream.readInt()]);
 
         body.setTransform(stream.readVector2(), stream.readFloat());
@@ -281,17 +281,16 @@ public class PhysicsObject extends NetworkableLevelComponent {
         required = stream.readByteBool();
     }
 
-    public static PhysicsObject readNewFromNetwork(NetworkByteReadStream stream) {
+    public static PhysicsObject readNewFromNetwork(NetworkReadStream stream) {
         String objectId = stream.readString();
         BodyDef.BodyType type = BodyDef.BodyType.values()[stream.readInt()];
         stream.seek(- 4);
         PhysicsObject newObject = PhysicsObjectsRegistry.createInstanceFromRegistry(objectId, type);
         newObject.readAllStateFromNetwork(stream);
-        newObject.createFixture();
         return newObject;
     }
 
-    public void readAllStateFromNetwork(NetworkByteReadStream stream) {
+    public void readAllStateFromNetwork(NetworkReadStream stream) {
         readPhysicsStateFromNetwork(stream);
         readStateFromNetwork(stream);
     }
@@ -315,21 +314,28 @@ public class PhysicsObject extends NetworkableLevelComponent {
     }
 
     @Override
-    public void writeToNetwork(NetworkByteWriteStream stream) {
-        stream.writeByteBool(syncNextTick);
-        if (syncNextTick) {
-            writeStateToNetwork(stream);
-            syncNextTick = false;
-        }
-        writePhysicsStateToNetwork(stream);
+    public void initialiseFromNetwork() {
+        super.initialiseFromNetwork();
+        createFixture();
     }
 
-    @Override
-    public void readFromNetwork(NetworkByteReadStream stream) {
-        boolean isSyncingState = stream.readByteBool();
-        if (isSyncingState) {
-            readStateFromNetwork(stream);
-        }
-        readPhysicsStateFromNetwork(stream);
-    }
+    //
+//    @Override
+//    public void writeToNetwork(NetworkByteWriteStream stream) {
+//        stream.writeByteBool(syncNextTick);
+//        if (syncNextTick) {
+//            writeStateToNetwork(stream);
+//            syncNextTick = false;
+//        }
+//        writePhysicsStateToNetwork(stream);
+//    }
+//
+//    @Override
+//    public void readFromNetwork(NetworkByteReadStream stream) {
+//        boolean isSyncingState = stream.readByteBool();
+//        if (isSyncingState) {
+//            readStateFromNetwork(stream);
+//        }
+//        readPhysicsStateFromNetwork(stream);
+//    }
 }

@@ -1,9 +1,10 @@
 package xyz.volcanobay.modog.core.interfaces.level;
 
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.game.NetworkLevelComponentConstructor;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.WorldJoint;
 
@@ -29,13 +30,18 @@ public abstract class DeltaLevel implements NetworkableLevel {
     }
 
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public NetworkLevelComponentConstructor resolveNewLevelComponentConstructor(NetworkReadStream stream) {
+        return NetworkLevelComponentConstructor.getById(stream.readByteInt());
+    }
+
+    @Override
+    public void write(NetworkWriteStream stream) {
         writeComponentSection(physicsObjectMap, stream);
         writeComponentSection(worldJointMap, stream);
     }
 
     private <T extends NetworkableLevelComponent> void writeComponentSection(
-            HashMap<NetworkableUUID, T> componentMap, NetworkByteWriteStream stream
+            HashMap<NetworkableUUID, T> componentMap, NetworkWriteStream stream
     ) {
         stream.writeInt(componentMap.size());
         for (Map.Entry<NetworkableUUID, T> physicsObject : componentMap.entrySet()) {
@@ -45,18 +51,21 @@ public abstract class DeltaLevel implements NetworkableLevel {
     }
 
     @Override
-    public void read(NetworkByteReadStream stream) {
-
+    public void read(NetworkReadStream stream) {
+        readComponentSection(physicsObjectMap, stream);
+        readComponentSection(worldJointMap, stream);
     }
 
     private <T extends NetworkableLevelComponent> void readComponentSection(
-            HashMap<NetworkableUUID, T> componentMap, NetworkByteReadStream stream
+            HashMap<NetworkableUUID, T> componentMap, NetworkReadStream stream
     ) {
         int length = stream.readInt();
         for (int i = 0; i < length; i++) {
             NetworkableUUID componentUUID = stream.readUUID();
             if (!componentMap.containsKey(componentUUID)) {
-
+                NetworkableLevelComponent newComponent = resolveNewLevelComponentConstructor(stream).build(stream);
+                newComponent.initialiseFromNetwork();
+                addLevelComponent(newComponent);
             }
         }
     }

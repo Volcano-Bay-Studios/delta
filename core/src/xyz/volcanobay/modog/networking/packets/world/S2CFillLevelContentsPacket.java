@@ -5,8 +5,8 @@ import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.WorldJoint;
@@ -28,7 +28,7 @@ public class S2CFillLevelContentsPacket extends Packet {
     }
     
     @Override
-    public void receive(NetworkByteReadStream stream) {
+    public void receive(NetworkReadStream stream) {
         System.out.println("Received level data ton");
         ConcurrentHashMap<NetworkableUUID, PhysicsObject> newPhysicsObjects = new ConcurrentHashMap<>();
         ConcurrentHashMap<NetworkableUUID, WorldJoint> newJoints = new ConcurrentHashMap<>();
@@ -60,7 +60,7 @@ public class S2CFillLevelContentsPacket extends Packet {
     }
     
     @Override
-    public void write(NetworkByteWriteStream stream) {
+    public void write(NetworkWriteStream stream) {
         stream.writeInt(physicsObjectMap.size());
         for (Map.Entry<NetworkableUUID, PhysicsObject> entry : physicsObjectMap.entrySet()) {
             stream.writeUUID(entry.getKey());

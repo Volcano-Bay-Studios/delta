@@ -7,11 +7,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NetworkByteWriteStream {
+public class NetworkWriteStream {
     
     List<Byte> bytes;
     
-    public NetworkByteWriteStream() {
+    public NetworkWriteStream() {
         bytes = new ArrayList<>();
     }
     
@@ -49,7 +49,11 @@ public class NetworkByteWriteStream {
     public void writeByteBool(boolean required) {
         writeByte((byte) (required ? 0 : 1));
     }
-    
+
+    public void writeByteInt(int i) {
+        writeByte((byte) i);
+    }
+
     protected static byte[] intToByteArray(int value) {
         return ByteBuffer.allocate(4).putInt(value).array();
     }

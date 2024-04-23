@@ -3,16 +3,16 @@ package xyz.volcanobay.modog.networking;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
 import xyz.volcanobay.modog.networking.enums.RelativeNetworkSide;
-import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 public abstract class Packet {
     
     public Packet() {}
     
     /**Fill in the fields from the read stream*/
-    public abstract void receive(NetworkByteReadStream stream);
-    public abstract void write(NetworkByteWriteStream stream);
+    public abstract void receive(NetworkReadStream stream);
+    public abstract void write(NetworkWriteStream stream);
     
     public abstract DeltaPacket getType();
     
