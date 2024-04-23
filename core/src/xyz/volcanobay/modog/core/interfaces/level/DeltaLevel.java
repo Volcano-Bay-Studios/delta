@@ -9,10 +9,8 @@ import xyz.volcanobay.modog.physics.WorldJoint;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
-public abstract class LinkedLevel implements NetworkableLevel {
+public abstract class DeltaLevel implements NetworkableLevel {
 
     /**Un lista generalmente de los componentes, pero no esta en red*/
     HashMap<NetworkableUUID, NetworkableLevelComponent> levelComponents;
@@ -20,7 +18,7 @@ public abstract class LinkedLevel implements NetworkableLevel {
     HashMap<NetworkableUUID, PhysicsObject> physicsObjectMap;
     HashMap<NetworkableUUID, WorldJoint> worldJointMap;
 
-    public LinkedLevel(
+    public DeltaLevel(
             HashMap<NetworkableUUID, NetworkableLevelComponent> levelComponents,
             HashMap<NetworkableUUID, PhysicsObject> physicsObjectMap,
             HashMap<NetworkableUUID, WorldJoint> worldJointMap
