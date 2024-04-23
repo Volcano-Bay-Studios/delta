@@ -1,8 +1,10 @@
 package xyz.volcanobay.modog.networking;
 
 import xyz.volcanobay.modog.LogUtils;
+import xyz.volcanobay.modog.core.annotations.Nullable;
 import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
 import xyz.volcanobay.modog.networking.enums.RelativeNetworkSide;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
 import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
 
@@ -14,20 +16,20 @@ public class PacketProcessor {
         NetworkByteReadStream readStream = new NetworkByteReadStream(bytes);
         
         int hostRoutingDirection = readStream.readInt();
-        int hostRoutingAdditional = 0;
+        @Nullable NetworkableUUID directedUUID = null;
         PacketRoutingHeader routingHeader = PacketRoutingHeader.values()[hostRoutingDirection];
         
-        if (routingHeader == PacketRoutingHeader.TO_CLIENT)
-            hostRoutingAdditional = readStream.readInt();
+        if (routingHeader.equals(PacketRoutingHeader.TO_CLIENT))
+            directedUUID = readStream.readUUID();
         
         int packetId = readStream.readInt();
         DeltaPacket packetSource = DeltaPacket.getPacketById(packetId);
         
-        if (!routingHeader.shouldReadOnCurrentConnection(packetSource, hostRoutingAdditional))
+        if (!routingHeader.shouldReadOnCurrentConnection(packetSource, directedUUID))
             return;
     
         Packet packet = packetSource.packetFactory.get();
-        packet.assertSide(RelativeNetworkSide.FROM);
+        packet.assertSide(RelativeNetworkSide.TO);
         packet.receive(readStream);
     }
     

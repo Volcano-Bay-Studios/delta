@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
@@ -17,38 +18,38 @@ import xyz.volcanobay.modog.screens.TextButtons;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhysicsObject {
-    
+public class PhysicsObject extends NetworkableLevelComponent {
+
     public Body body;
-    
+
     public List<TextButtons> textButtons = new ArrayList<>();
-    
+
     public NetworkableUUID uuid;
-    
+
     public Texture texture;
-    
+
     public String type;
-    
+
     public Vector2 textureOffset;
-    
+
     private Vector2 scale;
-    
+
     public Vector2 textureScale;
-    
+
     public Vector2 fixtureScale;
-    
+
     public boolean visible = true;
-    
+
     public boolean required = false;
-    
+
     public String tooltip = "Nothing to see here!";
-    
+
     public boolean markedForDeletion = false;
-    
+
     public boolean restricted = false;
-    
+
     public boolean syncNextTick = false;
-    
+
     /**
      * Constructor for Registry Do NOT use this, instead get a physics object from the registry
      * {@link PhysicsObjectsRegistry }
@@ -57,7 +58,7 @@ public class PhysicsObject {
         this.scale = new Vector2(1, 1);
         this.textureScale = new Vector2(0, 0);
     }
-    
+
     /**
      * Constructor for making new physics objects
      */
@@ -69,33 +70,32 @@ public class PhysicsObject {
         processTexture();
         initialise();
     }
-    
+
     public PhysicsObject create(Body body) {
         return new PhysicsObject(body);
     }
-    
+
     public void initialise() {
-    
+
     }
-    
+
     public PhysicsObject setUuid(NetworkableUUID uuid) {
         this.uuid = uuid;
         return this;
     }
-    
+
     public void pickTexture() {
         texture = new Texture("none.png");
     }
-    
+
     public void processTexture() {
         textureOffset = new Vector2((float) texture.getWidth() / 2 * scale.x, (float) texture.getHeight() / 2 * scale.y);
     }
-    
+
     /**
      * Returns a new {@link FixtureDef} from the {@link PhysicsObject}
      *
      * @return new {@link FixtureDef} from the {@link PhysicsObject}
-     *
      * @author ModogTheDev
      */
     @Deprecated
@@ -110,44 +110,46 @@ public class PhysicsObject {
         box.dispose();
         return fixtureDef;
     }
-    
+
     public void createFixture() {
-    
+
     }
-    
+
     public void resize(Vector2 newSize) {
         scale = newSize;
         processTexture();
     }
-    
+
     public void tickPhysics() {
-        if (!required && body.getPosition().y < -90 && !markedForDeletion && DeltaNetwork.isNetworkOwner()) {
+        if (! required && body.getPosition().y < - 90 && ! markedForDeletion && DeltaNetwork.isNetworkOwner()) {
             PhysicsHandler.bodiesForDeletion.add(body);
             markedForDeletion = true;
         }
-        if (required && body.getPosition().y < -90) {
-            body.setTransform(body.getPosition().x, -89.99f, body.getAngle());
+        if (required && body.getPosition().y < - 90) {
+            body.setTransform(body.getPosition().x, - 89.99f, body.getAngle());
             body.setLinearVelocity(0, 0);
         }
 //        System.out.println("hu");
     }
-    
+
     public void render() {
-        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(), texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown, (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
+        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(),
+                                texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown,
+                                (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
-    
+
     public void dispose() {
         texture.dispose();
     }
-    
+
     public void newButton(String string, ChangeListener changeListener) {
         textButtons.add(new TextButtons(string, changeListener));
     }
-    
+
     public List<TextButtons> getContextOptions() {
         textButtons.clear();
-        if (DeltaNetwork.isNetworkOwner() && !restricted) {
-            if (!required) {
+        if (DeltaNetwork.isNetworkOwner() && ! restricted) {
+            if (! required) {
                 newButton("Delete", new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
@@ -161,7 +163,7 @@ public class PhysicsObject {
                 public void changed(ChangeEvent event, Actor actor) {
                     PhysicsHandler.bodiesForJointRemoval.add(body);
                     actor.getParent().remove();
-                    
+
                 }
             });
             if ((body.getType() == BodyDef.BodyType.StaticBody)) {
@@ -207,7 +209,7 @@ public class PhysicsObject {
                 public void changed(ChangeEvent event, Actor actor) {
                     RenderSystem.followObject = PhysicsHandler.getPhysicsObjectFromBody(body);
                     actor.getParent().remove();
-                    
+
                 }
             });
             newButton("Zero Angle", new ChangeListener() {
@@ -217,29 +219,29 @@ public class PhysicsObject {
                     body.setAngularVelocity(0);
                     NetworkingCalls.updateObjectState(body);
                     actor.getParent().remove();
-                    
+
                 }
             });
         }
         return textButtons;
     }
-    
+
     public void tick() {
         if (syncNextTick) {
             DeltaNetwork.sendPacketToAllClients(new A2AObjectUpdateStatePacket(this));
             syncNextTick = false;
         }
     }
-    
+
     //>Networking
-    
+
     /**
      * Sync properties NOT position and velocity
      */
     public void writeStateToNetwork(NetworkByteWriteStream writeStream) {
-    
+
     }
-    
+
     /**
      * Sync position and velocity, called every tick by the StageUpdatePacket
      */
@@ -247,53 +249,53 @@ public class PhysicsObject {
         writeStream.writeInt(body.getType().ordinal());
         writeStream.writeVector2(body.getPosition());
         writeStream.writeFloat(body.getAngle());
-        
+
         writeStream.writeVector2(body.getLinearVelocity());
         writeStream.writeFloat(body.getAngularVelocity());
-        
+
         writeStream.writeByteBool(required);
     }
-    
+
     public void writeNewToNetwork(NetworkByteWriteStream stream) {
         stream.writeString(type);
         writeAllStateToNetwork(stream);
     }
-    
+
     public void writeAllStateToNetwork(NetworkByteWriteStream stream) {
         writePhysicsStateToNetwork(stream);
         writeStateToNetwork(stream);
     }
-    
+
     public void readStateFromNetwork(NetworkByteReadStream stream) {
-    
+
     }
-    
+
     public void readPhysicsStateFromNetwork(NetworkByteReadStream stream) {
         body.setType(BodyDef.BodyType.values()[stream.readInt()]);
-        
+
         body.setTransform(stream.readVector2(), stream.readFloat());
-        
+
         body.setLinearVelocity(stream.readVector2());
         body.setAngularVelocity(stream.readFloat());
-        
+
         required = stream.readByteBool();
     }
-    
+
     public static PhysicsObject readNewFromNetwork(NetworkByteReadStream stream) {
         String objectId = stream.readString();
         BodyDef.BodyType type = BodyDef.BodyType.values()[stream.readInt()];
-        stream.seek(-4);
+        stream.seek(- 4);
         PhysicsObject newObject = PhysicsObjectsRegistry.createInstanceFromRegistry(objectId, type);
         newObject.readAllStateFromNetwork(stream);
         newObject.createFixture();
         return newObject;
     }
-    
+
     public void readAllStateFromNetwork(NetworkByteReadStream stream) {
         readPhysicsStateFromNetwork(stream);
         readStateFromNetwork(stream);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Body thisBody) {
@@ -301,5 +303,33 @@ public class PhysicsObject {
         }
         return super.equals(obj);
     }
-    
+
+    @Override
+    public NetworkableUUID getNetworkUUID() {
+        return uuid;
+    }
+
+    @Override
+    public boolean shouldNetwork() {
+        return body.isAwake();
+    }
+
+    @Override
+    public void writeToNetwork(NetworkByteWriteStream stream) {
+        stream.writeByteBool(syncNextTick);
+        if (syncNextTick) {
+            writeStateToNetwork(stream);
+            syncNextTick = false;
+        }
+        writePhysicsStateToNetwork(stream);
+    }
+
+    @Override
+    public void readFromNetwork(NetworkByteReadStream stream) {
+        boolean isSyncingState = stream.readByteBool();
+        if (isSyncingState) {
+            readStateFromNetwork(stream);
+        }
+        readPhysicsStateFromNetwork(stream);
+    }
 }

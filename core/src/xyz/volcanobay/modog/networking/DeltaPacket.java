@@ -1,6 +1,6 @@
 package xyz.volcanobay.modog.networking;
 
-import xyz.volcanobay.modog.networking.packets.connection.C2SRequestConnectionAssignmentsPacket;
+import xyz.volcanobay.modog.networking.packets.connection.A2ANotifyNewConnectionPacket;
 import xyz.volcanobay.modog.networking.packets.connection.S2CRespondConnectionAssignmentsPacket;
 import xyz.volcanobay.modog.networking.packets.world.*;
 import xyz.volcanobay.modog.networking.packets.S2CUnimportantPacket;
@@ -13,7 +13,7 @@ import static xyz.volcanobay.modog.networking.DeltaNetwork.LAST_PACKET_ID;
 
 public enum DeltaPacket {
     VALIDATE_PACKET_VERSION(C2SValidateNetworkVersionPacket::new),
-    UPDATE_STAGE(S2CStageUpdatePacket::new),
+    UPDATE_STAGE(A2ADelegatedLevelObjectUpdatePacket::new),
     NOT_IMPORTANT_PACKET_DONT_LOOK(S2CUnimportantPacket::new),
     CURSOR_UPDATE_PACKET(A2ACursorUpdatePacket::new),
     //TODO RENAME TO ACTUAL ENUIM NAMES ICBA
@@ -23,8 +23,8 @@ public enum DeltaPacket {
     S2CRemoveJointsPacket(S2CRemoveJointsPacket::new),
     S2CRemoveObjectsPacket(S2CRemoveObjectsPacket::new),
     S2CRespondConnectionAssignmentsPacket(S2CRespondConnectionAssignmentsPacket::new),
-    C2SRequestConnectionAssignmentsPacket(C2SRequestConnectionAssignmentsPacket::new),
-    C2SRequestFillLevelContents(C2SRequestFillLevelContents::new);
+    C2SRequestConnectionAssignmentsPacket(A2ANotifyNewConnectionPacket::new),
+    C2SRequestFillLevelContents(C2SRequestLevelContents::new);
     final Supplier<Packet> packetFactory;
     final int id;
     

@@ -9,10 +9,9 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
-import xyz.volcanobay.modog.game.CursorHandler;
+import xyz.volcanobay.modog.core.interfaces.level.Level;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
-import xyz.volcanobay.modog.networking.packets.world.A2ACursorUpdatePacket;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
@@ -23,25 +22,27 @@ import xyz.volcanobay.modog.screens.AddressPicker;
 import java.util.logging.Logger;
 
 public class Delta extends ApplicationAdapter {
-    
+
     public static final int NETWORKING_VERSION = 0;
-    
+
     public static Logger LOGGER = Logger.getLogger("Delta");
-    
+
     public static DeltaStage stage;
-    
     public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
-    
+
+    public static Level LEVEL;
+
     public static boolean periodicScheduled;
-    
+
     @Override
     public void create() {
         PhysicsObjectsRegistry.registerObjects();
         RenderSystem.initialize();
         PhysicsHandler.initialize();
+        LEVEL = PhysicsHandler.asLevel();
         VisUI.load(VisUI.SkinScale.X1);
         System.out.println("Client UUID is " + uuid.toString());
-        
+
         stage = new DeltaStage(new ScreenViewport());
         final Table root = new Table();
         Gdx.input.setInputProcessor(stage);
@@ -58,7 +59,7 @@ public class Delta extends ApplicationAdapter {
             }
         }, 0.01f);
     }
-    
+
     @Override
     public void render() {
         RenderSystem.render();
@@ -75,11 +76,11 @@ public class Delta extends ApplicationAdapter {
 //            periodicScheduled = true;
 //        }
     }
-    
+
 //    public void periodic() {
 //        tickPeriodic();
 //    }
-    
+
     public void tickPeriodic() {
         Timer.schedule(new Timer.Task() {
             @Override
@@ -91,23 +92,23 @@ public class Delta extends ApplicationAdapter {
         PhysicsHandler.objectTickPeriodic();
         //DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
         DeltaNetwork.readDataTick();
-    
+
         PhysicsHandler.handleInput();
         PhysicsHandler.physicsStep();
-    
+
         DeltaNetwork.sendDataTick();
     }
-    
+
     @Override
     public void resize(int width, int height) {
         if (width == 0 && height == 0) return; //see https://github.com/libgdx/libgdx/issues/3673#issuecomment-177606278
         stage.getViewport().update(width, height, true);
         PopupMenu.removeEveryMenu(stage);
     }
-    
+
     @Override
     public void dispose() {
-        
+
         RenderSystem.dispose();
         stage.dispose();
         for (PhysicsObject object : PhysicsHandler.physicsObjectMap.values()) {
@@ -115,5 +116,5 @@ public class Delta extends ApplicationAdapter {
         }
         VisUI.dispose();
     }
-    
+
 }

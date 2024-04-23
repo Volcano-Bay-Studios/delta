@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
 import com.badlogic.gdx.physics.box2d.joints.DistanceJointDef;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
 import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
@@ -12,7 +13,7 @@ import xyz.volcanobay.modog.networking.stream.NetworkByteWriteStream;
 import static xyz.volcanobay.modog.physics.PhysicsHandler.getPhysicsObjectFromBody;
 import static xyz.volcanobay.modog.physics.PhysicsHandler.physicsObjectMap;
 
-public class WorldJoint {
+public class WorldJoint extends NetworkableLevelComponent {
     public Joint joint;
     public NetworkableUUID uuid;
     
@@ -37,11 +38,7 @@ public class WorldJoint {
         
         writeStream.writeFloat(((DistanceJoint) joint).getLength());
     }
-    
-    public void writePhysicsStateToNetwork(NetworkByteWriteStream readStream) {
-        readStream.writeFloat(((DistanceJoint) joint).getLength());
-    }
-    
+
     public static WorldJoint readNewFromNetwork(NetworkByteReadStream readStream) {
         WorldJoint worldJoint = new WorldJoint();
     
@@ -61,9 +58,24 @@ public class WorldJoint {
         
         return worldJoint;
     }
-    
-    public void readPhysicsStateToNetwork(NetworkByteReadStream readStream) {
-        ((DistanceJoint) joint).setLength(readStream.readFloat());
+
+    @Override
+    public NetworkableUUID getNetworkUUID() {
+        return uuid;
     }
-    
+
+    @Override
+    public boolean shouldNetwork() {
+        return true;
+    }
+
+    @Override
+    public void writeToNetwork(NetworkByteWriteStream stream) {
+        stream.writeFloat(((DistanceJoint) joint).getLength());
+    }
+
+    @Override
+    public void readFromNetwork(NetworkByteReadStream stream) {
+        ((DistanceJoint) joint).setLength(stream.readFloat());
+    }
 }

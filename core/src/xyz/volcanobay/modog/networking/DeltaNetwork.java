@@ -5,9 +5,9 @@ import com.github.czyzby.websocket.WebSockets;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
 import xyz.volcanobay.modog.networking.enums.ServerHostType;
 import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
-import xyz.volcanobay.modog.networking.packets.connection.C2SRequestConnectionAssignmentsPacket;
-import xyz.volcanobay.modog.networking.packets.world.C2SRequestFillLevelContents;
-import xyz.volcanobay.modog.networking.packets.world.S2CStageUpdatePacket;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
+import xyz.volcanobay.modog.networking.packets.world.C2SRequestLevelContents;
+import xyz.volcanobay.modog.networking.packets.world.A2ADelegatedLevelObjectUpdatePacket;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -53,7 +53,7 @@ public class DeltaNetwork {
     public static void initialiseConnectedGame() {
         
         System.out.println("Successfully connected to game, syncing world state");
-        DeltaNetwork.sendPacketToServer(new C2SRequestFillLevelContents());
+        DeltaNetwork.sendPacketToServer(new C2SRequestLevelContents());
         
     }
     
@@ -73,7 +73,7 @@ public class DeltaNetwork {
         if (!isConnected() || !isExternalServer())
             return;
         
-        sendPacketToAllClients(new S2CStageUpdatePacket());
+        sendPacketToAllClients(new A2ADelegatedLevelObjectUpdatePacket());
     }
     
     public static void readDataTick() {
@@ -105,13 +105,13 @@ public class DeltaNetwork {
         );
     }
     
-    public static void sendPacketToClient(Packet packet, int clientConnectionIndex) {
+    public static void sendPacketToClient(Packet packet, NetworkableUUID clientConnectionUUID) {
         if (!DeltaNetwork.isConnected() || !DeltaNetwork.isActive()) return;
         byte[] packetData = PacketProcessor.getRawPacketData(packet);
         socket.send(
-            ByteBuffer.allocate(packetData.length + 8)
+            ByteBuffer.allocate(packetData.length + 4 + 16)
                 .putInt(PacketRoutingHeader.TO_CLIENT.getId())
-                .putInt(clientConnectionIndex)
+                .put(clientConnectionUUID.getBytes())
                 .put(packetData)
                 .array()
         );

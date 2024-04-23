@@ -1,35 +1,29 @@
 package xyz.volcanobay.modog.networking.enums;
 
+import xyz.volcanobay.modog.core.annotations.Nullable;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.NetworkConnection;
 import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.packets.connection.S2CRespondConnectionAssignmentsPacket;
 import xyz.volcanobay.modog.networking.stream.NetworkByteReadStream;
 
 public enum PacketRoutingHeader {
-    TO_ALL_CLIENTS(0),
-    TO_CLIENT(1),
-    TO_SERVER(2),
-    TO_ALL_OTHERS(3);
-    final int id;
-    
-    PacketRoutingHeader(int id) {
-        this.id = id;
-    }
-    
+    TO_ALL_CLIENTS, TO_CLIENT, TO_SERVER, TO_ALL_OTHERS;
+
     public int getId() {
-        return id;
+        return ordinal();
     }
     
-    public boolean shouldReadOnCurrentConnection(DeltaPacket packetType, int additional) {
+    public boolean shouldReadOnCurrentConnection(DeltaPacket packetType, @Nullable NetworkableUUID directedUUID) {
         if (packetType == DeltaPacket.S2CRespondConnectionAssignmentsPacket && NetworkConnectionsManager.isAwaiting)
             return true;
         if (NetworkConnectionsManager.isAwaiting)
             return false;
     
         if (this.equals(TO_CLIENT)) {
-            return true;//additional == NetworkConnectionsManager.selfConnectionId
+            return directedUUID == NetworkConnectionsManager.selfConnectionId;
         }
         if (this.equals(TO_SERVER))
             return DeltaNetwork.isNetworkOwner();

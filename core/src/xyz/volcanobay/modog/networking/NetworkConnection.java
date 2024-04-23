@@ -1,23 +1,24 @@
 package xyz.volcanobay.modog.networking;
 
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
+import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 
 public class NetworkConnection {
 
     NetworkingSide connectionSide;
+
+    NetworkableUUID connectionId;
     
-    int connectionId;
-    
-    public NetworkConnection(NetworkingSide connectionSide, int connectionId) {
+    public NetworkConnection(NetworkingSide connectionSide, NetworkableUUID connectionId) {
         this.connectionSide = connectionSide;
         this.connectionId = connectionId;
     }
     
-    public NetworkingSide getConnectionSide() {
+    public NetworkingSide getNetworkingSide() {
         return connectionSide;
     }
     
-    public int getConnectionId() {
+    public NetworkableUUID getConnectionUUID() {
         return connectionId;
     }
     

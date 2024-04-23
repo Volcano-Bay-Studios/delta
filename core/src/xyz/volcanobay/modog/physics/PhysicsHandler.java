@@ -11,6 +11,9 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.core.interfaces.level.Level;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
@@ -25,6 +28,7 @@ import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -469,5 +473,25 @@ public class PhysicsHandler {
                 addNetworkedObject(physicsObject);
             }
         }
+    }
+
+    public static Level asLevel() {
+        return new NetworkableLevel() {
+
+            @Override
+            public HashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents() {
+                HashMap<NetworkableUUID, NetworkableLevelComponent> components = new HashMap<>();
+
+                components.putAll(physicsObjectMap);
+                components.putAll(jointMap);
+
+                return components;
+            }
+
+            @Override
+            public NetworkableLevelComponent createNewObject(NetworkableUUID newObject) {
+                return null;
+            }
+        };
     }
 }
