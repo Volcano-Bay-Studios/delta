@@ -20,11 +20,24 @@ public class SoundRegistry {
     }
     public static void reigsterSoundEvents(){
         registerSoundEvent("empty","empty",12);
+        registerSoundEvent("thruster","thruster",-1);
+
+        // Hit Sounds
+        registerSoundEvent("metal_1","metal_1",20);
+        registerSoundEvent("metal_2","metal_2",20);
+
+        // Sliding Sounds
+        registerSoundEvent("metal_slide_1","metal_slide_1",80);
     }
     public static void dispose(){
         for (SoundEvent event : soundEventHashMap.values()) {
             event.sound.dispose();
         }
         soundEventHashMap.clear();
+    }
+    public enum HitType {
+        METAL,
+        STONE,
+        GLASS
     }
 }

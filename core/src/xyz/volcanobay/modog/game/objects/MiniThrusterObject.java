@@ -14,7 +14,6 @@ import xyz.volcanobay.modog.screens.TextButtons;
 import java.util.List;
 
 public class MiniThrusterObject extends LogicObject {
-    public boolean working = false;
     ConeLight objectLight;
     Texture flames = new Texture("mini_thruster_flame.png");
     int animationTicks;
@@ -85,6 +84,7 @@ public class MiniThrusterObject extends LogicObject {
         super.initialise();
         pickTexture();
         type = "mini_thruster";
+        workingSound = "thruster";
         objectLight = new ConeLight(RenderSystem.rayHandler,20,new Color(0,0.2f,1f,.5f),100f,body.getPosition().x,body.getPosition().y, (float) Math.toDegrees(body.getAngle())-90,5f);
     }
     @Override

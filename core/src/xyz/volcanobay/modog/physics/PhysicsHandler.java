@@ -168,6 +168,9 @@ public class PhysicsHandler {
         }
 
         if (simSpeed > 0 && !lockChanges) {
+            for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
+                physicsObject.lastVelocity = new Vector2(physicsObject.body.getLinearVelocity().x,physicsObject.body.getLinearVelocity().y);
+            }
             world.step(1 / 120f, 6, 2);
             for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
                 physicsObject.tickPhysics();
@@ -199,9 +202,11 @@ public class PhysicsHandler {
 
         List<WorldJoint> removedJoints = new ArrayList<>();
         for (WorldJoint body : jointsForRemoval) {
-            world.destroyJoint(body.joint);
-            jointConcurrentHashMap.remove(body.uuid);
-            removedJoints.add(body);
+            if (body != null) {
+                world.destroyJoint(body.joint);
+                jointConcurrentHashMap.remove(body.uuid);
+                removedJoints.add(body);
+            }
         }
         jointsForRemoval.removeAll(removedJoints);
         if (!uuidsForRemovalFromClients.isEmpty())

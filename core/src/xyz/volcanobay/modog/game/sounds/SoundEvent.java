@@ -12,6 +12,7 @@ public class SoundEvent implements Cloneable{
     int ticksToPlay;
     int timePlaying;
     boolean loop;
+    float volume = 1;
     PhysicsObject trackingBody;
 
     @Override

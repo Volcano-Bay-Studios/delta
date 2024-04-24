@@ -6,6 +6,9 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import xyz.volcanobay.modog.game.DeltaConstants;
+import xyz.volcanobay.modog.game.objects.MachineObject;
+import xyz.volcanobay.modog.game.sounds.SoundHandeler;
+import xyz.volcanobay.modog.game.sounds.SoundRegistry;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.rendering.RenderSystem;
@@ -31,53 +34,68 @@ public class PhysicsObject {
     public boolean restricted = false;
     public float conductivity;
     public float charge;
+    public String workingSound;
+    boolean playingSound;
+    long soundAddr;
+    public int hitTicks = 0;
+    public Vector2 lastVelocity;
+    public Vector2 acceleration;
+    public SoundRegistry.HitType hitType = SoundRegistry.HitType.METAL;
+
     /**
      * Constructor for Registry
      * Do NOT use this, instead get a physics object from the registry {@link PhysicsObjectsRegistry }
      */
     public PhysicsObject() {
-        this.scale = new Vector2(1,1);
-        this.textureScale = new Vector2(0,0);
+        this.scale = new Vector2(1, 1);
+        this.textureScale = new Vector2(0, 0);
     }
+
     /**
      * Constructor for making new physics objects
      */
     public PhysicsObject(Body body) {
         this.body = body;
-        this.scale = new Vector2(1,1);
-        this.textureScale = new Vector2(0,0);
+        this.scale = new Vector2(1, 1);
+        this.textureScale = new Vector2(0, 0);
         pickTexture();
         processTexture();
         initialise();
     }
+
     public PhysicsObject create(Body body) {
         return new PhysicsObject(body);
     }
+
     public void initialise() {
 
     }
+
     public PhysicsObject setUuid(NetworkableUUID uuid) {
         this.uuid = uuid;
         return this;
     }
+
+
     public void pickTexture() {
         texture = new Texture("none.png");
     }
+
     public void processTexture() {
-        textureOffset = new Vector2((float) texture.getWidth() /2*scale.x, (float) texture.getHeight() /2*scale.y);
+        textureOffset = new Vector2((float) texture.getWidth() / 2 * scale.x, (float) texture.getHeight() / 2 * scale.y);
     }
 
     /**
      * Returns a new {@link FixtureDef} from the {@link PhysicsObject}
-     * @return new {@link FixtureDef} from the {@link PhysicsObject}
      *
+     * @return new {@link FixtureDef} from the {@link PhysicsObject}
      * @author ModogTheDev
      */
     @Deprecated
     public FixtureDef getFixtureDef() {
         FixtureDef fixtureDef = new FixtureDef();
         PolygonShape box = new PolygonShape();
-        box.setAsBox(fixtureScale.x/PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
+        box.setAsBox(fixtureScale.x / PhysicsHandler.scaleDown, fixtureScale.y / PhysicsHandler.scaleDown);
         fixtureDef.shape = box;
         fixtureDef.density = 0.5f;
         fixtureDef.friction = 0.4f;
@@ -85,39 +103,76 @@ public class PhysicsObject {
         box.dispose();
         return fixtureDef;
     }
+
     public void createFixture() {
 
     }
+
     public float getMaxCharge() {
         return DeltaConstants.maxCharge;
     }
+
     public void resize(Vector2 newSize) {
         scale = newSize;
         processTexture();
     }
+
     public void tickPhysics() {
         if (!required && body.getPosition().y < -90 && !markedForDeletion && (NetworkHandler.isHost || !NetworkHandler.isConnected)) {
             PhysicsHandler.bodiesForDeletion.add(body);
             markedForDeletion = true;
         }
         if (required && body.getPosition().y < -90) {
-            body.setTransform(body.getPosition().x,-89.99f,body.getAngle());
-            body.setLinearVelocity(0,0);
+            body.setTransform(body.getPosition().x, -89.99f, body.getAngle());
+            body.setLinearVelocity(0, 0);
+        }
+        if (this instanceof MachineObject machineObject) {
+            if (workingSound != null && machineObject.working && !playingSound) {
+                soundAddr = SoundHandeler.playSound(getSelf(), workingSound, true);
+                playingSound = true;
+            }
+            if (workingSound != null && !machineObject.working && playingSound) {
+                SoundHandeler.stopSound(soundAddr);
+                soundAddr = 0;
+                playingSound = false;
+            }
+        }
+        if (hitTicks > 0) {
+            if (acceleration != null) {
+                float strength = acceleration.dst(new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y));
+                if (strength > 3) {
+                    System.out.println(strength);
+                    SoundHandeler.playHitSound(body.getPosition(), hitType, strength / 30);
+                }
+            }
+            hitTicks--;
+        }
+        if (body != null) {
+            acceleration = new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y);
         }
 //        System.out.println("hu");
     }
-    public void render() {
-        RenderSystem.batch.draw(texture,body.getPosition().x-textureOffset.x,body.getPosition().y-textureOffset.y,textureOffset.x,textureOffset.y, texture.getWidth(), texture.getHeight(),(scale.x+textureScale.x)/PhysicsHandler.scaleDown,(scale.y+textureScale.y)/PhysicsHandler.scaleDown, (float) Math.toDegrees(body.getAngle()),0,0,texture.getWidth(),texture.getHeight(),false,false);
+
+    public Vector2 getBodyAcceleration() {
+        return acceleration;
     }
+
+    public void render() {
+        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(), texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown, (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
+    }
+
     public void dispose() {
         texture.dispose();
     }
+
     public float getGravity() {
-        return Math.min(30,Math.max(0,(body.getPosition().y*-0.3f)+30));
+        return Math.min(30, Math.max(0, (body.getPosition().y * -0.3f) + 30));
     }
+
     public void newButton(String string, ChangeListener changeListener) {
-        textButtons.add(new TextButtons(string,changeListener));
+        textButtons.add(new TextButtons(string, changeListener));
     }
+
     public List<TextButtons> getContextOptions() {
         textButtons.clear();
         if (NetworkHandler.hasAuthority || !restricted) {
@@ -187,7 +242,7 @@ public class PhysicsObject {
             newButton("Zero Angle", new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    body.setTransform(body.getPosition(),0);
+                    body.setTransform(body.getPosition(), 0);
                     body.setAngularVelocity(0);
                     actor.getParent().remove();
 
@@ -196,13 +251,17 @@ public class PhysicsObject {
         }
         return textButtons;
     }
+
     public PhysicsObject getSelf() {
         return this;
     }
+
     public void killMyself() {
         PhysicsHandler.bodiesForDeletion.add(body);
     }
-    public void tick() {}
+
+    public void tick() {
+    }
 
     @Override
     public boolean equals(Object obj) {

@@ -25,6 +25,7 @@ public class MachineObject  extends PhysicsObject {
     public int inventoryUsed;
     public boolean givesUpInventory;
     public boolean contactCharge;
+    public boolean working = false;
     public MachineObject() {
         super();
     }
