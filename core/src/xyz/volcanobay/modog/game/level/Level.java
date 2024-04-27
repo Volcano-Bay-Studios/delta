@@ -38,13 +38,14 @@ public class Level {
             bodyDef.position.set(x, 0);
             Body body = world.createBody(bodyDef);
             FixtureDef fixtureDef = new FixtureDef();
+            fixtureDef.friction = 1f;
             PolygonShape shape = new PolygonShape();
             Vector2[] verticies = new Vector2[5];
             verticies[0] = new Vector2(-.1f,getPoint(x-.1f));
             verticies[1] = new Vector2(0,getPoint(x));
             verticies[2] = new Vector2(.1f,getPoint(x+.1f));
-            verticies[3] = new Vector2(-.1f,getPoint(x+.1f)-.5f);
-            verticies[4] = new Vector2(.1f,getPoint(x-.1f)-.5f);
+            verticies[3] = new Vector2(-.1f,getPoint(x-.1f)-.5f);
+            verticies[4] = new Vector2(.1f,getPoint(x+.1f)-.5f);
             shape.set(verticies);
             fixtureDef.shape = shape;
             body.createFixture(fixtureDef);

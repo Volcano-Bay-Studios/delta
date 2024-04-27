@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import xyz.volcanobay.modog.game.Material;
 
 import java.util.ArrayList;
@@ -61,8 +62,11 @@ public class SkyRenderer {
         batch.begin();
 
 //        fbo.begin();
+        Vector3 start = RenderSystem.camera.unproject(new Vector3(0,0,0));
+        Vector3 end = RenderSystem.camera.unproject(new Vector3(Gdx.graphics.getWidth(),Gdx.graphics.getHeight(),0));
         for (Vector2 pos : stars) {
-            batch.draw(star, pos.x + cam.x*.9f, pos.y + cam.y*.9f, 0, 0, star.getWidth(), star.getHeight(), .1f, .1f, 0, 0, 0, star.getWidth(), star.getHeight(), false, false);
+            Vector2 offset = new Vector2(0,0);
+            batch.draw(star, pos.x + (cam.x*.9f) + offset.x, pos.y + (cam.y*.9f) + offset.y, 0, 0, star.getWidth(), star.getHeight(), .1f, .1f, 0, 0, 0, star.getWidth(), star.getHeight(), false, false);
         }
 //        fbo.end();
         batch.end();

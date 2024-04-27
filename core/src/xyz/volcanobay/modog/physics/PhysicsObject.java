@@ -141,7 +141,6 @@ public class PhysicsObject {
             if (acceleration != null) {
                 float strength = acceleration.dst(new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y));
                 if (strength > 3) {
-                    System.out.println(strength);
                     SoundHandeler.playHitSound(body.getPosition(), hitType, strength / 30);
                 }
             }

@@ -175,6 +175,7 @@ public class MachineObject  extends PhysicsObject {
         groundBox.setAsBox(fixtureScale.x/ PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
         body.createFixture(groundBox,1f);
         body.getFixtureList().get(0).setDensity(4f);
+        body.getFixtureList().get(0).setFriction(1f);
         groundBox.dispose();
     }
 

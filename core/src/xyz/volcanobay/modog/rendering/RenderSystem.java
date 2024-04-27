@@ -53,7 +53,7 @@ public class RenderSystem {
 
         rayHandler = new RayHandler(PhysicsHandler.world);
         rayHandler.setShadows(true);
-        rayHandler.setAmbientLight(0.5f);
+        rayHandler.setAmbientLight(.05f);
         skylight = new  DirectionalLight(rayHandler,4000,new Color(1,1,1,.5f),-90);
         rayHandler.setBlur(true);
         rayHandler.setBlurNum(6);
