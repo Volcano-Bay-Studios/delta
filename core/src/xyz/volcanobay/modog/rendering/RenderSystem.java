@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.game.CursorHandeler;
+import xyz.volcanobay.modog.game.level.LevelHandeler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.ObjectPicker;
@@ -72,6 +73,7 @@ public class RenderSystem {
 //        batch.draw(img, 0, 0);
         batch.enableBlending();
         SkyRenderer.render();
+        LevelHandeler.renderLevel();
         PhysicsHandler.renderObjects();
         batch.disableBlending();
         renderJoints();

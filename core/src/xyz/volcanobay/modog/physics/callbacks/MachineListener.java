@@ -13,17 +13,18 @@ public class MachineListener implements ContactListener {
         Body bodyB = contact.getFixtureB().getBody();
         PhysicsObject physicsObjectA = PhysicsHandler.getPhysicsObjectFromBody(bodyA);
         PhysicsObject physicsObjectB = PhysicsHandler.getPhysicsObjectFromBody(bodyB);
-        if (physicsObjectA != null && physicsObjectB != null) {
+        if (physicsObjectA != null) {
             physicsObjectA.hitTicks = 5;
-            physicsObjectB.hitTicks = 5;
             if (physicsObjectA instanceof MachineObject machine) {
-                machine.contact(physicsObjectB);
-            }
-            if (physicsObjectB instanceof MachineObject machine) {
                 machine.contact(physicsObjectA);
             }
-        } else
-            return;
+        }
+        if (physicsObjectB != null) {
+            physicsObjectB.hitTicks = 5;
+            if (physicsObjectB instanceof MachineObject machine) {
+                machine.contact(physicsObjectB);
+            }
+        }
     }
 
     @Override
@@ -32,16 +33,18 @@ public class MachineListener implements ContactListener {
         Body bodyB = contact.getFixtureB().getBody();
         PhysicsObject physicsObjectA = PhysicsHandler.getPhysicsObjectFromBody(bodyA);
         PhysicsObject physicsObjectB = PhysicsHandler.getPhysicsObjectFromBody(bodyB);
-        if (physicsObjectA != null && physicsObjectB != null) {
+        if (physicsObjectA != null) {
             if (physicsObjectA instanceof MachineObject machine) {
-                machine.removeContact(physicsObjectB);
-            }
-            if (physicsObjectB instanceof MachineObject machine) {
                 machine.removeContact(physicsObjectA);
             }
-        } else
-            return;
+        }
+        if (physicsObjectB != null) {
+            if (physicsObjectB instanceof MachineObject machine) {
+                machine.removeContact(physicsObjectB);
+            }
+        }
     }
+
     public static void removeFromAll(PhysicsObject object) {
         for (PhysicsObject object1 : PhysicsHandler.physicsObjectHashMap.values()) {
             if (object1 instanceof MachineObject machineObject) {

@@ -11,6 +11,7 @@ import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.game.MaterialRegistry;
+import xyz.volcanobay.modog.game.level.LevelHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
 import xyz.volcanobay.modog.networking.NetworkHandler;
@@ -37,6 +38,7 @@ public class Delta extends ApplicationAdapter {
 		MaterialRegistry.registerMaterials();
 		RenderSystem.initialize();
 		PhysicsHandler.initialize();
+		LevelHandeler.addLevels();
 		SoundRegistry.reigsterSoundEvents();
 		VisUI.load(VisUI.SkinScale.X1);
 		System.out.println("Client UUID is "+uuid.toString());
