@@ -9,11 +9,13 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import xyz.volcanobay.modog.game.Material;
+import xyz.volcanobay.modog.util.Mth;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static xyz.volcanobay.modog.rendering.RenderSystem.batch;
+import static xyz.volcanobay.modog.rendering.RenderSystem.camera;
 
 public class SkyRenderer {
     public static Texture atmosphere = new Texture("atmosphere.png");
@@ -58,15 +60,14 @@ public class SkyRenderer {
         }
 //        batch.setShader(atmosphereShader);
         Vector2 cam = new Vector2((RenderSystem.camera.position.x), (RenderSystem.camera.position.y));
-        FrameBuffer fbo = new FrameBuffer(Pixmap.Format.RGBA8888,Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
         batch.begin();
 
 //        fbo.begin();
         Vector3 start = RenderSystem.camera.unproject(new Vector3(0,0,0));
         Vector3 end = RenderSystem.camera.unproject(new Vector3(Gdx.graphics.getWidth(),Gdx.graphics.getHeight(),0));
         for (Vector2 pos : stars) {
-            Vector2 offset = new Vector2(0,0);
-            batch.draw(star, pos.x + (cam.x*.9f) + offset.x, pos.y + (cam.y*.9f) + offset.y, 0, 0, star.getWidth(), star.getHeight(), .1f, .1f, 0, 0, 0, star.getWidth(), star.getHeight(), false, false);
+            Vector2 offset = new Vector2(((float) Mth.roundToZero(((camera.position.x*.1f-pos.x))/100)*-100) + (pos.x>0 ? 50: -50),((float) Mth.roundToZero(((camera.position.y*.1f-pos.y))/100)*-100));
+            batch.draw(star, pos.x  + (cam.x*.9f) - (offset.x), pos.y + (cam.y*.9f) + offset.y, 0, 0, star.getWidth(), star.getHeight(), .1f, .1f, 0, 0, 0, star.getWidth(), star.getHeight(), false, false);
         }
 //        fbo.end();
         batch.end();
@@ -96,10 +97,8 @@ public class SkyRenderer {
 //            batch.end();
 //            blurTargetB.end();
 //        }
-        fbo.dispose();
         batch.begin();
         batch.setShader(SpriteBatch.createDefaultShader());
-        batch.draw(fbo.getColorBufferTexture(), 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), 0, 0, 1, 1);
     }
 
     public static void render() {

@@ -6,8 +6,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Joint;
 import com.badlogic.gdx.physics.box2d.joints.DistanceJoint;
@@ -53,11 +55,12 @@ public class RenderSystem {
 
         rayHandler = new RayHandler(PhysicsHandler.world);
         rayHandler.setShadows(true);
-        rayHandler.setAmbientLight(.05f);
+        rayHandler.setAmbientLight(0f);
         skylight = new  DirectionalLight(rayHandler,4000,new Color(1,1,1,.5f),-90);
         rayHandler.setBlur(true);
         rayHandler.setBlurNum(6);
-        RayHandler.useDiffuseLight(false);
+        RayHandler.useDiffuseLight(true);
+        RayHandler.setGammaCorrection(true);
     }
     public static void render() {
         handleInput();
@@ -67,6 +70,7 @@ public class RenderSystem {
         float w = Gdx.graphics.getWidth();
         float h = Gdx.graphics.getHeight();
         camera.viewportHeight = 30 * (h / w);
+//        FrameBuffer fbo = new FrameBuffer(Pixmap.Format.RGBA8888,Gdx.graphics.getWidth(), Gdx.graphics.getHeight(),false);
 
         ScreenUtils.clear(0, 0, 0, 1);
         batch.begin();
@@ -80,6 +84,7 @@ public class RenderSystem {
         renderOOB();
         CursorHandeler.renderCursors();
         PhysicsHandler.renderDebug();
+        batch.enableBlending();
         batch.end();
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();

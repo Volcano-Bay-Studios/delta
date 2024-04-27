@@ -58,7 +58,7 @@ public class Level {
             return heights.get((float) x);
         } else {
             float lowNoise = (float) SimplexNoise.noise((double) x / (scale), seed);
-            float highNoise = (float) SimplexNoise.noise((double) x / (scale*20), seed);
+            float highNoise = (float) SimplexNoise.noise((double) x / (scale*20), seed+2);
             float finalVal = lowNoise + (highNoise*10)+2;
             heights.put(x,finalVal);
             return finalVal;
