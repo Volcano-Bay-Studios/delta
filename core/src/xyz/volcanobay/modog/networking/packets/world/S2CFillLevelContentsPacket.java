@@ -1,5 +1,7 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
+import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
 import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
@@ -57,6 +59,7 @@ public class S2CFillLevelContentsPacket extends Packet {
         //And replace with the read ones
         physicsObjectMap = newPhysicsObjects;
         jointMap = newJoints;
+        Delta.LEVEL.reloadSourcedMaps();
     }
     
     @Override

@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
 import xyz.volcanobay.modog.core.interfaces.level.Level;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
@@ -30,7 +31,7 @@ public class Delta extends ApplicationAdapter {
     public static DeltaStage stage;
     public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
 
-    public static Level LEVEL;
+    public static NetworkableLevel LEVEL;
 
     public static boolean periodicScheduled;
 

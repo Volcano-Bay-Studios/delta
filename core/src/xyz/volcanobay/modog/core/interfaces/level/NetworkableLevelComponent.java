@@ -31,6 +31,18 @@ public abstract class NetworkableLevelComponent {
 
     public void writeToNetwork(NetworkWriteStream stream) {
         stream.writeByteInt(getUpdateType().getId());
+        switch (getUpdateType()) {
+            case FULL_STATE -> {
+                writePhysicsStateToNetwork(stream);
+                writeStateToNetwork(stream);
+            }
+            case ONLY_PHYSICS -> {
+                writePhysicsStateToNetwork(stream);
+            }
+            case NEW_COMPONENT -> {
+                writeNewToNetwork(stream);
+            }
+        }
     }
 
     public void readFromNetwork(NetworkReadStream stream) {

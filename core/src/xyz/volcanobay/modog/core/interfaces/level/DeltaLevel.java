@@ -10,19 +10,20 @@ import xyz.volcanobay.modog.physics.WorldJoint;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class DeltaLevel implements NetworkableLevel {
 
     /**Un lista generalmente de los componentes, pero no esta en red*/
-    HashMap<NetworkableUUID, NetworkableLevelComponent> levelComponents;
+    protected ConcurrentHashMap<NetworkableUUID, NetworkableLevelComponent> levelComponents;
 
-    HashMap<NetworkableUUID, PhysicsObject> physicsObjectMap;
-    HashMap<NetworkableUUID, WorldJoint> worldJointMap;
+    protected ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectMap;
+    protected ConcurrentHashMap<NetworkableUUID, WorldJoint> worldJointMap;
 
     public DeltaLevel(
-            HashMap<NetworkableUUID, NetworkableLevelComponent> levelComponents,
-            HashMap<NetworkableUUID, PhysicsObject> physicsObjectMap,
-            HashMap<NetworkableUUID, WorldJoint> worldJointMap
+            ConcurrentHashMap<NetworkableUUID, NetworkableLevelComponent> levelComponents,
+            ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectMap,
+            ConcurrentHashMap<NetworkableUUID, WorldJoint> worldJointMap
     ) {
         this.levelComponents = levelComponents;
         this.physicsObjectMap = physicsObjectMap;
@@ -41,7 +42,7 @@ public abstract class DeltaLevel implements NetworkableLevel {
     }
 
     private <T extends NetworkableLevelComponent> void writeComponentSection(
-            HashMap<NetworkableUUID, T> componentMap, NetworkWriteStream stream
+            ConcurrentHashMap<NetworkableUUID, T> componentMap, NetworkWriteStream stream
     ) {
         stream.writeInt(componentMap.size());
         for (Map.Entry<NetworkableUUID, T> physicsObject : componentMap.entrySet()) {
@@ -57,7 +58,7 @@ public abstract class DeltaLevel implements NetworkableLevel {
     }
 
     private <T extends NetworkableLevelComponent> void readComponentSection(
-            HashMap<NetworkableUUID, T> componentMap, NetworkReadStream stream
+            ConcurrentHashMap<NetworkableUUID, T> componentMap, NetworkReadStream stream
     ) {
         int length = stream.readInt();
         for (int i = 0; i < length; i++) {
@@ -96,15 +97,17 @@ public abstract class DeltaLevel implements NetworkableLevel {
             Delta.LOGGER.warning("Added a level component, but the type had no delegate, when one is expected (Dev issue, report)");
     }
 
-    public HashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents() {
+    public ConcurrentHashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents() {
         return levelComponents;
     }
 
-    public HashMap<NetworkableUUID, PhysicsObject> getPhysicsObjectMap() {
+    public ConcurrentHashMap<NetworkableUUID, PhysicsObject> getPhysicsObjectMap() {
         return physicsObjectMap;
     }
 
-    public HashMap<NetworkableUUID, WorldJoint> getWorldJointMap() {
+    public ConcurrentHashMap<NetworkableUUID, WorldJoint> getWorldJointMap() {
         return worldJointMap;
     }
+
+    public abstract void reloadSourcedMaps();
 }

@@ -11,9 +11,11 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
 import xyz.volcanobay.modog.core.interfaces.level.Level;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
+import xyz.volcanobay.modog.game.NetworkLevelComponentConstructor;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
@@ -23,6 +25,8 @@ import xyz.volcanobay.modog.networking.packets.world.S2CRemoveJointsPacket;
 import xyz.volcanobay.modog.networking.packets.world.S2CJointCreatedPacket;
 import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
 import xyz.volcanobay.modog.networking.packets.world.S2CRemoveObjectsPacket;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.callbacks.MachineListener;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
@@ -33,11 +37,21 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PhysicsHandler {
+
     public static World world = new World(new Vector2(0, -30), true);
     public static Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     public static boolean isDebug = false;
-    public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectMap = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<NetworkableUUID, WorldJoint> jointMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectMap;
+    public static ConcurrentHashMap<NetworkableUUID, WorldJoint> jointMap;
+    public static DeltaLevel level = new DeltaLevel(new ConcurrentHashMap<>(), physicsObjectMap = new ConcurrentHashMap<>(), jointMap  = new ConcurrentHashMap<>()) {
+        public void reloadSourcedMaps() {
+            this.levelComponents = new ConcurrentHashMap<>();
+            this.levelComponents.putAll(PhysicsHandler.physicsObjectMap);
+            this.levelComponents.putAll(PhysicsHandler.jointMap);
+            this.physicsObjectMap = PhysicsHandler.physicsObjectMap;
+            this.worldJointMap = PhysicsHandler.jointMap;
+        }
+    };
     public static List<Body> bodiesForDeletion = new ArrayList<>();
     public static List<Body> bodiesForJointRemoval = new ArrayList<>();
     public static List<WorldJoint> jointsForRemoval = new ArrayList<>();
@@ -475,23 +489,7 @@ public class PhysicsHandler {
         }
     }
 
-    public static Level asLevel() {
-        return new NetworkableLevel() {
-
-            @Override
-            public HashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents() {
-                HashMap<NetworkableUUID, NetworkableLevelComponent> components = new HashMap<>();
-
-                components.putAll(physicsObjectMap);
-                components.putAll(jointMap);
-
-                return components;
-            }
-
-            @Override
-            public NetworkableLevelComponent createNewObject(NetworkableUUID newObject) {
-                return null;
-            }
-        };
+    public static NetworkableLevel asLevel() {
+        return level;
     }
 }

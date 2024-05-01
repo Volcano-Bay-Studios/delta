@@ -41,21 +41,21 @@ public class WorldJoint extends NetworkableLevelComponent {
 
     public static WorldJoint readNewFromNetwork(NetworkReadStream readStream) {
         WorldJoint worldJoint = new WorldJoint();
-    
+
         worldJoint.uuid = readStream.readUUID();
-        
+
         DistanceJointDef jointDef = new DistanceJointDef();
-    
+
         Body bodyA = physicsObjectMap.get(readStream.readUUID()).body;
         Body bodyB = physicsObjectMap.get(readStream.readUUID()).body;
-        
+
         Vector2 localAnchorA = readStream.readVector2();
         Vector2 localAnchorB = readStream.readVector2();
-        
+
         jointDef.initialize(bodyA, bodyB, localAnchorA, localAnchorB);
-    
+
         worldJoint.joint = PhysicsHandler.world.createJoint(jointDef);
-        
+
         return worldJoint;
     }
 
@@ -69,13 +69,21 @@ public class WorldJoint extends NetworkableLevelComponent {
         return true;
     }
 
+
     @Override
-    public void writeToNetwork(NetworkWriteStream stream) {
+    public void writePhysicsStateToNetwork(NetworkWriteStream stream) {
         stream.writeFloat(((DistanceJoint) joint).getLength());
     }
 
     @Override
-    public void readFromNetwork(NetworkReadStream stream) {
+    public void readPhysicsStateFromNetwork(NetworkReadStream stream) {
         ((DistanceJoint) joint).setLength(stream.readFloat());
     }
+
+    @Override
+    public void writeStateToNetwork(NetworkWriteStream stream) {}
+
+    @Override
+    public void readStateFromNetwork(NetworkReadStream stream) {}
+
 }

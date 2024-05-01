@@ -73,7 +73,7 @@ public class DeltaNetwork {
         if (!isConnected() || !isExternalServer())
             return;
         
-        sendPacketToAllClients(new A2ADelegatedLevelObjectUpdatePacket());
+        //sendPacketToAllClients(new A2ADelegatedLevelObjectUpdatePacket());
     }
     
     public static void readDataTick() {

@@ -1,7 +1,9 @@
 package xyz.volcanobay.modog.networking.packets.world;
 
 import xyz.volcanobay.modog.Delta;
+import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
 import xyz.volcanobay.modog.core.interfaces.level.Level;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.DeltaPacket;
 import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
@@ -25,7 +27,7 @@ public class A2ADelegatedLevelObjectUpdatePacket extends LevelComponentStateUpda
     }
 
     @Override
-    public Level getLevelForUpdate() {
+    public NetworkableLevel getLevelForUpdate() {
         return Delta.LEVEL;
     }
 

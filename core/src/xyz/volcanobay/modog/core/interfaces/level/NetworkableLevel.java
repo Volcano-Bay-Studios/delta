@@ -6,10 +6,11 @@ import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
 import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface NetworkableLevel extends Level {
 
-    HashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents();
+    ConcurrentHashMap<NetworkableUUID, NetworkableLevelComponent> getLevelComponents();
 
     void write(NetworkWriteStream stream);
     void read(NetworkReadStream stream);
@@ -20,4 +21,5 @@ public interface NetworkableLevel extends Level {
      * */
     NetworkLevelComponentConstructor resolveNewLevelComponentConstructor(NetworkReadStream stream);
 
+    void reloadSourcedMaps();
 }
