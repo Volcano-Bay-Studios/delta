@@ -15,6 +15,9 @@ import xyz.volcanobay.modog.game.level.LevelHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
 import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.core.interfaces.level.Level;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
+import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
@@ -22,80 +25,95 @@ import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
 import xyz.volcanobay.modog.rendering.DeltaStage;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.rendering.SkyRenderer;
+import xyz.volcanobay.modog.rendering.SkyRenderer;
 import xyz.volcanobay.modog.screens.AddressPicker;
 
 import java.util.logging.Logger;
 
 public class Delta extends ApplicationAdapter {
-	public static Logger LOGGER = Logger.getLogger("Delta");
-	public static DeltaStage stage;
-	public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
-	public static boolean periodicScheduled;
 
-	@Override
-	public void create () {
-		PhysicsObjectsRegistry.registerObjects();
-		MaterialRegistry.registerMaterials();
-		RenderSystem.initialize();
-		PhysicsHandler.initialize();
-		LevelHandeler.addLevels();
-		SoundRegistry.reigsterSoundEvents();
-		VisUI.load(VisUI.SkinScale.X1);
-		System.out.println("Client UUID is "+uuid.toString());
+    public static final int NETWORKING_VERSION = 0;
 
-		stage =  new DeltaStage(new ScreenViewport());
-		final Table root = new Table();
-		Gdx.input.setInputProcessor(stage);
-		stage.addActor(root);
-		stage.addActor(new AddressPicker());
-		Pixmap pixmap = new Pixmap(Gdx.files.internal("cursor.png"));
-		Cursor cursor = Gdx.graphics.newCursor(pixmap, 1 ,1);
-		pixmap.dispose();
-		Gdx.graphics.setCursor(cursor);
-		Timer.schedule(new Timer.Task() {
-			@Override
-			public void run() {
-				periodic();
-				tickPeriodic();
-			}
-		},0.05f);
-	}
+    public static Logger LOGGER = Logger.getLogger("Delta");
 
-	@Override
-	public void render () {
-		RenderSystem.render();
-		PhysicsHandler.handleInput();
-		PhysicsHandler.physicsStep();
-		stage.act();
-		stage.draw();
-		InputHandeler.render();
-		NetworkHandler.handleFrame();
-		if (!periodicScheduled) {
-			Timer.schedule(new Timer.Task() {
-				@Override
-				public void run() {
-					periodic();
-					periodicScheduled = false;
-				}
-			},10);
-			periodicScheduled = true;
-		}
-	}
-	public void periodic() {
-		NetworkHandler.periodic();
-	}
-	public void tickPeriodic() {
-		Timer.schedule(new Timer.Task() {
-			@Override
-			public void run() {
-				periodic();
-				tickPeriodic();
-			}
-		},0.05f);
-		SoundHandeler.handleSoundEvents();
-		if (PhysicsHandler.simSpeed > 0)
-			PhysicsHandler.objectTickPeriodic();
-	}
+    public static DeltaStage stage;
+    public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
+
+    public static NetworkableLevel LEVEL;
+
+    public static boolean periodicScheduled;
+
+    @Override
+    public void create() {
+        PhysicsObjectsRegistry.registerObjects();
+        RenderSystem.initialize();
+        PhysicsHandler.initialize();
+        MaterialRegistry.registerMaterials();
+        LEVEL = PhysicsHandler.asLevel();
+        LevelHandeler.addLevels();
+        SoundRegistry.reigsterSoundEvents();
+        VisUI.load(VisUI.SkinScale.X1);
+        System.out.println("Client UUID is " + uuid.toString());
+
+        stage = new DeltaStage(new ScreenViewport());
+        final Table root = new Table();
+        Gdx.input.setInputProcessor(stage);
+        stage.addActor(root);
+        stage.addActor(new AddressPicker());
+        Pixmap pixmap = new Pixmap(Gdx.files.internal("cursor.png"));
+        Cursor cursor = Gdx.graphics.newCursor(pixmap, 1, 1);
+        pixmap.dispose();
+        Gdx.graphics.setCursor(cursor);
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                tickPeriodic();
+            }
+        }, 0.01f);
+    }
+
+    @Override
+    public void render() {
+        RenderSystem.render();
+        stage.act();
+        stage.draw();
+        PhysicsHandler.handleInput();
+        PhysicsHandler.physicsStep();
+        LevelHandeler.addLevels();
+        SoundRegistry.reigsterSoundEvents();
+//        if (!periodicScheduled) {
+//            Timer.schedule(new Timer.Task() {
+//                @Override
+//                public void run() {
+//                    periodic();
+//                    periodicScheduled = false;
+//                }
+//            }, 20);
+//            periodicScheduled = true;
+//        }
+    }
+
+//    public void periodic() {
+//        tickPeriodic();
+//    }
+
+    public void tickPeriodic() {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+//                periodic();
+                tickPeriodic();
+            }
+        }, 0.01f);
+        PhysicsHandler.objectTickPeriodic();
+        //DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
+        DeltaNetwork.readDataTick();
+
+        PhysicsHandler.handleInput();
+        PhysicsHandler.physicsStep();
+
+        DeltaNetwork.sendDataTick();
+    }
 
 	@Override
 	public void resize(int width, int height) {
@@ -105,14 +123,15 @@ public class Delta extends ApplicationAdapter {
 		PopupMenu.removeEveryMenu(stage);
 	}
 
-	@Override
-	public void dispose () {
+    @Override
+    public void dispose() {
 
-		RenderSystem.dispose();
-		stage.dispose();
-		for (PhysicsObject object: PhysicsHandler.physicsObjectHashMap.values()) {
-			object.dispose();
-		}
-		VisUI.dispose();
-	}
+        RenderSystem.dispose();
+        stage.dispose();
+        for (PhysicsObject object : PhysicsHandler.physicsObjectMap.values()) {
+            object.dispose();
+        }
+        VisUI.dispose();
+    }
+
 }

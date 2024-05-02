@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.*;
-import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 
@@ -41,13 +41,13 @@ public class GameScreen extends VisWindow {
         isHost.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                NetworkHandler.isHost = isHost.isChecked();
+                //NetworkHandler.isHost = isHost.isChecked();
             }
         });
         resync.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                NetworkHandler.fullResync();
+                //NetworkHandler.fullResync();
             }
         });
         gravitySlider.addListener(new ChangeListener() {
@@ -69,7 +69,7 @@ public class GameScreen extends VisWindow {
     }
     @Override
     public void draw(Batch batch, float parentAlpha) {
-        if (!NetworkHandler.isConnected)
+        if (!DeltaNetwork.isConnected())
             remove();
         objectSelected.setText(PhysicsHandler.selectedPlaceableObject);
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);

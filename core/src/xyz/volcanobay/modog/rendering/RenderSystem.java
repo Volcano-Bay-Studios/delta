@@ -18,6 +18,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.game.CursorHandeler;
 import xyz.volcanobay.modog.game.level.LevelHandeler;
+import xyz.volcanobay.modog.game.CursorHandler;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.ObjectPicker;
@@ -53,6 +54,7 @@ public class RenderSystem {
         camera.zoom = 1;
         camera.update();
 
+
         rayHandler = new RayHandler(PhysicsHandler.world);
         rayHandler.setShadows(true);
         rayHandler.setAmbientLight(0f);
@@ -82,7 +84,7 @@ public class RenderSystem {
         batch.disableBlending();
         renderJoints();
         renderOOB();
-        CursorHandeler.renderCursors();
+        CursorHandler.renderCursors();
         batch.end();
         rayHandler.setCombinedMatrix(camera);
 //        rayHandler.updateAndRender();
@@ -168,11 +170,11 @@ public class RenderSystem {
         batch.dispose();
         img.dispose();
         jointTexture.dispose();
-        CursorHandeler.cursor.dispose();
-        CursorHandeler.cursorRed.dispose();
-        CursorHandeler.cursorBlue.dispose();
-        CursorHandeler.cursorLime.dispose();
-        CursorHandeler.cursorYellow.dispose();
+        CursorHandler.cursor.dispose();
+        CursorHandler.cursorRed.dispose();
+        CursorHandler.cursorBlue.dispose();
+        CursorHandler.cursorLime.dispose();
+        CursorHandler.cursorYellow.dispose();
     }
 
 }

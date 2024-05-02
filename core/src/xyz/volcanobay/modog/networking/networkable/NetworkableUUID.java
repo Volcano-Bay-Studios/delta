@@ -3,17 +3,18 @@ package xyz.volcanobay.modog.networking.networkable;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
 
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 
 public class NetworkableUUID implements Json.Serializable, Comparable<NetworkableUUID> {
-    /*
+    /**
      * The most significant 64 bits of this UUID.
      *
      * @serial
      */
     private long mostSigBits;
 
-    /*
+    /**
      * The least significant 64 bits of this UUID.
      *
      * @serial
@@ -73,10 +74,10 @@ public class NetworkableUUID implements Json.Serializable, Comparable<Networkabl
 
     // Constructors and Factories
 
-    /*
-     * Private constructor which uses a byte array to construct the new UUID.
+    /**
+     * Constructor which uses a byte array to construct the new UUID.
      */
-    private NetworkableUUID(byte[] data) {
+    public NetworkableUUID(byte[] data) {
         long msb = 0;
         long lsb = 0;
         assert data.length == 16 : "data must be 16 bytes in length";
@@ -125,6 +126,11 @@ public class NetworkableUUID implements Json.Serializable, Comparable<Networkabl
         randomBytes[8]  |= 0x80;  /* set to IETF variant  */
         return new NetworkableUUID(randomBytes);
     }
+    
+    public byte[] getBytes() {
+        return ByteBuffer.allocate(16).putLong(mostSigBits).putLong(leastSigBits).array();
+    }
+    
     @Override
     public void write(Json json) {
         json.writeValue("most",mostSigBits);

@@ -5,32 +5,52 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
+import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.game.DeltaConstants;
 import xyz.volcanobay.modog.game.objects.MachineObject;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
 import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
+import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.TextButtons;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhysicsObject {
+public class PhysicsObject extends NetworkableLevelComponent {
+
     public Body body;
+
     public List<TextButtons> textButtons = new ArrayList<>();
+
     public NetworkableUUID uuid;
+
     public Texture texture;
+
     public String type;
+
     public Vector2 textureOffset;
+
     private Vector2 scale;
+
     public Vector2 textureScale;
+
     public Vector2 fixtureScale;
+
     public boolean visible = true;
+
     public boolean required = false;
+
     public String tooltip = "Nothing to see here!";
+
     public boolean markedForDeletion = false;
+
     public boolean restricted = false;
     public float conductivity;
     public float charge;
@@ -42,9 +62,12 @@ public class PhysicsObject {
     public Vector2 acceleration;
     public SoundRegistry.HitType hitType = SoundRegistry.HitType.METAL;
 
+
+    public boolean syncNextTick = false;
+
     /**
-     * Constructor for Registry
-     * Do NOT use this, instead get a physics object from the registry {@link PhysicsObjectsRegistry }
+     * Constructor for Registry Do NOT use this, instead get a physics object from the registry
+     * {@link PhysicsObjectsRegistry }
      */
     public PhysicsObject() {
         this.scale = new Vector2(1, 1);
@@ -75,8 +98,6 @@ public class PhysicsObject {
         this.uuid = uuid;
         return this;
     }
-
-
     public void pickTexture() {
         texture = new Texture("none.png");
     }
@@ -107,47 +128,19 @@ public class PhysicsObject {
     public void createFixture() {
 
     }
-
-    public float getMaxCharge() {
-        return DeltaConstants.maxCharge;
-    }
-
     public void resize(Vector2 newSize) {
         scale = newSize;
         processTexture();
     }
 
     public void tickPhysics() {
-        if (!required && body.getPosition().y < -90 && !markedForDeletion && (NetworkHandler.isHost || !NetworkHandler.isConnected)) {
+        if (! required && body.getPosition().y < - 90 && ! markedForDeletion && DeltaNetwork.isNetworkOwner()) {
             PhysicsHandler.bodiesForDeletion.add(body);
             markedForDeletion = true;
         }
-        if (required && body.getPosition().y < -90) {
-            body.setTransform(body.getPosition().x, -89.99f, body.getAngle());
+        if (required && body.getPosition().y < - 90) {
+            body.setTransform(body.getPosition().x, - 89.99f, body.getAngle());
             body.setLinearVelocity(0, 0);
-        }
-        if (this instanceof MachineObject machineObject) {
-            if (workingSound != null && machineObject.working && !playingSound) {
-                soundAddr = SoundHandeler.playSound(getSelf(), workingSound, true);
-                playingSound = true;
-            }
-            if (workingSound != null && !machineObject.working && playingSound) {
-                SoundHandeler.stopSound(soundAddr);
-                soundAddr = 0;
-                playingSound = false;
-            }
-        }
-        if (hitTicks > 0) {
-            if (acceleration != null) {
-                float strength = acceleration.dst(new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y));
-                if (strength > 3) {
-                    SoundHandeler.playHitSound(body.getPosition(), hitType, strength / 30);
-                }
-            }
-            hitTicks--;
-        }
-        if (body != null) {
-            acceleration = new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y);
         }
 //        System.out.println("hu");
     }
@@ -156,8 +149,11 @@ public class PhysicsObject {
         return acceleration;
     }
 
+
     public void render() {
-        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(), texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown, (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
+        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(),
+                                texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown,
+                                (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 
     public void dispose() {
@@ -168,13 +164,14 @@ public class PhysicsObject {
         return Math.min(30, Math.max(0, (body.getPosition().y * -0.3f) + 30));
     }
 
+
     public void newButton(String string, ChangeListener changeListener) {
         textButtons.add(new TextButtons(string, changeListener));
     }
 
     public List<TextButtons> getContextOptions() {
         textButtons.clear();
-        if (NetworkHandler.hasAuthority || !restricted) {
+        if (DeltaNetwork.isNetworkOwner() || !restricted) {
             if (!required) {
                 newButton("Delete", new ChangeListener() {
                     @Override
@@ -197,7 +194,7 @@ public class PhysicsObject {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
                         body.setType(BodyDef.BodyType.DynamicBody);
-                        NetworkHandler.clientAddObject(body);
+                        NetworkingCalls.updateObjectState(body);
                         actor.getParent().remove();
                     }
                 });
@@ -206,12 +203,12 @@ public class PhysicsObject {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
                         body.setType(BodyDef.BodyType.StaticBody);
-                        NetworkHandler.clientAddObject(body);
+                        NetworkingCalls.updateObjectState(body);
                         actor.getParent().remove();
                     }
                 });
             }
-            if (NetworkHandler.isHost) {
+            if (DeltaNetwork.isNetworkOwner()) {
                 if (restricted) {
                     newButton("Unrestrict", new ChangeListener() {
                         @Override
@@ -243,12 +240,82 @@ public class PhysicsObject {
                 public void changed(ChangeEvent event, Actor actor) {
                     body.setTransform(body.getPosition(), 0);
                     body.setAngularVelocity(0);
+                    NetworkingCalls.updateObjectState(body);
                     actor.getParent().remove();
 
                 }
             });
         }
         return textButtons;
+    }
+
+    public void tick() {
+        if (syncNextTick) {
+            DeltaNetwork.sendPacketToAllClients(new A2AObjectUpdateStatePacket(this));
+            syncNextTick = false;
+        }
+    }
+
+    //>Networking
+
+    /**
+     * Sync properties NOT position and velocity
+     */
+    public void writeStateToNetwork(NetworkWriteStream writeStream) {
+
+    }
+
+    /**
+     * Sync position and velocity, called every tick by the StageUpdatePacket
+     */
+    public void writePhysicsStateToNetwork(NetworkWriteStream writeStream) {
+        writeStream.writeInt(body.getType().ordinal());
+        writeStream.writeVector2(body.getPosition());
+        writeStream.writeFloat(body.getAngle());
+
+        writeStream.writeVector2(body.getLinearVelocity());
+        writeStream.writeFloat(body.getAngularVelocity());
+
+        writeStream.writeByteBool(required);
+    }
+
+    public void writeNewToNetwork(NetworkWriteStream stream) {
+        stream.writeString(type);
+        writeAllStateToNetwork(stream);
+    }
+
+    public void writeAllStateToNetwork(NetworkWriteStream stream) {
+        writePhysicsStateToNetwork(stream);
+        writeStateToNetwork(stream);
+    }
+
+    public void readStateFromNetwork(NetworkReadStream stream) {
+
+    }
+
+    public void readPhysicsStateFromNetwork(NetworkReadStream stream) {
+        body.setType(BodyDef.BodyType.values()[stream.readInt()]);
+
+        body.setTransform(stream.readVector2(), stream.readFloat());
+
+        body.setLinearVelocity(stream.readVector2());
+        body.setAngularVelocity(stream.readFloat());
+
+        required = stream.readByteBool();
+    }
+
+    public static PhysicsObject readNewFromNetwork(NetworkReadStream stream) {
+        String objectId = stream.readString();
+        BodyDef.BodyType type = BodyDef.BodyType.values()[stream.readInt()];
+        stream.seek(- 4);
+        PhysicsObject newObject = PhysicsObjectsRegistry.createInstanceFromRegistry(objectId, type);
+        newObject.readAllStateFromNetwork(stream);
+        return newObject;
+    }
+
+    public void readAllStateFromNetwork(NetworkReadStream stream) {
+        readPhysicsStateFromNetwork(stream);
+        readStateFromNetwork(stream);
     }
 
     public PhysicsObject getSelf() {
@@ -259,8 +326,6 @@ public class PhysicsObject {
         PhysicsHandler.bodiesForDeletion.add(body);
     }
 
-    public void tick() {
-    }
 
     @Override
     public boolean equals(Object obj) {
@@ -269,4 +334,40 @@ public class PhysicsObject {
         }
         return super.equals(obj);
     }
+
+    @Override
+    public NetworkableUUID getNetworkUUID() {
+        return uuid;
+    }
+
+    @Override
+    public boolean shouldNetwork() {
+        return body.isAwake();
+    }
+
+    @Override
+    public void initialiseFromNetwork() {
+        super.initialiseFromNetwork();
+        createFixture();
+    }
+
+    //
+//    @Override
+//    public void writeToNetwork(NetworkByteWriteStream stream) {
+//        stream.writeByteBool(syncNextTick);
+//        if (syncNextTick) {
+//            writeStateToNetwork(stream);
+//            syncNextTick = false;
+//        }
+//        writePhysicsStateToNetwork(stream);
+//    }
+//
+//    @Override
+//    public void readFromNetwork(NetworkByteReadStream stream) {
+//        boolean isSyncingState = stream.readByteBool();
+//        if (isSyncingState) {
+//            readStateFromNetwork(stream);
+//        }
+//        readPhysicsStateFromNetwork(stream);
+//    }
 }

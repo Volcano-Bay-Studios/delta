@@ -103,8 +103,8 @@ public class NetworkHandler {
             JsonValue rootArray = new JsonReader().parse(root.asString());
             for (JsonValue value : rootArray) {
                 NetworkableUUID uuid = new NetworkableUUID(value.child.next.asLong(),value.child.next.next.asLong());
-                if (PhysicsHandler.physicsObjectHashMap.containsKey(uuid)) {
-                    PhysicsHandler.bodiesForDeletion.add(PhysicsHandler.physicsObjectHashMap.get(uuid).body);
+                if (PhysicsHandler.physicsObjectMap.containsKey(uuid)) {
+                    PhysicsHandler.bodiesForDeletion.add(PhysicsHandler.physicsObjectMap.get(uuid).body);
                 }
             }
             PhysicsHandler.updateObjects();
@@ -119,7 +119,7 @@ public class NetworkHandler {
         for (JsonValue value : rootArray) {
             NetworkableWorldJoint networkableWorldJoint = json.fromJson(NetworkableWorldJoint.class, value.toJson(JsonWriter.OutputType.json));
             if (networkableWorldJoint != null) {
-                WorldJoint ourJoint = PhysicsHandler.jointConcurrentHashMap.get(networkableWorldJoint.uuid);
+                WorldJoint ourJoint = PhysicsHandler.jointMap.get(networkableWorldJoint.uuid);
                 PhysicsHandler.jointsForRemoval.add(ourJoint);
             }
         }
@@ -204,7 +204,7 @@ public class NetworkHandler {
             String packed = packagePhysicsData(false);
             if (packed != null)
                 socket.send(packed);
-            String packed1 = packageJoints(PhysicsHandler.jointConcurrentHashMap.values().stream().toList());
+            String packed1 = packageJoints(PhysicsHandler.jointMap.values().stream().toList());
             if (packed1 != null)
                 socket.send(packed1);
         }
@@ -213,7 +213,7 @@ public class NetworkHandler {
     public static String packagePhysicsData(boolean onlyAwake) {
         List<NetworkablePhysicsObject> physicsObjects = new ArrayList<>();
         int i=0;
-        for (PhysicsObject physicsObject: PhysicsHandler.physicsObjectHashMap.values()) {
+        for (PhysicsObject physicsObject: PhysicsHandler.physicsObjectMap.values()) {
             if (!onlyAwake || physicsObject.body.isAwake()) {
                 Body body = physicsObject.body;
                 int bodyType = 0;

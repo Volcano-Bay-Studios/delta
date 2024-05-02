@@ -15,23 +15,47 @@ import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.game.Material;
 import xyz.volcanobay.modog.game.objects.MaterialObject;
 import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
+import xyz.volcanobay.modog.core.interfaces.level.Level;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
+import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
+import xyz.volcanobay.modog.game.NetworkLevelComponentConstructor;
+import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.networkable.NetworkableWorldJoint;
+import xyz.volcanobay.modog.networking.packets.world.S2CRemoveJointsPacket;
+import xyz.volcanobay.modog.networking.packets.world.S2CJointCreatedPacket;
+import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
+import xyz.volcanobay.modog.networking.packets.world.S2CRemoveObjectsPacket;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.callbacks.MachineListener;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PhysicsHandler {
-    public static World world = new World(new Vector2(0, 0), true);
+
+    public static World world = new World(new Vector2(0, -30), true);
     public static Box2DDebugRenderer debugRenderer = new Box2DDebugRenderer();
     public static boolean isDebug = false;
-    public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectHashMap = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<NetworkableUUID, WorldJoint> jointConcurrentHashMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<NetworkableUUID, PhysicsObject> physicsObjectMap;
+    public static ConcurrentHashMap<NetworkableUUID, WorldJoint> jointMap;
+    public static DeltaLevel level = new DeltaLevel(new ConcurrentHashMap<>(), physicsObjectMap = new ConcurrentHashMap<>(), jointMap  = new ConcurrentHashMap<>()) {
+        public void reloadSourcedMaps() {
+            this.levelComponents = new ConcurrentHashMap<>();
+            this.levelComponents.putAll(PhysicsHandler.physicsObjectMap);
+            this.levelComponents.putAll(PhysicsHandler.jointMap);
+            this.physicsObjectMap = PhysicsHandler.physicsObjectMap;
+            this.worldJointMap = PhysicsHandler.jointMap;
+        }
+    };
     public static List<Body> bodiesForDeletion = new ArrayList<>();
     public static List<Body> bodiesForJointRemoval = new ArrayList<>();
     public static List<WorldJoint> jointsForRemoval = new ArrayList<>();
@@ -62,14 +86,31 @@ public class PhysicsHandler {
     }
     public static void addJoint(JointDef joint) {
         NetworkableUUID uuid = NetworkableUUID.randomUUID();
-        while (jointConcurrentHashMap.containsKey(uuid))
+        while (jointMap.containsKey(uuid))
             uuid = NetworkableUUID.randomUUID();
         Joint newJoint = world.createJoint(joint);
         WorldJoint worldJoint = new WorldJoint(newJoint,uuid);
-        NetworkHandler.sendJoint(worldJoint);
-        jointConcurrentHashMap.put(uuid,worldJoint);
+        DeltaNetwork.sendPacketToAllClients(new S2CJointCreatedPacket(worldJoint));
+        jointMap.put(uuid,worldJoint);
     }
-    public static void addBasicPhysicsObject(float x, float y) {
+
+    //    public static void addBasicPhysicsObject(float x, float y) {
+////        System.out.println("addBasicPhysicsObject");
+//
+//        BodyDef bodyDef = new BodyDef();
+//        bodyDef.type = BodyDef.BodyType.DynamicBody;
+//        bodyDef.position.set(x, y);
+//
+//        Body body = world.createBody(bodyDef);
+//        NetworkableUUID uuid = NetworkableUUID.randomUUID();
+//        while (physicsObjectMap.containsKey(uuid))
+//            uuid = NetworkableUUID.randomUUID();
+//        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("wheel").create(body).setUuid(uuid);
+//        physicsObjectMap.put(uuid, newPhysicsObject);
+//        newPhysicsObject.createFixture();
+//    }
+
+    public static void addObjectFromRegistry(float x, float y, String registryObject) {
 //        System.out.println("addBasicPhysicsObject");
 
         BodyDef bodyDef = new BodyDef();
@@ -78,29 +119,12 @@ public class PhysicsHandler {
 
         Body body = world.createBody(bodyDef);
         NetworkableUUID uuid = NetworkableUUID.randomUUID();
-        while (physicsObjectHashMap.containsKey(uuid))
-            uuid = NetworkableUUID.randomUUID();
-        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("wheel").create(body).setUuid(uuid);
-        physicsObjectHashMap.put(uuid, newPhysicsObject);
-        newPhysicsObject.createFixture();
-    }
-    public static void addObjectFromRegString(float x, float y, String registryObject) {
-//        System.out.println("addBasicPhysicsObject");
-
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(x, y);
-
-        Body body = world.createBody(bodyDef);
-        NetworkableUUID uuid = NetworkableUUID.randomUUID();
-        while (physicsObjectHashMap.containsKey(uuid))
+        while (physicsObjectMap.containsKey(uuid))
             uuid = NetworkableUUID.randomUUID();
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(registryObject).create(body).setUuid(uuid);
-        physicsObjectHashMap.put(uuid, newPhysicsObject);
+        physicsObjectMap.put(uuid, newPhysicsObject);
         newPhysicsObject.createFixture();
-        if (!NetworkHandler.isHost) {
-            NetworkHandler.clientAddObject(newPhysicsObject);
-        }
+        DeltaNetwork.sendPacketToAllOthers(new A2AObjectUpdateStatePacket(newPhysicsObject));
     }
     public static void addMaterialObject(Vector2 pos, Material material) {
         if (NetworkHandler.hasAuthority) {
@@ -110,11 +134,11 @@ public class PhysicsHandler {
 
         Body body = world.createBody(bodyDef);
         NetworkableUUID uuid = NetworkableUUID.randomUUID();
-        while (physicsObjectHashMap.containsKey(uuid))
+        while (physicsObjectMap.containsKey(uuid))
             uuid = NetworkableUUID.randomUUID();
         MaterialObject newPhysicsObject = (MaterialObject) new MaterialObject().create(body).setUuid(uuid);
         newPhysicsObject.material = material;
-        physicsObjectHashMap.put(uuid, newPhysicsObject);
+            physicsObjectMap.put(uuid, newPhysicsObject);
         newPhysicsObject.createFixture();
         }
     }
@@ -138,7 +162,7 @@ public class PhysicsHandler {
 
         Body body = world.createBody(bodyDef);
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(physicsObject.type).create(body).setUuid(physicsObject.uuid);
-        physicsObjectHashMap.put(physicsObject.uuid, newPhysicsObject);
+        physicsObjectMap.put(physicsObject.uuid, newPhysicsObject);
         newPhysicsObject.createFixture();
     }
 
@@ -153,7 +177,7 @@ public class PhysicsHandler {
         groundBody = body;
         NetworkableUUID uuid = new NetworkableUUID(-4866359188412218577L,-6878574037472667055L);
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry("ground").create(body).setUuid(uuid);
-        physicsObjectHashMap.put(uuid, newPhysicsObject);
+        physicsObjectMap.put(uuid, newPhysicsObject);
         newPhysicsObject.createFixture();
     }
 
@@ -168,28 +192,20 @@ public class PhysicsHandler {
         }
 
         if (simSpeed > 0 && !lockChanges) {
-            for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
-                physicsObject.lastVelocity = new Vector2(physicsObject.body.getLinearVelocity().x,physicsObject.body.getLinearVelocity().y);
-            }
             world.step(1 / 120f, 6, 2);
-            for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
+            for (PhysicsObject physicsObject : physicsObjectMap.values()) {
                 physicsObject.tickPhysics();
-                if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
-                    physicsObject.body.applyForceToCenter(0,-physicsObject.getGravity()*physicsObject.body.getMass(),false);
-                }
             }
         }
-        List<NetworkableUUID> uuidsForRemovalFromClients = new ArrayList<>();
+        List<NetworkableUUID> objectsForClientRemoval = new ArrayList<>();
         for (Body body : bodiesForDeletion) {
             PhysicsObject object = getPhysicsObjectFromBody(body);
             if (object != null) {
                 if (mouseJoint != null && mouseJoint.getBodyB() == object.body) {
                     mouseJoint = null;
                 }
-                uuidsForRemovalFromClients.add(object.uuid);
-                object.dispose();
-                MachineListener.removeFromAll(object);
-                physicsObjectHashMap.remove(object.uuid);
+                objectsForClientRemoval.add(object.uuid);
+                physicsObjectMap.remove(object.uuid);
                 world.destroyBody(body);
             }
         }
@@ -202,76 +218,71 @@ public class PhysicsHandler {
 
         List<WorldJoint> removedJoints = new ArrayList<>();
         for (WorldJoint body : jointsForRemoval) {
-            if (body != null) {
-                world.destroyJoint(body.joint);
-                jointConcurrentHashMap.remove(body.uuid);
-                removedJoints.add(body);
-            }
+            world.destroyJoint(body.joint);
+            jointMap.remove(body.uuid);
+            removedJoints.add(body);
         }
         jointsForRemoval.removeAll(removedJoints);
-        if (!uuidsForRemovalFromClients.isEmpty())
-            NetworkHandler.removeFromClients(uuidsForRemovalFromClients);
+        if (!objectsForClientRemoval.isEmpty())
+            DeltaNetwork.sendPacketToAllClients(new S2CRemoveObjectsPacket(objectsForClientRemoval));
         bodiesForDeletion.clear();
-        for (WorldJoint joint: jointConcurrentHashMap.values()) {
-            joint.propagatePower();
-        }
     }
     public static void removeObject(PhysicsObject object) {
         bodiesForDeletion.add(object.body);
     }
     public static void objectTickPeriodic() {
-        for (PhysicsObject object: physicsObjectHashMap.values()) {
+        for (PhysicsObject object: physicsObjectMap.values()) {
             object.tick();
         }
     }
     public static void updateJoints(NetworkableWorldJoint joint) {
-        if (!jointConcurrentHashMap.containsKey(joint.uuid)) {
-            if (physicsObjectHashMap.containsKey(joint.bodyAUUID) && physicsObjectHashMap.containsKey(joint.bodyAUUID)) {
+        if (!jointMap.containsKey(joint.uuid)) {
+            if (physicsObjectMap.containsKey(joint.bodyAUUID) && physicsObjectMap.containsKey(joint.bodyAUUID)) {
                 DistanceJointDef jointDef = new DistanceJointDef();
-                Body bodyA = physicsObjectHashMap.get(joint.bodyAUUID).body;
-                Body bodyB = physicsObjectHashMap.get(joint.bodyBUUID).body;
+                Body bodyA = physicsObjectMap.get(joint.bodyAUUID).body;
+                Body bodyB = physicsObjectMap.get(joint.bodyBUUID).body;
                 jointDef.initialize(bodyA,bodyB,joint.localPointA,joint.localPointB);
                 jointDef.collideConnected = true;
                 DistanceJoint newJoint = (DistanceJoint) world.createJoint(jointDef);
                 newJoint.setLength(joint.length);
                 WorldJoint worldJoint = new WorldJoint(newJoint, joint.uuid);
-                jointConcurrentHashMap.put(joint.uuid, worldJoint);
+                jointMap.put(joint.uuid, worldJoint);
             }
         } else {
-            WorldJoint ourJoint = jointConcurrentHashMap.get(joint.uuid);
+            WorldJoint ourJoint = jointMap.get(joint.uuid);
             DistanceJoint distanceJoint = (DistanceJoint) ourJoint.joint;
             distanceJoint.setLength(joint.length);
         }
     }
 
     public static void updateObjects() {
-//        System.out.println("updateObjects");
-
-        List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
-        for (NetworkablePhysicsObject physicsObject: networkablePhysicsObjects) {
-            PhysicsObject ourPhysicsObject = physicsObjectHashMap.get(physicsObject.uuid);
-            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (InputHandeler.playerControlledObjects == null || !InputHandeler.playerControlledObjects.contains(ourPhysicsObject)) && (!NetworkHandler.isHost || !ourPhysicsObject.restricted)) {
-                Body ourBody = ourPhysicsObject.body;
-                ourBody.setTransform(physicsObject.pos, physicsObject.angle);
-                ourBody.setLinearVelocity(physicsObject.vel);
-                ourBody.setAngularVelocity(physicsObject.angularVelocity);
-                ourPhysicsObject.restricted = physicsObject.restricted;
-                ourPhysicsObject.charge = physicsObject.charge;
-                if (physicsObject.bodyType == 0) {
-                    ourPhysicsObject.body.setType(BodyDef.BodyType.StaticBody);
-                } else if (physicsObject.bodyType == 2) {
-                    ourPhysicsObject.body.setType(BodyDef.BodyType.KinematicBody);
-                } else {
-                    ourPhysicsObject.body.setType(BodyDef.BodyType.DynamicBody);
-                }
-            }
-        }
-        for (NetworkablePhysicsObject networkablePhysicsObject: newObjectsForAddition) {
-            addNetworkedObject(networkablePhysicsObject);
-        }
-
-        objectsForUpdates.removeAll(networkablePhysicsObjects);
-        newObjectsForAddition.clear();
+////        System.out.println("updateObjects");
+//
+//        List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
+//        for (NetworkablePhysicsObject physicsObject : networkablePhysicsObjects) {
+//            PhysicsObject ourPhysicsObject = physicsObjectMap.get(physicsObject.uuid);
+//            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (mouseJoint == null ||
+//                ourPhysicsObject.body != mouseJoint.getBodyB()) && (!NetworkHandler.isHost || !ourPhysicsObject.restricted)) {
+//                Body ourBody = ourPhysicsObject.body;
+//                ourBody.setTransform(physicsObject.pos, physicsObject.angle);
+//                ourBody.setLinearVelocity(physicsObject.vel);
+//                ourBody.setAngularVelocity(physicsObject.angularVelocity);
+//                ourPhysicsObject.restricted = physicsObject.restricted;
+//                if (physicsObject.bodyType == 0) {
+//                    ourPhysicsObject.body.setType(BodyDef.BodyType.StaticBody);
+//                } else if (physicsObject.bodyType == 2) {
+//                    ourPhysicsObject.body.setType(BodyDef.BodyType.KinematicBody);
+//                } else {
+//                    ourPhysicsObject.body.setType(BodyDef.BodyType.DynamicBody);
+//                }
+//            }
+//        }
+//        for (NetworkablePhysicsObject networkablePhysicsObject: newObjectsForAddition) {
+//            addNetworkedObject(networkablePhysicsObject);
+//        }
+//
+//        objectsForUpdates.removeAll(networkablePhysicsObjects);
+//        newObjectsForAddition.clear();
     }
 
     public static void renderDebug() {
@@ -284,7 +295,7 @@ public class PhysicsHandler {
     public static void renderObjects() {
 //        System.out.println("renderObjects");
 
-        for (PhysicsObject physicsObject : physicsObjectHashMap.values()) {
+        for (PhysicsObject physicsObject : physicsObjectMap.values()) {
             physicsObject.render();
         }
     }
@@ -300,7 +311,7 @@ public class PhysicsHandler {
     public static PhysicsObject getPhysicsObjectFromBody(Body body) {
 //        System.out.println("getPhysicsObjectFromBody");
 
-        for (PhysicsObject object : physicsObjectHashMap.values()) {
+        for (PhysicsObject object : physicsObjectMap.values()) {
             if (object.body == body) {
                 return object;
             }
@@ -310,7 +321,7 @@ public class PhysicsHandler {
     public static WorldJoint getWorldJointFromJoint(Joint joint) {
 //        System.out.println("getPhysicsObjectFromBody");
 
-        for (WorldJoint object : jointConcurrentHashMap.values()) {
+        for (WorldJoint object : jointMap.values()) {
             if (object.joint == joint) {
                 return object;
             }
@@ -319,19 +330,19 @@ public class PhysicsHandler {
     }
     public static void deleteBodyJoints(Body body) {
         Array<Joint> joints = new Array<>();
-        List<WorldJoint> jointsForClientRemoval = new ArrayList<>();
+        List<NetworkableUUID> jointsForClientRemoval = new ArrayList<>();
         world.getJoints(joints);
         for (Joint joint: joints) {
             if (joint.getBodyA().equals(body) || joint.getBodyB().equals(body)) {
                 WorldJoint worldJoint= getWorldJointFromJoint(joint);
                 if (worldJoint != null) {
-                    jointsForClientRemoval.add(worldJoint);
-                    jointConcurrentHashMap.remove(worldJoint.uuid);
+                    jointsForClientRemoval.add(worldJoint.uuid);
+                    jointMap.remove(worldJoint.uuid);
                 }
                 world.destroyJoint(joint);
             }
         }
-        NetworkHandler.removeJoints(jointsForClientRemoval);
+        DeltaNetwork.sendPacketToAllClients(new S2CRemoveJointsPacket(jointsForClientRemoval));
     }
 
     public static void handleInput() {
@@ -339,16 +350,15 @@ public class PhysicsHandler {
 
         getMouseObject();
         Vector2 mouse = getMouseWorldPosition();
+        PhysicsObject mouseObject = getPhysicsObjectFromBody(mouseBody);
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !placingJoint) {
             if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && mouseJoint == null && staticMoveBody == null) {
-                if ((NetworkHandler.isHost || !getPhysicsObjectFromBody(mouseBody).restricted)) {
+                if ((DeltaNetwork.isNetworkOwner() || !mouseObject.restricted)) {
                     grabPoint = new Vector2(mouse.x-mouseBody.getPosition().x,mouse.y-mouseBody.getPosition().y);
                     staticMoveBody = mouseBody;
-                    if (!NetworkHandler.isHost) {
-                        NetworkHandler.clientAddObject(getPhysicsObjectFromBody(mouseBody));
-                    }
+                    NetworkingCalls.updateObjectState(mouseObject);
                 }
-            } else if (mouseBody != null && mouseJoint == null && simSpeed > 0 && (NetworkHandler.isHost || !getPhysicsObjectFromBody(mouseBody).restricted) && mouseBody != groundBody) {
+            } else if (mouseBody != null && mouseJoint == null && simSpeed > 0 && (DeltaNetwork.isNetworkOwner() || !mouseObject.restricted) && mouseBody != groundBody) {
                 MouseJointDef jointDef = new MouseJointDef();
                 jointDef.bodyA = groundBody;
                 jointDef.bodyB = mouseBody;
@@ -358,7 +368,6 @@ public class PhysicsHandler {
                 mouseJoint = (MouseJoint) world.createJoint(jointDef);
                 mouseJoint.setTarget(getMouseWorldPosition());
                 mouseBody.setAwake(true);
-
             }
             float spinSpeed = 5;
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
@@ -385,13 +394,10 @@ public class PhysicsHandler {
                     staticMoveBody.setTransform(staticMoveBody.getPosition(),staticMoveBody.getAngle()-(spinSpeed/100));
                 }
             }
-            if (!NetworkHandler.isHost && mouseJoint != null) {
-                PhysicsObject mouseObject = getPhysicsObjectFromBody(mouseJoint.getBodyB());
-                if (mouseObject != null) {
-                    InputHandeler.playerControlledObjects = getContraption(mouseObject);
-                    NetworkHandler.sendPhysicsObjects(InputHandeler.playerControlledObjects,false);
-                }
-            }
+//            if (mouseJoint != null) {
+//                NetworkingCalls.updateObjectState(mouseObject);
+//                NetworkingCalls.updateObjectState(mouseJoint.getBodyB());
+//            }
             if (staticMoveBody != null) {
                 staticMoveBody.setTransform(getMouseWorldPosition().sub(grabPoint), staticMoveBody.getAngle());
                 staticMoveBody.setAwake(true);
@@ -404,7 +410,6 @@ public class PhysicsHandler {
             mouseJoint.getBodyB().setFixedRotation(false);
             world.destroyJoint(mouseJoint);
             mouseJoint = null;
-            InputHandeler.playerControlledObjects = null;
             lockRot = false;
         } else if (staticMoveBody != null) {
             staticMoveBody.setAwake(false);
@@ -413,13 +418,12 @@ public class PhysicsHandler {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             Vector2 mousePos = getMouseWorldPosition();
-            addObjectFromRegString(mousePos.x, mouse.y,selectedPlaceableObject);
+            addObjectFromRegistry(mousePos.x, mouse.y, selectedPlaceableObject);
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             if (mouseBody != null) {
-                PhysicsObject physicsObject = getPhysicsObjectFromBody(mouseBody);
-                if (physicsObject != null && !context) {
-                    Delta.stage.addActor(new ObjectContext(physicsObject, physicsObject.getContextOptions()));
+                if (mouseObject != null && !context) {
+                    Delta.stage.addActor(new ObjectContext(mouseObject, mouseObject.getContextOptions()));
                     context = true;
                 }
             }
@@ -486,7 +490,7 @@ public class PhysicsHandler {
 //                return 0;
 //            }
 //        },mouse,mouse.add(0,1f));
-        for (PhysicsObject object: physicsObjectHashMap.values()) {
+        for (PhysicsObject object: physicsObjectMap.values()) {
             for (Fixture fixture: object.body.getFixtureList()) {
                 if (fixture.testPoint(mouse.x, mouse.y)) {
                     mouseBody = object.body;
@@ -501,16 +505,20 @@ public class PhysicsHandler {
 
         if (!world.isLocked()) {
             newObjectsForAddition.clear();
-            if (physicsObjectHashMap.containsKey(physicsObject.uuid)) {
+            if (physicsObjectMap.containsKey(physicsObject.uuid)) {
                 objectsForUpdates.add(physicsObject);
             } else {
                 addNetworkedObject(physicsObject);
             }
         }
     }
+
+    public static NetworkableLevel asLevel() {
+        return level;
+    }
     public static List<WorldJoint> getObjectJoints(PhysicsObject object) {
         List<WorldJoint> jointObjects = new ArrayList<>();
-        for (WorldJoint joint : jointConcurrentHashMap.values()) {
+        for (WorldJoint joint : jointMap.values()) {
             if ((joint.joint.getBodyA() != null && joint.joint.getBodyB() != null) && (joint.joint.getBodyA().equals(object.body) || joint.joint.getBodyB().equals(object.body))) {
                 jointObjects.add(joint);
             }
