@@ -39,6 +39,7 @@ public class Level {
             Body body = world.createBody(bodyDef);
             FixtureDef fixtureDef = new FixtureDef();
             fixtureDef.friction = 1f;
+            fixtureDef.restitution = .2f;
             PolygonShape shape = new PolygonShape();
             Vector2[] verticies = new Vector2[5];
             verticies[0] = new Vector2(-.1f,getPoint(x-.1f));

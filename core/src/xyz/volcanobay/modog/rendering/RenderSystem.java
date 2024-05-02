@@ -83,11 +83,13 @@ public class RenderSystem {
         renderJoints();
         renderOOB();
         CursorHandeler.renderCursors();
-        PhysicsHandler.renderDebug();
-        batch.enableBlending();
         batch.end();
         rayHandler.setCombinedMatrix(camera);
-        rayHandler.updateAndRender();
+//        rayHandler.updateAndRender();
+        batch.begin();
+        batch.enableBlending();
+        PhysicsHandler.renderDebug();
+        batch.end();
     }
     public static void renderOOB() {
         batch.enableBlending();

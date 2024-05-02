@@ -15,16 +15,16 @@ public class SoundHandeler {
     public static float masterVolume = .25f;
     public static float getSoundVolume(Vector2 pos, float objectVolume){
         Vector2 camPos = new Vector2(RenderSystem.camera.position.x,RenderSystem.camera.position.y);
-        float distance = camPos.dst2(pos);
+        float distance = camPos.dst2(pos)*Math.min(1,(.5f/RenderSystem.camera.zoom));
         return ((20/distance)*objectVolume)*masterVolume;
     }
     public static long playSound(Vector2 pos, String sound, boolean loop) {
         SoundEvent event = SoundRegistry.getSound(sound).clone();
         event.pos = pos;
         if (loop) {
-            event.addr = event.sound.loop(getSoundVolume(event.pos,event.volume));
+            event.addr = event.sound.loop(getSoundVolume(event.pos,getSoundVolume(event.pos,event.volume)));
         } else {
-            event.addr = event.sound.play(getSoundVolume(event.pos,event.volume));
+            event.addr = event.sound.play(getSoundVolume(event.pos,getSoundVolume(event.pos,event.volume)));
         }
         event.loop = loop;
         soundEventList.put(event.addr,event);
@@ -34,9 +34,9 @@ public class SoundHandeler {
         SoundEvent event = SoundRegistry.getSound(sound).clone();
         event.pos = pos;
         if (loop) {
-            event.addr = event.sound.loop(getSoundVolume(event.pos,event.volume));
+            event.addr = event.sound.loop(getSoundVolume(event.pos,getSoundVolume(event.pos,event.volume)));
         } else {
-            event.addr = event.sound.play(getSoundVolume(event.pos,event.volume));
+            event.addr = event.sound.play(getSoundVolume(event.pos,getSoundVolume(event.pos,event.volume)));
         }
         event.volume = volume;
         event.loop = loop;

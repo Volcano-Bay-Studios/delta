@@ -47,6 +47,7 @@ public class SkyRenderer {
     public static void initialize(){
         buildFBO(Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         buildStars();
+        atmosphereShader.bind();
     }
     public static void drawParalax(Texture texture, float ratio) {
         Vector2 scale = new Vector2(.1f,.1f);
