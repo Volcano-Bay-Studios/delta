@@ -33,7 +33,7 @@ public class LevelHandeler {
             }
 
         }
-        for (PhysicsObject object : PhysicsHandler.physicsObjectHashMap.values()) {
+        for (PhysicsObject object : PhysicsHandler.physicsObjectMap.values()) {
             float posToCheck = (float) Math.round(object.body.getPosition().x * 5) / 5;
             levels.get(0).worldCheckPhysics(posToCheck);
         }

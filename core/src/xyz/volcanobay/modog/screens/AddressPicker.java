@@ -23,7 +23,7 @@ public class AddressPicker extends VisWindow {
         TableUtils.setSpacingDefaults(this);
         columnDefaults(0).left();
 
-        textField = new VisTextField("localhost");
+        textField = new VisTextField("omega.yamishdoy.com");
         validatableTextField = new VisValidatableTextField("8081");
         textButton = new VisTextButton("Join");
 

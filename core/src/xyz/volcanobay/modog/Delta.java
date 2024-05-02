@@ -14,7 +14,6 @@ import xyz.volcanobay.modog.game.MaterialRegistry;
 import xyz.volcanobay.modog.game.level.LevelHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
-import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.core.interfaces.level.Level;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
 import xyz.volcanobay.modog.networking.DeltaNetwork;

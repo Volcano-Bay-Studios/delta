@@ -9,7 +9,7 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import xyz.volcanobay.modog.game.InputHandeler;
-import xyz.volcanobay.modog.networking.NetworkHandler;
+import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.rendering.RenderSystem;
@@ -138,7 +138,7 @@ public class BudgeObject extends MachineObject {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     InputHandeler.controlledContraption = getSelf();
-                    NetworkHandler.clientAddObject(body);
+//                    NetworkHandler.clientAddObject(body);
                     actor.getParent().remove();
                 }
             });
@@ -148,7 +148,7 @@ public class BudgeObject extends MachineObject {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     InputHandeler.controlledContraption = null;
-                    NetworkHandler.clientAddObject(body);
+//                    DeltaNetwork.clientAddObject(body);
                     actor.getParent().remove();
                 }
             });

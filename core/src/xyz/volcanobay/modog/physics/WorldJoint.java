@@ -11,10 +11,8 @@ import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
 import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 
 import static xyz.volcanobay.modog.physics.PhysicsHandler.getPhysicsObjectFromBody;
-
-public class WorldJoint {
-import static xyz.volcanobay.modog.physics.PhysicsHandler.getPhysicsObjectFromBody;
 import static xyz.volcanobay.modog.physics.PhysicsHandler.physicsObjectMap;
+
 
 public class WorldJoint extends NetworkableLevelComponent {
     public Joint joint;

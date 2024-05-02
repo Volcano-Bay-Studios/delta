@@ -49,7 +49,7 @@ public class MachineListener implements ContactListener {
     }
 
     public static void removeFromAll(PhysicsObject object) {
-        for (PhysicsObject object1 : PhysicsHandler.physicsObjectHashMap.values()) {
+        for (PhysicsObject object1 : PhysicsHandler.physicsObjectMap.values()) {
             if (object1 instanceof MachineObject machineObject) {
                 machineObject.removeContact(object);
             }

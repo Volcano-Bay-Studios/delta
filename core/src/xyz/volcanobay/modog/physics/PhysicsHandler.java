@@ -14,7 +14,6 @@ import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.game.Material;
 import xyz.volcanobay.modog.game.objects.MaterialObject;
-import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
 import xyz.volcanobay.modog.core.interfaces.level.Level;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
@@ -127,7 +126,7 @@ public class PhysicsHandler {
         DeltaNetwork.sendPacketToAllOthers(new A2AObjectUpdateStatePacket(newPhysicsObject));
     }
     public static void addMaterialObject(Vector2 pos, Material material) {
-        if (NetworkHandler.hasAuthority) {
+        if (DeltaNetwork.isNetworkOwner()) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
         bodyDef.position.set(pos);

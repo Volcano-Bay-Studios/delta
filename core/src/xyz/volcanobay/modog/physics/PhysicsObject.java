@@ -12,7 +12,6 @@ import xyz.volcanobay.modog.game.DeltaConstants;
 import xyz.volcanobay.modog.game.objects.MachineObject;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
-import xyz.volcanobay.modog.networking.NetworkHandler;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
 import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
@@ -254,6 +253,9 @@ public class PhysicsObject extends NetworkableLevelComponent {
             DeltaNetwork.sendPacketToAllClients(new A2AObjectUpdateStatePacket(this));
             syncNextTick = false;
         }
+    }
+    public float getMaxCharge() {
+        return 10f;
     }
 
     //>Networking
