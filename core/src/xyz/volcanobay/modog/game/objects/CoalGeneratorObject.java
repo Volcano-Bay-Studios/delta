@@ -41,6 +41,7 @@ public class CoalGeneratorObject extends MachineObject {
         } else
             animationTicks = 0;
         activeTime--;
+        checkInventory();
         Material coal = getMaterial("coal");
         if (coal != null) {
             if (activeTime < 800) {

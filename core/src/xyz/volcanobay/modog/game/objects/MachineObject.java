@@ -135,12 +135,13 @@ public class MachineObject  extends PhysicsObject {
                 this.charge -= myDonatedCharge;
                 objectB.charge += myDonatedCharge;
                 objectB.charge -= objectDonatedCharge;
-                if (this.charge> this.getMaxCharge())
-                    this.charge = this.getMaxCharge();
+
                 if (objectB.charge> objectB.getMaxCharge())
                     objectB.charge = objectB.getMaxCharge();
             }
         }
+        if (this.charge> this.getMaxCharge())
+            this.charge = this.getMaxCharge();
     }
 
     @Override

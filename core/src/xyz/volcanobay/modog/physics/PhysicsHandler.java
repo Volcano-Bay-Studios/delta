@@ -191,7 +191,8 @@ public class PhysicsHandler {
         }
 
         if (simSpeed > 0 && !lockChanges) {
-            world.step(1 / 120f, 6, 2);
+            int fps = Gdx.graphics.getFramesPerSecond();
+            world.step(1f / ((fps*1.2f)*simSpeed), 6, 2);
             for (PhysicsObject physicsObject : physicsObjectMap.values()) {
                 physicsObject.tickPhysics();
             }
@@ -234,6 +235,11 @@ public class PhysicsHandler {
             object.tick();
         }
     }
+    public static void worldJointTickPeriodic() {
+        for (WorldJoint object: jointMap.values()) {
+            object.propagatePower();
+        }
+    }
     public static void updateJoints(NetworkableWorldJoint joint) {
         if (!jointMap.containsKey(joint.uuid)) {
             if (physicsObjectMap.containsKey(joint.bodyAUUID) && physicsObjectMap.containsKey(joint.bodyAUUID)) {
@@ -255,13 +261,13 @@ public class PhysicsHandler {
     }
 
     public static void updateObjects() {
-////        System.out.println("updateObjects");
+//        System.out.println("updateObjects");
 //
 //        List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
 //        for (NetworkablePhysicsObject physicsObject : networkablePhysicsObjects) {
 //            PhysicsObject ourPhysicsObject = physicsObjectMap.get(physicsObject.uuid);
 //            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (mouseJoint == null ||
-//                ourPhysicsObject.body != mouseJoint.getBodyB()) && (!NetworkHandler.isHost || !ourPhysicsObject.restricted)) {
+//                ourPhysicsObject.body != mouseJoint.getBodyB()) && (!DeltaNetwork.isNetworkOwner() || !ourPhysicsObject.restricted)) {
 //                Body ourBody = ourPhysicsObject.body;
 //                ourBody.setTransform(physicsObject.pos, physicsObject.angle);
 //                ourBody.setLinearVelocity(physicsObject.vel);
@@ -427,21 +433,24 @@ public class PhysicsHandler {
                 }
             }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && placingJoint) {
-            placingJoint = false;
-            bodyA = null;
-            bodyB = null;
-            anchorA = null;
-            anchorB = null;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            if (!placingJoint) {
+                placingJoint = true;
+                placementStep = 1;
+                bodyA = null;
+                bodyB = null;
+                anchorA = null;
+                anchorB = null;
+            } else {
+                placingJoint = false;
+                placementStep = 0;
+                bodyA = null;
+                bodyB = null;
+                anchorA = null;
+                anchorB = null;
+            }
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.R) && !placingJoint) {
-            placingJoint = true;
-            placementStep = 1;
-            bodyA = null;
-            bodyB = null;
-            anchorA = null;
-            anchorB = null;
-        }
+
 
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && placingJoint) {
             if (mouseBody != null) {

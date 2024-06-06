@@ -18,7 +18,7 @@ public class SoundRegistry {
     public static SoundEvent getSound(String sound){
         return soundEventHashMap.getOrDefault(sound,new SoundEvent()).clone();
     }
-    public static void reigsterSoundEvents(){
+    public static void registerSoundEvents(){
         registerSoundEvent("empty","empty",12);
         registerSoundEvent("thruster","thruster",-1);
 

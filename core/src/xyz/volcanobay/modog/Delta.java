@@ -9,12 +9,10 @@ import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.kotcrab.vis.ui.VisUI;
 import com.kotcrab.vis.ui.widget.PopupMenu;
-import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.game.MaterialRegistry;
 import xyz.volcanobay.modog.game.level.LevelHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
-import xyz.volcanobay.modog.core.interfaces.level.Level;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
@@ -23,7 +21,6 @@ import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.physics.PhysicsObjectsRegistry;
 import xyz.volcanobay.modog.rendering.DeltaStage;
 import xyz.volcanobay.modog.rendering.RenderSystem;
-import xyz.volcanobay.modog.rendering.SkyRenderer;
 import xyz.volcanobay.modog.rendering.SkyRenderer;
 import xyz.volcanobay.modog.screens.AddressPicker;
 
@@ -50,7 +47,6 @@ public class Delta extends ApplicationAdapter {
         MaterialRegistry.registerMaterials();
         LEVEL = PhysicsHandler.asLevel();
         LevelHandeler.addLevels();
-        SoundRegistry.reigsterSoundEvents();
         VisUI.load(VisUI.SkinScale.X1);
         System.out.println("Client UUID is " + uuid.toString());
 
@@ -69,6 +65,7 @@ public class Delta extends ApplicationAdapter {
                 tickPeriodic();
             }
         }, 0.01f);
+        SoundRegistry.registerSoundEvents();
     }
 
     @Override
@@ -76,10 +73,8 @@ public class Delta extends ApplicationAdapter {
         RenderSystem.render();
         stage.act();
         stage.draw();
-        PhysicsHandler.handleInput();
-        PhysicsHandler.physicsStep();
         LevelHandeler.addLevels();
-        SoundRegistry.reigsterSoundEvents();
+        SoundHandeler.handleSoundEvents();
 //        if (!periodicScheduled) {
 //            Timer.schedule(new Timer.Task() {
 //                @Override
@@ -105,6 +100,7 @@ public class Delta extends ApplicationAdapter {
             }
         }, 0.01f);
         PhysicsHandler.objectTickPeriodic();
+        PhysicsHandler.worldJointTickPeriodic();
         //DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(CursorHandler.myCursor));
         DeltaNetwork.readDataTick();
 

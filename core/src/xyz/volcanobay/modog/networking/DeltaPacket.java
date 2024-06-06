@@ -16,7 +16,7 @@ public enum DeltaPacket {
     UPDATE_STAGE(A2ADelegatedLevelObjectUpdatePacket::new),
     NOT_IMPORTANT_PACKET_DONT_LOOK(S2CUnimportantPacket::new),
     CURSOR_UPDATE_PACKET(A2ACursorUpdatePacket::new),
-    //TODO RENAME TO ACTUAL ENUIM NAMES ICBA
+    //TODO RENAME TO ACTUAL ENUM NAMES ICBA
     A2AObjectUpdateStatePacket(A2AObjectUpdateStatePacket::new),
     S2CFillStageContentsUpdatePacket(S2CFillLevelContentsPacket::new),
     S2CJointCreatedPacket(S2CJointCreatedPacket::new),

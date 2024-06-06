@@ -108,7 +108,7 @@ public class RenderSystem {
         float angle = (float) Math.toDegrees(Math.atan2(pos2.y-pos1.y,pos2.x-pos1.x));
 //        batch.draw(jointTexture,pos1.x,pos1.y, distance, .1f, 0, 0, jointTexture.getWidth(), jointTexture.getHeight(), false, false);
         Vector2 offset = getOffsetFromAngle(angle,new Vector2(0f,-.05f));
-        batch.draw(jointTexture,pos1.x+offset.x,pos1.y+offset.y,0,-0 ,(distance),.1f,1,1,angle,rand,0,8,jointTexture.getHeight(), false, false);
+        batch.draw(jointTexture,pos1.x+offset.x,pos1.y+offset.y, (float) 0,-0 ,(distance),.1f,1,1,angle,rand,0,(int) (distance*10),jointTexture.getHeight(), false, false);
     }
     public static void renderJoints() {
         batch.enableBlending();
