@@ -5,6 +5,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Timer;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
 import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
@@ -51,6 +52,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
     public boolean markedForDeletion = false;
 
     public boolean restricted = false;
+    public boolean held = false;
     public float conductivity;
     public float charge;
     public String workingSound;
@@ -194,6 +196,14 @@ public class PhysicsObject extends NetworkableLevelComponent {
 
     public void newButton(String string, ChangeListener changeListener) {
         textButtons.add(new TextButtons(string, changeListener));
+    }
+    public void scheduleDeDelegate() {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                selfDelegate();
+            }
+        }, 0.5f);
     }
 
     public List<TextButtons> getContextOptions() {

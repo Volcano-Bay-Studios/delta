@@ -42,7 +42,7 @@ public class GameScreen extends VisWindow {
         resync.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                //NetworkHandler.fullResync();
+                    NetworkConnectionsManager.searchForConnectionsOnNetwork();
             }
         });
         isHost.addListener(new ChangeListener() {
@@ -50,12 +50,6 @@ public class GameScreen extends VisWindow {
             public void changed(ChangeEvent event, Actor actor) {
 //                if (DeltaNetwork.isConnected())
 //                    NetworkConnectionsManager.searchForConnectionsOnNetwork();
-            }
-        });
-        gravitySlider.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                PhysicsHandler.world.setGravity(new Vector2(0, gravitySlider.getValue()));
             }
         });
 

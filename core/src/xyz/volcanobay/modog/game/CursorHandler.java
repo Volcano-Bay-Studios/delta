@@ -7,6 +7,7 @@ import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.packets.world.A2ACursorUpdatePacket;
+import xyz.volcanobay.modog.networking.packets.world.A2ADelegatedObjectUpdatePacket;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,9 @@ public class CursorHandler {
             cursor.render();
         }
         batch.disableBlending();
+
+        DeltaNetwork.sendPacketToAllOthers(new A2ACursorUpdatePacket(myCursor));
+
     }
 //    public static void updateCursor(Cursor data) {
 //        if (cursors.containsKey(data.uuid)) {

@@ -24,6 +24,8 @@ public class Cursor {
         }
         if (color == 3) {
             RenderSystem.batch.draw(CursorHandler.cursorLime, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandler.cursor.getWidth(), CursorHandler.cursor.getHeight(), false, false);
+        } else {
+            RenderSystem.batch.draw(CursorHandler.cursorYellow, pos.x, pos.y - (RenderSystem.camera.zoom / 2), RenderSystem.camera.zoom / 2, RenderSystem.camera.zoom / 2, 0, 0, CursorHandler.cursor.getWidth(), CursorHandler.cursor.getHeight(), false, false);
         }
     }
 }

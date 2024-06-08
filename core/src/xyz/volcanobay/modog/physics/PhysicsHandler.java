@@ -21,10 +21,7 @@ import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.networkable.NetworkableWorldJoint;
-import xyz.volcanobay.modog.networking.packets.world.S2CRemoveJointsPacket;
-import xyz.volcanobay.modog.networking.packets.world.S2CJointCreatedPacket;
-import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
-import xyz.volcanobay.modog.networking.packets.world.S2CRemoveObjectsPacket;
+import xyz.volcanobay.modog.networking.packets.world.*;
 import xyz.volcanobay.modog.physics.callbacks.MachineListener;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
@@ -76,6 +73,7 @@ public class PhysicsHandler {
     public static void initialize() {
         addGround();
         world.setContactListener(new MachineListener());
+        PhysicsHandler.world.setGravity(new Vector2(0, 0));
     }
     public static void addJoint(JointDef joint) {
         NetworkableUUID uuid = NetworkableUUID.randomUUID();
@@ -103,7 +101,7 @@ public class PhysicsHandler {
 //        newPhysicsObject.createFixture();
 //    }
 
-    public static void addObjectFromRegistry(float x, float y, String registryObject) {
+    public static void addObjectFromRegistry(float x, float y, String registryObject, boolean clientCreated) {
 //        System.out.println("addBasicPhysicsObject");
 
         BodyDef bodyDef = new BodyDef();
@@ -117,6 +115,10 @@ public class PhysicsHandler {
         PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(registryObject).create(body).setUuid(uuid);
         physicsObjectMap.put(uuid, newPhysicsObject);
         newPhysicsObject.createFixture();
+        if (clientCreated) {
+            newPhysicsObject.scheduleDeDelegate();
+            DeltaNetwork.sendPacketToAllOthers(new A2ADelegatedObjectUpdatePacket(newPhysicsObject,false));
+        }
         DeltaNetwork.sendPacketToAllOthers(new A2AObjectUpdateStatePacket(newPhysicsObject));
     }
     public static void addMaterialObject(Vector2 pos, Material material) {
@@ -181,6 +183,9 @@ public class PhysicsHandler {
             }
             for (PhysicsObject physicsObject : physicsObjectMap.values()) {
                 physicsObject.tickPhysics();
+                if (physicsObject.body.getType() == BodyDef.BodyType.DynamicBody) {
+                    physicsObject.body.applyForceToCenter(0,-physicsObject.getGravity()*physicsObject.body.getMass(),false);
+                }
             }
         }
         List<NetworkableUUID> objectsForClientRemoval = new ArrayList<>();
@@ -366,6 +371,9 @@ public class PhysicsHandler {
                 mouseJoint = (MouseJoint) world.createJoint(jointDef);
                 mouseJoint.setTarget(getMouseWorldPosition());
                 mouseBody.setAwake(true);
+                if (mouseObject != null) {
+                    mouseObject.held = true;
+                }
             }
             float spinSpeed = 5;
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
@@ -387,6 +395,7 @@ public class PhysicsHandler {
                 }
                 if (mouseObject != null) {
                     mouseObject.selfDelegate();
+                    mouseObject.held = false;
                 }
             }
             if (staticMoveBody != null) {
@@ -426,7 +435,7 @@ public class PhysicsHandler {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             Vector2 mousePos = getMouseWorldPosition();
-            addObjectFromRegistry(mousePos.x, mouse.y, selectedPlaceableObject);
+            addObjectFromRegistry(mousePos.x, mouse.y, selectedPlaceableObject,true);
         }
         if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
             if (mouseBody != null) {

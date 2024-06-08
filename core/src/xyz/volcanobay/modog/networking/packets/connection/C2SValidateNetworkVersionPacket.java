@@ -32,5 +32,4 @@ public class C2SValidateNetworkVersionPacket extends Packet {
     public DeltaPacket getType() {
         return DeltaPacket.VALIDATE_PACKET_VERSION;
     }
-    
 }
