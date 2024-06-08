@@ -21,5 +21,9 @@ public class NetworkConnection {
     public NetworkableUUID getConnectionUUID() {
         return connectionId;
     }
-    
+
+    @Override
+    public String toString() {
+        return connectionSide+": "+connectionId ;
+    }
 }

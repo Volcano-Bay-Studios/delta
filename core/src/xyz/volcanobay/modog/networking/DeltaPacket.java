@@ -13,7 +13,7 @@ import static xyz.volcanobay.modog.networking.DeltaNetwork.LAST_PACKET_ID;
 
 public enum DeltaPacket {
     VALIDATE_PACKET_VERSION(C2SValidateNetworkVersionPacket::new),
-    UPDATE_STAGE(A2ADelegatedLevelObjectUpdatePacket::new),
+    UPDATE_OBJECT_DELEGATION(A2ADelegatedObjectUpdatePacket::new),
     NOT_IMPORTANT_PACKET_DONT_LOOK(S2CUnimportantPacket::new),
     CURSOR_UPDATE_PACKET(A2ACursorUpdatePacket::new),
     //TODO RENAME TO ACTUAL ENUM NAMES ICBA

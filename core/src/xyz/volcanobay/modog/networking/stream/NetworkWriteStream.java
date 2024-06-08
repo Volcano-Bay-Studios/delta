@@ -47,7 +47,7 @@ public class NetworkWriteStream {
     }
     
     public void writeByteBool(boolean required) {
-        writeByte((byte) (required ? 0 : 1));
+        writeByte((byte) (required ? 1 : 0));
     }
 
     public void writeByteInt(int i) {

@@ -2,6 +2,8 @@ package xyz.volcanobay.modog.networking.networkable;
 
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonValue;
+import xyz.volcanobay.modog.networking.NetworkConnection;
+import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
@@ -107,6 +109,11 @@ public class NetworkableUUID implements Json.Serializable, Comparable<Networkabl
     }
     public NetworkableUUID() {
     }
+
+    public NetworkConnection getConnection() {
+        return NetworkConnectionsManager.getConnection(this);
+    }
+
 
     /**
      * Static factory to retrieve a type 4 (pseudo randomly generated) UUID.

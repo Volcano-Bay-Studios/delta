@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.kotcrab.vis.ui.util.TableUtils;
 import com.kotcrab.vis.ui.widget.*;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 
@@ -38,16 +39,17 @@ public class GameScreen extends VisWindow {
                 RenderSystem.skylight.setColor(1,1,1,ambientLightSlider.getValue());
             }
         });
-        isHost.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                //NetworkHandler.isHost = isHost.isChecked();
-            }
-        });
         resync.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 //NetworkHandler.fullResync();
+            }
+        });
+        isHost.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+//                if (DeltaNetwork.isConnected())
+//                    NetworkConnectionsManager.searchForConnectionsOnNetwork();
             }
         });
         gravitySlider.addListener(new ChangeListener() {
@@ -56,7 +58,6 @@ public class GameScreen extends VisWindow {
                 PhysicsHandler.world.setGravity(new Vector2(0, gravitySlider.getValue()));
             }
         });
-
 
         add(isHost).row();
         add(gravitySlider).row();
@@ -71,6 +72,7 @@ public class GameScreen extends VisWindow {
     public void draw(Batch batch, float parentAlpha) {
         if (!DeltaNetwork.isConnected())
             remove();
+        isHost.setChecked(DeltaNetwork.isNetworkOwner());
         objectSelected.setText(PhysicsHandler.selectedPlaceableObject);
         setPosition(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()-20);
         Vector2 mouse = PhysicsHandler.getMouseWorldPosition();

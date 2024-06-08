@@ -56,11 +56,17 @@ public abstract class NetworkableLevelComponent {
     public abstract void readStateFromNetwork(NetworkReadStream stream);
 
     public abstract void writeNewToNetwork(NetworkWriteStream stream);
+    public NetworkableUUID delegatedTo() {
+        if (delegatedTo == null)
+            delegatedTo = NetworkConnectionsManager.hostUUID;
+        return delegatedTo;
+    }
 
     public boolean isDelegatedTo(NetworkableUUID connection) {
-        return (delegatedTo == null && (DeltaNetwork.isNetworkOwner()
-                || NetworkConnectionsManager.connections.get(connection).getNetworkingSide().equals(NetworkingSide.SERVER)))
-                || delegatedTo == connection;
+        if (delegatedTo == null) {
+            delegatedTo = NetworkConnectionsManager.hostUUID;
+        }
+        return (delegatedTo() == connection);
     }
 
     public void setDelegateOf(NetworkableUUID connection) {

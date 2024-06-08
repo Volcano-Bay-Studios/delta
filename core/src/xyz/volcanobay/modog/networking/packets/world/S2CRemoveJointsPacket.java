@@ -8,9 +8,12 @@ import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
 import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.physics.WorldJoint;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static xyz.volcanobay.modog.physics.PhysicsHandler.getWorldJointFromJoint;
 
 @PacketDirection(NetworkingDirection.S2C)
 public class S2CRemoveJointsPacket extends Packet {
@@ -30,8 +33,13 @@ public class S2CRemoveJointsPacket extends Packet {
         for (int i = 0; i < size; i++)
             objectsForClientRemoval.add(i, stream.readUUID());
         
-        for (NetworkableUUID uuid : objectsForClientRemoval)
-            PhysicsHandler.jointMap.remove(uuid);
+        for (NetworkableUUID uuid : objectsForClientRemoval) {
+            WorldJoint worldJoint = PhysicsHandler.jointMap.get(uuid);
+            if (worldJoint != null) {
+                PhysicsHandler.world.destroyJoint(worldJoint.joint);
+                PhysicsHandler.jointMap.remove(worldJoint.uuid);
+            }
+        }
     }
     
     @Override

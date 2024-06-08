@@ -11,15 +11,12 @@ import com.badlogic.gdx.physics.box2d.joints.MouseJoint;
 import com.badlogic.gdx.physics.box2d.joints.MouseJointDef;
 import com.badlogic.gdx.utils.Array;
 import xyz.volcanobay.modog.Delta;
-import xyz.volcanobay.modog.game.InputHandeler;
 import xyz.volcanobay.modog.game.Material;
 import xyz.volcanobay.modog.game.objects.MaterialObject;
 import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
-import xyz.volcanobay.modog.core.interfaces.level.Level;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevel;
-import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
-import xyz.volcanobay.modog.game.NetworkLevelComponentConstructor;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkablePhysicsObject;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
@@ -28,14 +25,11 @@ import xyz.volcanobay.modog.networking.packets.world.S2CRemoveJointsPacket;
 import xyz.volcanobay.modog.networking.packets.world.S2CJointCreatedPacket;
 import xyz.volcanobay.modog.networking.packets.world.A2AObjectUpdateStatePacket;
 import xyz.volcanobay.modog.networking.packets.world.S2CRemoveObjectsPacket;
-import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
-import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.callbacks.MachineListener;
 import xyz.volcanobay.modog.rendering.RenderSystem;
 import xyz.volcanobay.modog.screens.ObjectContext;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -142,27 +136,15 @@ public class PhysicsHandler {
         }
     }
 
-    public static void addNetworkedObject(NetworkablePhysicsObject physicsObject) {
+    public static void addNetworkedObject(PhysicsObject physicsObject) {
 //        System.out.println("addNetworkedObject");
         if (physicsObject.type == null || physicsObject.type.equals("ground") )
             return;
         BodyDef bodyDef = new BodyDef();
-        if (physicsObject.bodyType == 0) {
-            bodyDef.type = BodyDef.BodyType.StaticBody;
-        } else if (physicsObject.bodyType == 2) {
-            bodyDef.type = BodyDef.BodyType.KinematicBody;
-        } else {
-            bodyDef.type = BodyDef.BodyType.DynamicBody;
-        }
-        bodyDef.position.set(physicsObject.pos);
-        bodyDef.linearVelocity.set(physicsObject.vel);
-        bodyDef.angle = physicsObject.angle;
-        bodyDef.angularVelocity = physicsObject.angularVelocity;
 
         Body body = world.createBody(bodyDef);
-        PhysicsObject newPhysicsObject = PhysicsObjectsRegistry.getFromRegistry(physicsObject.type).create(body).setUuid(physicsObject.uuid);
-        physicsObjectMap.put(physicsObject.uuid, newPhysicsObject);
-        newPhysicsObject.createFixture();
+        physicsObjectMap.put(physicsObject.uuid, physicsObject);
+        physicsObject.createFixture();
     }
 
     public static void addGround() {
@@ -182,6 +164,7 @@ public class PhysicsHandler {
 
     public static void physicsStep() {
 //        System.out.println("physicsStep");
+        updateNetworkedObjects();
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             if (simSpeed == 0)
@@ -192,7 +175,10 @@ public class PhysicsHandler {
 
         if (simSpeed > 0 && !lockChanges) {
             int fps = Gdx.graphics.getFramesPerSecond();
-            world.step(1f / ((fps*1.2f)*simSpeed), 6, 2);
+            world.step(1f / ((fps*1.4f)*simSpeed), 6, 2);
+            for (PhysicsObject physicsObject : physicsObjectMap.values()) {
+                physicsObject.lastVelocity = new Vector2(physicsObject.body.getLinearVelocity().x,physicsObject.body.getLinearVelocity().y);
+            }
             for (PhysicsObject physicsObject : physicsObjectMap.values()) {
                 physicsObject.tickPhysics();
             }
@@ -232,7 +218,9 @@ public class PhysicsHandler {
     }
     public static void objectTickPeriodic() {
         for (PhysicsObject object: physicsObjectMap.values()) {
-            object.tick();
+            if (object.body.isAwake()) {
+                object.tick();
+            }
         }
     }
     public static void worldJointTickPeriodic() {
@@ -259,35 +247,40 @@ public class PhysicsHandler {
             distanceJoint.setLength(joint.length);
         }
     }
+    public static void networkTick(){
+        for (PhysicsObject object : physicsObjectMap.values()) {
+            if (object.isDelegatedTo(NetworkConnectionsManager.selfConnectionId)) {
+                NetworkingCalls.updateObjectState(object);
+            } else {
+            }
+        }
+    }
 
-    public static void updateObjects() {
+    public static void updateNetworkedObjects() {
 //        System.out.println("updateObjects");
-//
-//        List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
-//        for (NetworkablePhysicsObject physicsObject : networkablePhysicsObjects) {
-//            PhysicsObject ourPhysicsObject = physicsObjectMap.get(physicsObject.uuid);
-//            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (mouseJoint == null ||
-//                ourPhysicsObject.body != mouseJoint.getBodyB()) && (!DeltaNetwork.isNetworkOwner() || !ourPhysicsObject.restricted)) {
-//                Body ourBody = ourPhysicsObject.body;
-//                ourBody.setTransform(physicsObject.pos, physicsObject.angle);
-//                ourBody.setLinearVelocity(physicsObject.vel);
-//                ourBody.setAngularVelocity(physicsObject.angularVelocity);
-//                ourPhysicsObject.restricted = physicsObject.restricted;
-//                if (physicsObject.bodyType == 0) {
-//                    ourPhysicsObject.body.setType(BodyDef.BodyType.StaticBody);
-//                } else if (physicsObject.bodyType == 2) {
-//                    ourPhysicsObject.body.setType(BodyDef.BodyType.KinematicBody);
-//                } else {
-//                    ourPhysicsObject.body.setType(BodyDef.BodyType.DynamicBody);
-//                }
-//            }
-//        }
-//        for (NetworkablePhysicsObject networkablePhysicsObject: newObjectsForAddition) {
-//            addNetworkedObject(networkablePhysicsObject);
-//        }
-//
-//        objectsForUpdates.removeAll(networkablePhysicsObjects);
-//        newObjectsForAddition.clear();
+
+        List<NetworkablePhysicsObject> networkablePhysicsObjects = new ArrayList<>(objectsForUpdates);
+        for (NetworkablePhysicsObject physicsObject : networkablePhysicsObjects) {
+            PhysicsObject ourPhysicsObject = physicsObjectMap.get(physicsObject.uuid);
+            if (ourPhysicsObject != null && ourPhysicsObject.body != staticMoveBody && (mouseJoint == null ||
+                ourPhysicsObject.body != mouseJoint.getBodyB()) && (!DeltaNetwork.isNetworkOwner() || !ourPhysicsObject.restricted)) {
+                Body ourBody = ourPhysicsObject.body;
+                ourBody.setTransform(physicsObject.pos, physicsObject.angle);
+                ourBody.setLinearVelocity(physicsObject.vel);
+                ourBody.setAngularVelocity(physicsObject.angularVelocity);
+                ourPhysicsObject.restricted = physicsObject.restricted;
+                if (physicsObject.bodyType == 0) {
+                    ourPhysicsObject.body.setType(BodyDef.BodyType.StaticBody);
+                } else if (physicsObject.bodyType == 2) {
+                    ourPhysicsObject.body.setType(BodyDef.BodyType.KinematicBody);
+                } else {
+                    ourPhysicsObject.body.setType(BodyDef.BodyType.DynamicBody);
+                }
+            }
+        }
+
+        objectsForUpdates.removeAll(networkablePhysicsObjects);
+        newObjectsForAddition.clear();
     }
 
     public static void renderDebug() {
@@ -380,6 +373,7 @@ public class PhysicsHandler {
             if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT))
                 spinSpeed = 1;
             if (mouseJoint != null) {
+                mouseObject = getPhysicsObjectFromBody(mouseJoint.getBodyB());
                 mouseJoint.setTarget(getMouseWorldPosition());
                 if (Gdx.input.isKeyPressed(Input.Keys.A)) {
                     mouseJoint.getBodyB().setAngularVelocity(spinSpeed);
@@ -390,6 +384,9 @@ public class PhysicsHandler {
                 } else if (lockRot) {
                     mouseJoint.getBodyB().setAngularVelocity(0);
                     mouseJoint.getBodyB().setFixedRotation(true);
+                }
+                if (mouseObject != null) {
+                    mouseObject.selfDelegate();
                 }
             }
             if (staticMoveBody != null) {
@@ -410,13 +407,19 @@ public class PhysicsHandler {
                     staticMoveBody.setLinearVelocity(0, 0);
                     staticMoveBody.setAngularVelocity(0);
                 }
+                PhysicsObject staticMoveObject = getPhysicsObjectFromBody(staticMoveBody);
+                if (staticMoveObject != null) {
+                    staticMoveObject.selfDelegate();
+                }
             }
         } else if (mouseJoint != null && mouseJoint.getBodyB() != null) {
             mouseJoint.getBodyB().setFixedRotation(false);
+            NetworkingCalls.deDelegate(getPhysicsObjectFromBody(mouseJoint.getBodyB()));
             world.destroyJoint(mouseJoint);
             mouseJoint = null;
             lockRot = false;
         } else if (staticMoveBody != null) {
+            NetworkingCalls.deDelegate(getPhysicsObjectFromBody(staticMoveBody));
             staticMoveBody.setAwake(false);
             staticMoveBody = null;
             lockRot = false;
@@ -508,18 +511,18 @@ public class PhysicsHandler {
         }
     }
 
-    public static void updatePhysicsObjectFromNetworkedObject(NetworkablePhysicsObject physicsObject) {
+//    public static void updatePhysicsObjectFromNetworkedObject(NetworkablePhysicsObject physicsObject) {
 //        System.out.println("updatePhysicsObjectFromNetworkedObject");
-
-        if (!world.isLocked()) {
-            newObjectsForAddition.clear();
-            if (physicsObjectMap.containsKey(physicsObject.uuid)) {
-                objectsForUpdates.add(physicsObject);
-            } else {
-                addNetworkedObject(physicsObject);
-            }
-        }
-    }
+//
+//        if (!world.isLocked()) {
+//            newObjectsForAddition.clear();
+//            if (physicsObjectMap.containsKey(physicsObject.uuid)) {
+//                objectsForUpdates.add(physicsObject);
+//            } else {
+//                addNetworkedObject(physicsObject);
+//            }
+//        }
+//    }
 
     public static NetworkableLevel asLevel() {
         return level;

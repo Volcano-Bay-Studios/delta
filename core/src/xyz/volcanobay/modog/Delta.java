@@ -33,7 +33,6 @@ public class Delta extends ApplicationAdapter {
     public static Logger LOGGER = Logger.getLogger("Delta");
 
     public static DeltaStage stage;
-    public static NetworkableUUID uuid = NetworkableUUID.randomUUID();
 
     public static NetworkableLevel LEVEL;
 
@@ -48,7 +47,6 @@ public class Delta extends ApplicationAdapter {
         LEVEL = PhysicsHandler.asLevel();
         LevelHandeler.addLevels();
         VisUI.load(VisUI.SkinScale.X1);
-        System.out.println("Client UUID is " + uuid.toString());
 
         stage = new DeltaStage(new ScreenViewport());
         final Table root = new Table();
@@ -59,12 +57,8 @@ public class Delta extends ApplicationAdapter {
         Cursor cursor = Gdx.graphics.newCursor(pixmap, 1, 1);
         pixmap.dispose();
         Gdx.graphics.setCursor(cursor);
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                tickPeriodic();
-            }
-        }, 0.01f);
+        tickPeriodic();
+        networkTick();
         SoundRegistry.registerSoundEvents();
     }
 
@@ -75,16 +69,6 @@ public class Delta extends ApplicationAdapter {
         stage.draw();
         LevelHandeler.addLevels();
         SoundHandeler.handleSoundEvents();
-//        if (!periodicScheduled) {
-//            Timer.schedule(new Timer.Task() {
-//                @Override
-//                public void run() {
-//                    periodic();
-//                    periodicScheduled = false;
-//                }
-//            }, 20);
-//            periodicScheduled = true;
-//        }
     }
 
 //    public void periodic() {
@@ -108,6 +92,16 @@ public class Delta extends ApplicationAdapter {
         PhysicsHandler.physicsStep();
 
         DeltaNetwork.sendDataTick();
+    }
+    public void networkTick() {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+//                periodic();
+                networkTick();
+            }
+        }, 0.05f);
+        PhysicsHandler.networkTick();
     }
 
 	@Override

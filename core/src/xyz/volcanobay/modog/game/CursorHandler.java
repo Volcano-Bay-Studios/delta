@@ -3,6 +3,7 @@ package xyz.volcanobay.modog.game;
 import com.badlogic.gdx.graphics.Texture;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.packets.world.A2ACursorUpdatePacket;
@@ -18,7 +19,7 @@ public class CursorHandler {
     public static Texture cursorBlue = new Texture("cursor_blue.png");
     public static Texture cursorLime = new Texture("cursor_lime.png");
     public static Texture cursorYellow = new Texture("cursor_yellow.png");
-    public static Cursor myCursor = new Cursor(Delta.uuid);
+    public static Cursor myCursor = new Cursor(NetworkConnectionsManager.selfConnectionId);
     public static ConcurrentHashMap<NetworkableUUID, Cursor> cursors = new ConcurrentHashMap<>();
 
     public static void renderCursors() {

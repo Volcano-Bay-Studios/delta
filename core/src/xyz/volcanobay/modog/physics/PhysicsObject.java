@@ -7,8 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import xyz.volcanobay.modog.core.interfaces.level.NetworkableLevelComponent;
 import xyz.volcanobay.modog.networking.DeltaNetwork;
+import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.networking.NetworkingCalls;
-import xyz.volcanobay.modog.game.DeltaConstants;
 import xyz.volcanobay.modog.game.objects.MachineObject;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
 import xyz.volcanobay.modog.game.sounds.SoundRegistry;
@@ -97,6 +97,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
         this.uuid = uuid;
         return this;
     }
+
     public void pickTexture() {
         texture = new Texture("none.png");
     }
@@ -125,21 +126,50 @@ public class PhysicsObject extends NetworkableLevelComponent {
     }
 
     public void createFixture() {
-
+        PolygonShape groundBox = new PolygonShape();
+        fixtureScale = new Vector2(7.8f, 7.8f);
+        groundBox.setAsBox(fixtureScale.x / PhysicsHandler.scaleDown, fixtureScale.y / PhysicsHandler.scaleDown);
+        body.createFixture(groundBox, 1f);
+        groundBox.dispose();
     }
+
     public void resize(Vector2 newSize) {
         scale = newSize;
         processTexture();
     }
 
     public void tickPhysics() {
-        if (! required && body.getPosition().y < - 90 && ! markedForDeletion && DeltaNetwork.isNetworkOwner()) {
+        if (!required && body.getPosition().y < -90 && !markedForDeletion && DeltaNetwork.isNetworkOwner()) {
             PhysicsHandler.bodiesForDeletion.add(body);
             markedForDeletion = true;
         }
-        if (required && body.getPosition().y < - 90) {
-            body.setTransform(body.getPosition().x, - 89.99f, body.getAngle());
+        if (required && body.getPosition().y < -90) {
+            body.setTransform(body.getPosition().x, -89.99f, body.getAngle());
             body.setLinearVelocity(0, 0);
+        }
+        if (this instanceof MachineObject machineObject) {
+            if (workingSound != null && machineObject.working && !playingSound) {
+                soundAddr = SoundHandeler.playSound(getSelf(), workingSound, true);
+                playingSound = true;
+            }
+            if (workingSound != null && !machineObject.working && playingSound) {
+                SoundHandeler.stopSound(soundAddr);
+                soundAddr = 0;
+                playingSound = false;
+            }
+        }
+        if (hitTicks > 0) {
+            if (acceleration != null) {
+                float strength = acceleration.dst(new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y));
+                if (strength > 3) {
+                    System.out.println(strength);
+                    SoundHandeler.playHitSound(body.getPosition(), hitType, strength / 30);
+                }
+            }
+            hitTicks--;
+        }
+        if (body != null) {
+            acceleration = new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y);
         }
 //        System.out.println("hu");
     }
@@ -150,9 +180,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
 
 
     public void render() {
-        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(),
-                                texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown,
-                                (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
+        RenderSystem.batch.draw(texture, body.getPosition().x - textureOffset.x, body.getPosition().y - textureOffset.y, textureOffset.x, textureOffset.y, texture.getWidth(), texture.getHeight(), (scale.x + textureScale.x) / PhysicsHandler.scaleDown, (scale.y + textureScale.y) / PhysicsHandler.scaleDown, (float) Math.toDegrees(body.getAngle()), 0, 0, texture.getWidth(), texture.getHeight(), false, false);
     }
 
     public void dispose() {
@@ -253,12 +281,18 @@ public class PhysicsObject extends NetworkableLevelComponent {
             DeltaNetwork.sendPacketToAllClients(new A2AObjectUpdateStatePacket(this));
             syncNextTick = false;
         }
+
     }
+
     public float getMaxCharge() {
         return 10f;
     }
 
     //>Networking
+    public void selfDelegate() {
+        setDelegateOf(NetworkConnectionsManager.selfConnectionId);
+    }
+
 
     /**
      * Sync properties NOT position and velocity
@@ -286,6 +320,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
         writeAllStateToNetwork(stream);
     }
 
+
     public void writeAllStateToNetwork(NetworkWriteStream stream) {
         writePhysicsStateToNetwork(stream);
         writeStateToNetwork(stream);
@@ -296,20 +331,22 @@ public class PhysicsObject extends NetworkableLevelComponent {
     }
 
     public void readPhysicsStateFromNetwork(NetworkReadStream stream) {
-        body.setType(BodyDef.BodyType.values()[stream.readInt()]);
+        if (!isDelegatedTo(NetworkConnectionsManager.selfConnectionId)) {
+            body.setType(BodyDef.BodyType.values()[stream.readInt()]);
 
-        body.setTransform(stream.readVector2(), stream.readFloat());
+            body.setTransform(stream.readVector2(), stream.readFloat());
 
-        body.setLinearVelocity(stream.readVector2());
-        body.setAngularVelocity(stream.readFloat());
+            body.setLinearVelocity(stream.readVector2());
+            body.setAngularVelocity(stream.readFloat());
 
-        required = stream.readByteBool();
+            required = stream.readByteBool();
+        }
     }
 
     public static PhysicsObject readNewFromNetwork(NetworkReadStream stream) {
         String objectId = stream.readString();
         BodyDef.BodyType type = BodyDef.BodyType.values()[stream.readInt()];
-        stream.seek(- 4);
+        stream.seek(-4);
         PhysicsObject newObject = PhysicsObjectsRegistry.createInstanceFromRegistry(objectId, type);
         newObject.readAllStateFromNetwork(stream);
         return newObject;

@@ -16,6 +16,7 @@ public class NetworkConnectionsManager {
     public static Timer.Task searchTimer;
     public static boolean isAwaiting = true;
     public static NetworkableUUID selfConnectionId = NetworkableUUID.randomUUID();
+    public static NetworkableUUID hostUUID;
     
     public static void searchForConnectionsOnNetwork() {
         if (!DeltaNetwork.isConnected())
@@ -31,6 +32,7 @@ public class NetworkConnectionsManager {
     public static void onGetConnectionsOnNetworkFail() {
         isAwaiting = false;
         System.out.println("Search for server on network failed, becoming the alpha...");
+        hostUUID = selfConnectionId;
         DeltaNetwork.setEnabled(true);
         DeltaNetwork.setNetworkingSide(NetworkingSide.SERVER);
         DeltaNetwork.setHostingType(ServerHostType.EXTERNAL);
@@ -40,10 +42,18 @@ public class NetworkConnectionsManager {
         System.out.println("Search for server successful, found " + connections.size() + " connections becoming the beta...");
         searchTimer.cancel();
         isAwaiting = false;
+        for (NetworkConnection connection: connections.values()) {
+            if (connection.connectionSide == NetworkingSide.SERVER) {
+                hostUUID = connection.getConnectionUUID();
+            }
+        }
         DeltaNetwork.setEnabled(true);
         DeltaNetwork.setNetworkingSide(NetworkingSide.CLIENT);
         DeltaNetwork.setHostingType(ServerHostType.EXTERNAL);
         DeltaNetwork.initialiseConnectedGame();
+    }
+    public static NetworkConnection getConnection(NetworkableUUID uuid) {
+        return connections.get(uuid);
     }
     
 }

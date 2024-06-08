@@ -3,6 +3,7 @@ package xyz.volcanobay.modog.networking.packets.world;
 import xyz.volcanobay.modog.Delta;
 import xyz.volcanobay.modog.core.interfaces.level.DeltaLevel;
 import xyz.volcanobay.modog.networking.DeltaPacket;
+import xyz.volcanobay.modog.networking.NetworkConnectionsManager;
 import xyz.volcanobay.modog.networking.Packet;
 import xyz.volcanobay.modog.networking.annotations.PacketDirection;
 import xyz.volcanobay.modog.networking.enums.NetworkingDirection;
@@ -31,7 +32,7 @@ public class S2CFillLevelContentsPacket extends Packet {
     
     @Override
     public void receive(NetworkReadStream stream) {
-        System.out.println("Received level data ton");
+        System.out.println("Received level data");
         ConcurrentHashMap<NetworkableUUID, PhysicsObject> newPhysicsObjects = new ConcurrentHashMap<>();
         ConcurrentHashMap<NetworkableUUID, WorldJoint> newJoints = new ConcurrentHashMap<>();
         
@@ -57,7 +58,9 @@ public class S2CFillLevelContentsPacket extends Packet {
         }
     
         //And replace with the read ones
-        physicsObjectMap = newPhysicsObjects;
+        for (PhysicsObject object : newPhysicsObjects.values()) {
+            PhysicsHandler.addNetworkedObject(object);
+        }
         jointMap = newJoints;
         Delta.LEVEL.reloadSourcedMaps();
     }

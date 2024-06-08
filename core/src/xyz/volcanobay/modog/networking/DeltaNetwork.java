@@ -7,7 +7,6 @@ import xyz.volcanobay.modog.networking.enums.ServerHostType;
 import xyz.volcanobay.modog.networking.enums.PacketRoutingHeader;
 import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.packets.world.C2SRequestLevelContents;
-import xyz.volcanobay.modog.networking.packets.world.A2ADelegatedLevelObjectUpdatePacket;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
