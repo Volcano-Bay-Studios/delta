@@ -8,6 +8,7 @@ import xyz.volcanobay.modog.networking.networkable.NetworkableUUID;
 import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
 import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
+import xyz.volcanobay.modog.physics.PhysicsObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,8 +32,13 @@ public class S2CRemoveObjectsPacket extends Packet {
         for (int i = 0; i < size; i++)
             objectsForClientRemoval.add(i, stream.readUUID());
         
-        for (NetworkableUUID uuid : objectsForClientRemoval)
-            PhysicsHandler.physicsObjectMap.remove(uuid);
+        for (NetworkableUUID uuid : objectsForClientRemoval) {
+            PhysicsObject object = PhysicsHandler.physicsObjectMap.get(uuid);
+            if (object != null) {
+                PhysicsHandler.world.destroyBody(object.body);
+                PhysicsHandler.physicsObjectMap.remove(uuid);
+            }
+        }
     }
     
     @Override

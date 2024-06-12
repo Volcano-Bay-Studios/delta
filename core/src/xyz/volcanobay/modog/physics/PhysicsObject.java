@@ -62,6 +62,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
     public Vector2 lastVelocity;
     public Vector2 acceleration;
     public SoundRegistry.HitType hitType = SoundRegistry.HitType.METAL;
+    public int dedelegateTimer = 0;
 
 
     public boolean syncNextTick = false;
@@ -174,6 +175,12 @@ public class PhysicsObject extends NetworkableLevelComponent {
             acceleration = new Vector2(body.getLinearVelocity().x - lastVelocity.x, body.getLinearVelocity().y - lastVelocity.y);
         }
 //        System.out.println("hu");
+        if (dedelegateTimer > 0) {
+            dedelegateTimer--;
+            if (dedelegateTimer == 0) {
+                selfDelegate();
+            }
+        }
     }
 
     public Vector2 getBodyAcceleration() {
@@ -197,13 +204,9 @@ public class PhysicsObject extends NetworkableLevelComponent {
     public void newButton(String string, ChangeListener changeListener) {
         textButtons.add(new TextButtons(string, changeListener));
     }
+
     public void scheduleDeDelegate() {
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                selfDelegate();
-            }
-        }, 0.5f);
+        dedelegateTimer = 400;
     }
 
     public List<TextButtons> getContextOptions() {
@@ -232,6 +235,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
                     public void changed(ChangeEvent event, Actor actor) {
                         body.setType(BodyDef.BodyType.DynamicBody);
                         NetworkingCalls.updateObjectState(body);
+                        scheduleDeDelegate();
                         actor.getParent().remove();
                     }
                 });
@@ -241,6 +245,7 @@ public class PhysicsObject extends NetworkableLevelComponent {
                     public void changed(ChangeEvent event, Actor actor) {
                         body.setType(BodyDef.BodyType.StaticBody);
                         NetworkingCalls.updateObjectState(body);
+                        scheduleDeDelegate();
                         actor.getParent().remove();
                     }
                 });
@@ -251,6 +256,8 @@ public class PhysicsObject extends NetworkableLevelComponent {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
                             restricted = false;
+                            NetworkingCalls.updateObjectState(body);
+                            scheduleDeDelegate();
                             actor.getParent().remove();
                         }
                     });
@@ -259,7 +266,10 @@ public class PhysicsObject extends NetworkableLevelComponent {
                         @Override
                         public void changed(ChangeEvent event, Actor actor) {
                             restricted = true;
+                            NetworkingCalls.updateObjectState(body);
+                            scheduleDeDelegate();
                             actor.getParent().remove();
+
                         }
                     });
                 }
@@ -278,8 +288,16 @@ public class PhysicsObject extends NetworkableLevelComponent {
                     body.setTransform(body.getPosition(), 0);
                     body.setAngularVelocity(0);
                     NetworkingCalls.updateObjectState(body);
+                    scheduleDeDelegate();
                     actor.getParent().remove();
 
+                }
+            });
+        } else {
+            newButton("Restricted!", new ChangeListener() {
+                @Override
+                public void changed(ChangeEvent event, Actor actor) {
+                    actor.getParent().remove();
                 }
             });
         }
@@ -323,6 +341,10 @@ public class PhysicsObject extends NetworkableLevelComponent {
         writeStream.writeFloat(body.getAngularVelocity());
 
         writeStream.writeByteBool(required);
+        writeStream.writeByteBool(restricted);
+
+        //Server will not read
+        writeStream.writeFloat(charge);
     }
 
     public void writeNewToNetwork(NetworkWriteStream stream) {
@@ -334,22 +356,52 @@ public class PhysicsObject extends NetworkableLevelComponent {
     public void writeAllStateToNetwork(NetworkWriteStream stream) {
         writePhysicsStateToNetwork(stream);
         writeStateToNetwork(stream);
+        if (DeltaNetwork.isNetworkOwner())
+            writeServerStateToNetwork(stream);
     }
 
+    /**
+     * Call super last. This prevents server data from overflowing.
+     *
+     * @param stream
+     */
     public void readStateFromNetwork(NetworkReadStream stream) {
+        if (!DeltaNetwork.isNetworkOwner())
+            readServerStateFromNetwork(stream);
+    }
+
+    /**
+     * This will not be called on the server. This is for data like inventories to not be set by clients.
+     *
+     * @param stream
+     */
+    public void readServerStateFromNetwork(NetworkReadStream stream) {
+
+    }
+
+    /**
+     * This will only be called on the server. This is for data like inventories to not be sent by clients to avoid sending unessesary data.
+     *
+     * @param stream
+     */
+    public void writeServerStateToNetwork(NetworkWriteStream stream) {
 
     }
 
     public void readPhysicsStateFromNetwork(NetworkReadStream stream) {
-        if (!isDelegatedTo(NetworkConnectionsManager.selfConnectionId)) {
-            body.setType(BodyDef.BodyType.values()[stream.readInt()]);
+        body.setType(BodyDef.BodyType.values()[stream.readInt()]);
 
-            body.setTransform(stream.readVector2(), stream.readFloat());
+        body.setTransform(stream.readVector2(), stream.readFloat());
 
-            body.setLinearVelocity(stream.readVector2());
-            body.setAngularVelocity(stream.readFloat());
+        body.setLinearVelocity(stream.readVector2());
+        body.setAngularVelocity(stream.readFloat());
 
-            required = stream.readByteBool();
+        required = stream.readByteBool();
+        restricted = stream.readByteBool();
+
+        //Server will not read
+        if (!DeltaNetwork.isNetworkOwner()) {
+            charge = stream.readFloat();
         }
     }
 
@@ -363,6 +415,8 @@ public class PhysicsObject extends NetworkableLevelComponent {
     }
 
     public void readAllStateFromNetwork(NetworkReadStream stream) {
+        if (restricted && DeltaNetwork.isNetworkOwner())
+            return;
         readPhysicsStateFromNetwork(stream);
         readStateFromNetwork(stream);
     }

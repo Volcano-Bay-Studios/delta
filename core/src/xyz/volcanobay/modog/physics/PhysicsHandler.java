@@ -356,7 +356,7 @@ public class PhysicsHandler {
         PhysicsObject mouseObject = getPhysicsObjectFromBody(mouseBody);
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && !placingJoint) {
             if (mouseBody != null && (mouseBody.getType() == BodyDef.BodyType.StaticBody || simSpeed == 0) && mouseJoint == null && staticMoveBody == null) {
-                if ((DeltaNetwork.isNetworkOwner() || !mouseObject.restricted)) {
+                if (mouseObject == null || (DeltaNetwork.isNetworkOwner() || !mouseObject.restricted)) {
                     grabPoint = new Vector2(mouse.x-mouseBody.getPosition().x,mouse.y-mouseBody.getPosition().y);
                     staticMoveBody = mouseBody;
                     NetworkingCalls.updateObjectState(mouseObject);

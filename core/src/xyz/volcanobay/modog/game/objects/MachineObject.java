@@ -9,6 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import xyz.volcanobay.modog.game.Material;
 import xyz.volcanobay.modog.game.MaterialRegistry;
 import xyz.volcanobay.modog.game.sounds.SoundHandeler;
+import xyz.volcanobay.modog.networking.NetworkingCalls;
+import xyz.volcanobay.modog.networking.stream.NetworkReadStream;
+import xyz.volcanobay.modog.networking.stream.NetworkWriteStream;
 import xyz.volcanobay.modog.physics.PhysicsHandler;
 import xyz.volcanobay.modog.physics.PhysicsObject;
 import xyz.volcanobay.modog.screens.TextButtons;
@@ -17,15 +20,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class MachineObject  extends PhysicsObject {
+public class MachineObject extends PhysicsObject {
     List<PhysicsObject> objectsImTouching = new ArrayList<>();
-    public HashMap<String,Integer> inventory = new HashMap<>();
+    public HashMap<String, Integer> inventory = new HashMap<>();
     List<String> filter = new ArrayList<>();
     public int inventorySize;
     public int inventoryUsed;
     public boolean givesUpInventory;
     public boolean contactCharge;
     public boolean working = false;
+
     public MachineObject() {
         super();
     }
@@ -38,20 +42,22 @@ public class MachineObject  extends PhysicsObject {
     public void tickPhysics() {
         super.tickPhysics();
     }
+
     public int tryPutInInventory(Material material) {
         if (inventoryUsed == inventorySize) {
             return 0;
         }
-        int amountToPut = Math.min(inventorySize-inventoryUsed,material.amount);
+        int amountToPut = Math.min(inventorySize - inventoryUsed, material.amount);
         if (inventory.containsKey(material.type)) {
-            inventory.put(material.type,inventory.get(material.type) + amountToPut);
+            inventory.put(material.type, inventory.get(material.type) + amountToPut);
         } else {
-            inventory.put(material.type,amountToPut);
+            inventory.put(material.type, amountToPut);
         }
         material.amount -= amountToPut;
         inventoryUsed += amountToPut;
         return amountToPut;
     }
+
     public void checkInventory() {
         for (String material : inventory.keySet()) {
             if (inventory.get(material) <= 0) {
@@ -59,7 +65,8 @@ public class MachineObject  extends PhysicsObject {
             }
         }
     }
-    public void dropMaterial(String material,int amount) {
+
+    public void dropMaterial(String material, int amount) {
         if (inventory.containsKey(material) && inventory.get(material) <= amount) {
             Material ourMaterial = getMaterial(material);
             ourMaterial.setAmount(1);
@@ -67,22 +74,24 @@ public class MachineObject  extends PhysicsObject {
                 PhysicsHandler.addMaterialObject(body.getPosition().add((texture.getWidth() / PhysicsHandler.scaleDown) + .02f, 0), ourMaterial.clone());
             }
             inventoryUsed -= amount;
-            inventory.put(material, inventory.get(material)-amount);
+            inventory.put(material, inventory.get(material) - amount);
         }
         if (inventory.get(material) <= 0) {
             inventory.remove(material);
         }
     }
+
     public void removeMaterial(String key, int amount) {
         if (inventory.containsKey(key)) {
-            inventory.put(key,inventory.get(key)-amount);
+            inventory.put(key, inventory.get(key) - amount);
             inventoryUsed -= amount;
         }
         checkInventory();
     }
+
     public void addMaterial(String key, int amount) {
         if (inventory.containsKey(key)) {
-            inventory.put(key,inventory.get(key)-amount);
+            inventory.put(key, inventory.get(key) - amount);
             inventoryUsed += amount;
         }
         checkInventory();
@@ -99,9 +108,11 @@ public class MachineObject  extends PhysicsObject {
 
     public void emptyInventory() {
         for (String materialKey : inventory.keySet()) {
-            dropMaterial(materialKey,inventory.get(materialKey));
+            dropMaterial(materialKey, inventory.get(materialKey));
         }
+        NetworkingCalls.updateObjectState(this);
     }
+
     @Override
     public void tick() {
         super.tick();
@@ -119,7 +130,7 @@ public class MachineObject  extends PhysicsObject {
                         ourMaterial.setAmount(inventory.get(string));
                         int remove = machineObject.tryPutInInventory(ourMaterial);
                         if (remove > 0) {
-                            removeMaterial(string,remove);
+                            removeMaterial(string, remove);
                         }
                     }
                 }
@@ -127,20 +138,20 @@ public class MachineObject  extends PhysicsObject {
             if (objectB != null && contactCharge) {
                 float aDifference = this.getMaxCharge();
                 float bDifference = objectB.getMaxCharge();
-                float myDonatedCharge =     (this.charge/(aDifference));
-                float objectDonatedCharge = (objectB.charge/(bDifference));
-                myDonatedCharge = Math.min(this.charge,myDonatedCharge);
-                objectDonatedCharge = Math.min(objectB.charge,objectDonatedCharge);
+                float myDonatedCharge = (this.charge / (aDifference));
+                float objectDonatedCharge = (objectB.charge / (bDifference));
+                myDonatedCharge = Math.min(this.charge, myDonatedCharge);
+                objectDonatedCharge = Math.min(objectB.charge, objectDonatedCharge);
                 this.charge += objectDonatedCharge;
                 this.charge -= myDonatedCharge;
                 objectB.charge += myDonatedCharge;
                 objectB.charge -= objectDonatedCharge;
 
-                if (objectB.charge> objectB.getMaxCharge())
+                if (objectB.charge > objectB.getMaxCharge())
                     objectB.charge = objectB.getMaxCharge();
             }
         }
-        if (this.charge> this.getMaxCharge())
+        if (this.charge > this.getMaxCharge())
             this.charge = this.getMaxCharge();
     }
 
@@ -155,9 +166,11 @@ public class MachineObject  extends PhysicsObject {
         pickTexture();
         type = "machine";
     }
+
     public void contact(PhysicsObject object) {
         objectsImTouching.add(object);
     }
+
     public void removeContact(PhysicsObject object) {
         objectsImTouching.remove(object);
     }
@@ -166,15 +179,18 @@ public class MachineObject  extends PhysicsObject {
     public void pickTexture() {
         texture = new Texture("crate.png");
     }
-    public MachineObject getSelf() { return this; }
+
+    public MachineObject getSelf() {
+        return this;
+    }
 
 
     @Override
     public void createFixture() {
         PolygonShape groundBox = new PolygonShape();
-        fixtureScale = new Vector2((float) texture.getWidth() /2-.3f, (float) texture.getHeight() /2-.3f);
-        groundBox.setAsBox(fixtureScale.x/ PhysicsHandler.scaleDown, fixtureScale.y/PhysicsHandler.scaleDown);
-        body.createFixture(groundBox,1f);
+        fixtureScale = new Vector2((float) texture.getWidth() / 2 - .3f, (float) texture.getHeight() / 2 - .3f);
+        groundBox.setAsBox(fixtureScale.x / PhysicsHandler.scaleDown, fixtureScale.y / PhysicsHandler.scaleDown);
+        body.createFixture(groundBox, 1f);
         body.getFixtureList().get(0).setDensity(4f);
         body.getFixtureList().get(0).setFriction(1f);
         groundBox.dispose();
@@ -188,12 +204,39 @@ public class MachineObject  extends PhysicsObject {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
                     getSelf().emptyInventory();
-                    SoundHandeler.playSound(body.getPosition(),"empty",false);
+                    SoundHandeler.playSound(body.getPosition(), "empty", false);
                     actor.getParent().remove();
                 }
             });
 
         }
         return textButtons;
+    }
+    // Networking
+    public void writeInventory(NetworkWriteStream stream) {
+        stream.writeInt(inventory.size());
+        for (String item: inventory.keySet()) {
+            int amount = inventory.get(item);
+            stream.writeString(item);
+            stream.writeInt(amount);
+        }
+    }
+    @Override
+    public void writeServerStateToNetwork(NetworkWriteStream stream) {
+        writeInventory(stream);
+    }
+    public void readInventory(NetworkReadStream stream) {
+        int size = stream.readInt();
+        inventory.clear();
+        for (int i = 0; i < size; i++) {
+            String item = stream.readString();
+            int amount = stream.readInt();
+            inventory.put(item,amount);
+        }
+    }
+
+    @Override
+    public void readServerStateFromNetwork(NetworkReadStream stream) {
+        readInventory(stream);
     }
 }

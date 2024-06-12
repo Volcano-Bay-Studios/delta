@@ -1,5 +1,6 @@
 package xyz.volcanobay.modog.networking;
 
+import com.badlogic.gdx.utils.Timer;
 import com.github.czyzby.websocket.WebSocket;
 import com.github.czyzby.websocket.WebSockets;
 import xyz.volcanobay.modog.networking.enums.NetworkingSide;
@@ -73,6 +74,15 @@ public class DeltaNetwork {
             return;
         
         //sendPacketToAllClients(new A2ADelegatedLevelObjectUpdatePacket());
+    }
+    public static void scheduleSendToAllOthers(Packet packet, float time) {
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                sendPacketToAllOthers(packet);
+            }
+        }, time);
+
     }
     
     public static void readDataTick() {
