@@ -346,6 +346,9 @@ public class PhysicsObject extends NetworkableLevelComponent {
         //Server will not read
         writeStream.writeFloat(charge);
     }
+    public boolean sleepTick() {
+        return true;
+    }
 
     public void writeNewToNetwork(NetworkWriteStream stream) {
         stream.writeString(type);

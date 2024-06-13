@@ -64,6 +64,8 @@ public class MachineObject extends PhysicsObject {
                 inventory.remove(material);
             }
         }
+        if (inventory.isEmpty())
+            inventoryUsed = 0;
     }
 
     public void dropMaterial(String material, int amount) {
@@ -111,6 +113,11 @@ public class MachineObject extends PhysicsObject {
             dropMaterial(materialKey, inventory.get(materialKey));
         }
         NetworkingCalls.updateObjectState(this);
+    }
+
+    @Override
+    public boolean sleepTick() {
+        return false;
     }
 
     @Override
@@ -199,6 +206,7 @@ public class MachineObject extends PhysicsObject {
     @Override
     public List<TextButtons> getContextOptions() {
         super.getContextOptions();
+        checkInventory();
         if (inventorySize > 0 && inventoryUsed > 0) {
             newButton("Empty", new ChangeListener() {
                 @Override
@@ -212,27 +220,35 @@ public class MachineObject extends PhysicsObject {
         }
         return textButtons;
     }
+
     // Networking
     public void writeInventory(NetworkWriteStream stream) {
+        checkInventory();
+        stream.writeInt(inventoryUsed);
         stream.writeInt(inventory.size());
-        for (String item: inventory.keySet()) {
+        for (String item : inventory.keySet()) {
             int amount = inventory.get(item);
             stream.writeString(item);
             stream.writeInt(amount);
         }
+        return;
     }
+
     @Override
     public void writeServerStateToNetwork(NetworkWriteStream stream) {
         writeInventory(stream);
     }
+
     public void readInventory(NetworkReadStream stream) {
+        inventoryUsed = stream.readInt();
         int size = stream.readInt();
         inventory.clear();
         for (int i = 0; i < size; i++) {
             String item = stream.readString();
             int amount = stream.readInt();
-            inventory.put(item,amount);
+            inventory.put(item, amount);
         }
+        return;
     }
 
     @Override

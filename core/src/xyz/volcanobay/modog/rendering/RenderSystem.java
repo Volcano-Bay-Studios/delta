@@ -99,6 +99,12 @@ public class RenderSystem {
         }
         batch.disableBlending();
     }
+    public static void setShaderColor(float red, float green, float blue, float alpha) {
+        if (batch.isDrawing()) {
+            batch.setColor(red,green,blue,alpha);
+        } else
+            throw new IllegalStateException("SpriteBatch.begin must be called before draw.");
+    }
     public static Vector2 getOffsetFromAngle(float angle, Vector2 offset) {
         float inRadians = (float) Math.toRadians(angle);
         return new Vector2(((float) (Math.cos(inRadians)*offset.x) - (float) (offset.x  * Math.sin(angle))),  ( (float) (Math.cos(inRadians)*offset.y) + (float) (offset.x * Math.sin(angle))));

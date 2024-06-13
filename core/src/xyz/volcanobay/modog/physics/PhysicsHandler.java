@@ -195,6 +195,7 @@ public class PhysicsHandler {
                 if (mouseJoint != null && mouseJoint.getBodyB() == object.body) {
                     mouseJoint = null;
                 }
+                MachineListener.removeFromAll(object);
                 objectsForClientRemoval.add(object.uuid);
                 physicsObjectMap.remove(object.uuid);
                 world.destroyBody(body);
@@ -223,7 +224,7 @@ public class PhysicsHandler {
     }
     public static void objectTickPeriodic() {
         for (PhysicsObject object: physicsObjectMap.values()) {
-            if (object.body.isAwake()) {
+            if (object.body.isAwake() || !object.sleepTick()) {
                 object.tick();
             }
         }
